@@ -1,0 +1,8 @@
+rmarkdown
+knitr
+repr
+IRdisplay
+pbdZMQ
+crayon
+devtools
+pacman

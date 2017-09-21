@@ -1,0 +1,286 @@
+1600/1455*1355
+164+166
+330*1.06
+60*1.06
+(569+533+158)*1.06 +300
+980+120+330
+980+120+330+88*1.06
+1600/1455*1355
+1600/1450*1355
+1700/1555*1355
+1600/145
+1400*.025
+980+120
++330
+980+120+330
+1/2^20
+1/2^5
+66*1.06+64
+66*1.06+64+980
+66*1.06+64+980+330*1.06
+1/2*5*2
+(1/2)^5*2
+pnorm(0)
+help(pbinom)
+pbinom(0,10,0.5)
+pbinom(1,10,0.5)
+pbinom(2,10,0.5)
+pbinom(0,5,0.5)
+plot(0:10,dbinom(0:10,10,0.5))
+barplot(0:10,dbinom(0:10,10,0.5))
+barplot(dbinom(0:10,10,0.5))
+barplot(dbinom(0:10,10,0.5),labels=c("0","1","2","3","4","5","6","7","8","9","10"))
+barplot(dbinom(0:10,10,0.5),lab=c("0","1","2","3","4","5","6","7","8","9","10"))
+help(barplot)
+barplot(dbinom(0:10,10,0.5),names.arg=c("0","1","2","3","4","5","6","7","8","9","10"))
+barplot(dbinom(0:10,10,0.5),names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),main="How many heads in ten flips?")
+barplot(dbinom(0:10,10,0.5),names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),main="Flipping a fair coin ten times",xlab="Total number of heads",ylab="Probability")
+dev.print(file="flipping.pdf",dev=pdf)
+1600/1450*1355
+1600/1450*1311
+1450/1400
+1450/1355
+11600/1450*1355
+1600/1450*1355
+1450/1355
+1450/1311
+1350/1100
+1250/1100
+1600/1450
+1600/1450*1355
+1600/1450*1311
+1600/1450*1400
+y<-dbinom(0:10,10,0.5)#
+barplot(y)
+barplot(y,names.arg=c"0","1","2","3","4","5","6","7","8","9","10"))
+barplot(y,names.arg=c()"0","1","2","3","4","5","6","7","8","9","10"))
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"))
+barplot(y,names.arg=c"0","1","2","3","4","5","6","7","8","9","10"),col=c("red","red","gray","gray","gray","gray","gray","gray","gray","red","red")#
+)
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","red","gray","gray","gray","gray","gray","gray","gray","red","red"))
+pbinom(c(0,1,9,10),10,0.5)
+dbinom(c(0,1,9,10),10,0.5)
+sum(dbinom(c(0,1,9,10),10,0.5))
+sum(dbinom(c(0,1,8,9),9,0.5))
+sum(dbinom(c(0,1,7,8),8,0.5))
+sum(dbinom(c(0,1,2,8,9,10),10,0.5))
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+dev.print(file="coin1.pdf",dev=pdf)#
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","red","gray","gray","gray","gray","gray","gray","gray","red","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+dev.print(file="coin2.pdf",dev=pdf)#
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+ipping a fair coin ten times")
+dev.print(file="coin3.pdf",dev=pdf)
+sum(dbinom(c(0,1,9,10),10,0.5))
+sum(dbinom(c(0,1,9,10),10,0.5))*20000
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("cyan","gray","gray","gray","gray","gray","gray","gray","gray","gray","cyan"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times"=
+help(barplot)
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times",border=NA)
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times",border=c("red",,"gray","gray","gray","gray","gray","gray","gray","gray","gray","red"))
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times",border=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"))
+y<-dbinom(0:10,10,0.5)#
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times",border=c("gray","gray","gray","gray","gray","gray","gray","gray","gray","gray","gray"))#
+dev.print(file="coin1.pdf",dev=pdf)
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","red","gray","gray","gray","gray","gray","gray","gray","red","red"),border=c("red","red","gray","gray","gray","gray","gray","gray","gray","red","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times")#
+dev.print(file="coin2.pdf",dev=pdf)
+barplot(y,names.arg=c("0","1","2","3","4","5","6","7","8","9","10"),col=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"),xlab="Total number of heads",ylab="Probability",main="Flipping a fair coin ten times",border=c("red","gray","gray","gray","gray","gray","gray","gray","gray","gray","red"))#
+dev.print(file="coin3.pdf",dev=pdf)
+1450*.025
+1450-43.5
+1406-945
+-40
+-60
+1406-945-40-60
+338*1.06
+1406.5-945-40-60
+1406.5-945-40-60-27
+330*1.06
+19=9=33
+19+9+33
+18+9+33
+23+6+31
+17+8+14+20
+19+14+9+16+1
+380*1.05
+380*1.06
+388*1.05
+945=80
+945+80
+964+80
+1044+380
+388*1.05
+380*1.05
+945+80
+1044+400
+388*1.04
+11.117+56.791+113.593+44.710+11.177+89.405+11.176
+388
+388*1.05
+388*1.04
+984+60
+1044+400
+1044+390
+388*1.04
+129+26+550+400
+60/2.75
+21.8*6
+1600/450*1300
+1600/1450*1300
+1600/1450*1311
+1400/60
+1600/1450*1311
+1450/6
+241*5
+1044+390
+1044+395
+1439-10
+1439-1416
+150/4
+1875/1555
+1450/1311
+1600/1450
+1600/1450*1555
+14=14
+14+14
+48987/2+15112+630
+450*30*.49
+2050/44073
+2056/39506
+44073-39506
+2272/32900
+110*.25
+186/27
+27/186
+110*.25
+27/185
+data(Snow.deaths)
+install.packages()
+data(Snow.deaths)
+ls()
+ls
+ls!
+read.delim
+help(read.delim)
+40*.05
+2*53
+(57119-51900)/2+51900
+help(median)
+(140/9)*12
+(203/9)*12
+(205/9)812
+(205/9)*12
+(240/9)*12
+help(barplot)
+diversitycodes <- read_delim("./data/diversitycodes", " ", escape_double = FALSE, col_names = FALSE, #
+    trim_ws = TRUE)#
+head(diversitycodes)
+library(readr)
+library(dplyr)#
+library(ggplot2)
+diversitycodes <- read_delim("./data/diversitycodes", " ", escape_double = FALSE, col_names = FALSE, #
+    trim_ws = TRUE)#
+head(diversitycodes)
+names(diversitycodes)<-c("Code","Population
+","Location","Continent")
+diversitydata <- read_delim("./data/diversitydata.freqs", #
+    " ", escape_double = FALSE, col_names = FALSE, #
+    col_types = cols(X2 = col_character(), #
+        X4 = col_double()), trim_ws = TRUE)#
+  head(diversitydata)
+names(diversitydata)<-c("Marker","Allele","Population","Frequency")
+MARKER<-unique(diversitydata$Marker)#
+POP<-unique(diversitydata$Population)
+Diversity<-matrix(NA,ncol=377,nrow=52)#
+for(i in 1:52)#
+{#
+for(j in 1:377)#
+{#
+Diversity[i,j]<-sum(filter(diversitydata, Marker==MARKER[j],Population==POP[i])[,4]^2)#
+}#
+}#
+colnames(Diversity)<-MARKER#
+rownames(Diversity)<-POP#
+Diversity<-data.frame(POP,apply(Diversity,1,mean),Diversity)#
+names(Diversity)<-c("Population","Average",MARKER)
+Diversity<-inner_join(diversitycodes,Diversity,by=c("Population"))
+names(diversitycodes)<-c("Code","Population","Location","Continent")
+Diversity<-inner_join(diversitycodes,Diversity,by=c("Population"))
+contcol<-data.frame(sort(unique(Diversity$Continent)),c("green","red","yellow","orange","azure","beige","blue"))#
+names(contcol)=c("Continent","Color")#
+Diversity<-inner_join(Diversity,contcol,by=c("Continent"))#
+Diversity<-Diversity[order(Diversity$Continent,Diversity$Location),]
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.x),cex.lab=.4, las=3,mar=c(20,4,4,2))
+help(par)
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.x),cex.lab=.4, las=3,mar=c(40,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4, las=3,mar=c(40,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4, las=3,mar=c(40,4,4,2))
+par(mar=c(40,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4)
+par(mar=c(20,4,4,2))
+par(mar=c(12,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4)
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4,las=3)
+par(mar=c(8,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.4,las=3)
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.3,las=3)
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.2,las=3)
+dev.print(file="PopDiversity.pdf",dev=pdf)
+contcol
+contcol<-data.frame(sort(unique(Diversity$Continent)),c("green","red","orange","yellow","azure","beige","blue"))#
+names(contcol)=c("Continent","Color")#
+Diversity<-inner_join(Diversity,contcol,by=c("Continent"))#
+Diversity<-Diversity[order(Diversity$Continent,Diversity$Location),]
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.y),cex.lab=.2,las=3)
+dev.print(file="PopDiversity.pdf",dev=pdf)
+contdiv<-tapply(Diversity$Average,Diversity$Continent,mean)
+contdiv
+contcol
+contdiv<-tapply(Diversity$Average,Diversity$Continent,mean)
+contdiv<-data.frame(names(contdiv),contdiv)
+contdiv
+contdiv<-tapply(Diversity$Average,Diversity$Continent,mean)#
+contdiv<-data.frame(names(contdiv),contdiv)
+contdiv
+contcol$Color[contcol$Continent==contdiv[order(-contdiv[,2]),1]]
+contcol$Color[contcol$Continent==contdiv[order(-contdiv[,2]),]]
+contcol$Color[contcol$Continent==contdiv[order(-contdiv[,2]),1]]
+contdiv[order(-contdiv[,2]),1]
+rownames(contcol)<-contocol$Continent
+rownames(contcol)<-contcol$Continent
+contdiv<-tapply(Diversity$Average,Diversity$Continent,mean)
+contdiv
+names(contdiv[order(-contdiv[,2])])
+names(contdiv[order(-contdiv)])
+barplot(contdiv[order(-contdiv)],col=contcol$Color[names(contdiv[order(-contdiv)])],main="Continental Diversity",horiz = T,las=1,)
+contdiv
+contcol
+names(contdiv[order(-contdiv)])
+barplot(contdiv[order(-contdiv)],col=as.character(contcol$Color[names(contdiv[order(-contdiv)])]),main="Continental Diversity",horiz = T,las=1,)
+barplot(contdiv[order(-contdiv)],col=as.character(contcol$Color[names(contdiv[order(-contdiv)])]),main="Continental Diversity",horiz = T,las=1,)
+barplot(contdiv[order(-contdiv)],col=as.character(contcol$Color[names(contdiv[order(-contdiv)])]),main="Continental Diversity",horiz = T,las=1)
+as.character(contcol$Color[names(contdiv[order(-contdiv)])])
+contcol$Color[names(contdiv[order(-contdiv)])]
+contcol[names(contdiv[order(-contdiv)]),2]
+as.character(contcol[names(contdiv[order(-contdiv)]),2])
+barplot(contdiv[order(-contdiv)],col=as.character(contcol[names(contdiv[order(-contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+par(mar=c(5,15,4,2))
+barplot(contdiv[order(-contdiv)],col=as.character(contcol[names(contdiv[order(-contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+dev.print(file="ContDiv.pdf",dev=pdf)
+barplot(1-contdiv[order(-contdiv)],col=as.character(contcol[names(contdiv[order(-contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+par(mar=c(5,15,4,2))
+barplot(1-contdiv[order(-contdiv)],col=as.character(contcol[names(contdiv[order(-contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+dev.print(file="ContDiv.pdf",dev=pdf)
+barplot(1-Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.y),cex.lab=.2,las=3)
+par(mar=c(12,4,4,2))
+barplot(1-Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.y),cex.lab=.2,las=3)
+barplot(1-Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color.y),cex.lab=.2,las=3)
+dev.print(file="PopDiv.pdf",dev=pdf)
+par(mar=c(5,15,4,2))
+barplot(1-contdiv[order(contdiv)],col=as.character(contcol[names(contdiv[order(contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+dev.print(file="ContDiv.pdf",dev=pdf)
+barplot(1-contdiv[order(contdiv)],col=as.character(contcol[names(contdiv[order(contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+par(mar=c(5,15,4,2))
+barplot(1-contdiv[order(contdiv)],col=as.character(contcol[names(contdiv[order(contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)

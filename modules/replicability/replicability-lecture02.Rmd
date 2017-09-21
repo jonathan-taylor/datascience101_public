@@ -1,0 +1,506 @@
+---
+title: "Replicability"
+author: "Data Science 101 Team"
+output: slidy_presentation
+---
+
+
+```{r setup, include=F}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="pdf", fig.align="center",fig.width=4.5,fig.height=3.3,out.width ='.85\\linewidth')
+library(ggplot2)
+```
+
+## Replicability II: Multiple testing
+
+- The testing strategies  we have studied are okay when we are interested in testing one hypothesis 
+
+- We will see that when we consider many hypotheses some adjustment may be in order
+
+- We start by defining / reviewing the concepts of Type-I and Type-II errors
+
+
+## Two types of error
+
+
+- **Type-I** error: false positive 
+
+- **Type-II** error: false negative
+
+- In the standard testing framework, we bound the probability of Type-I error, the probability of rejecting the null hypothesis when this is true. This is called the **level** of the test
+
+- The **power** of a test is, instead, the probability of rejecting the null hypothesis when it is false 
+$$
+\text{Power} = 1 - \mathbb{P}(\text{ type 2 error})
+$$
+
+## Example
+
+Suppose $x$ is normally distribution with mean $\mu$ and variance $1$,
+$$
+x \sim \mathcal{N}(\mu, 1)
+$$
+We will visualize the power of the one-sided test
+$$
+H_0: \mu = 0 \qquad\text{vs}\qquad H_1: \mu > 0
+$$
+at fixed level $\alpha = 0.05$
+
+## 
+
+```{r, warning=FALSE,echo=FALSE}
+library(ggplot2)
+
+power_plot <- function(alpha=0.05, mu=1, xlim=c(-3,6)) {
+  q = qnorm(1-alpha)
+  power = pnorm(q, mean=mu, lower.tail=FALSE)
+  text = bquote(list(mu == .(mu), 'power' == .(round(power, 2))))
+  ggplot(data.frame(x=xlim), aes(x)) + 
+    stat_function(fun=dnorm, geom='line') +
+    stat_function(fun=function(x) ifelse(x>q, dnorm(x), NA),
+                  geom='area', fill='#CC79A7') +
+    stat_function(fun=function(x) dnorm(x, mean=mu), geom='line') +
+    stat_function(fun=function(x) ifelse(x>q, dnorm(x, mean=mu), NA),
+                  geom='area', fill='#56B4E9', alpha=0.25) +
+    annotate('text', x=0, y=dnorm(0)+1e-2, parse=TRUE, label='H[0]') +
+    annotate('text', x=mu, y=dnorm(0)+1e-2, parse=TRUE, label='H[1]') +
+    labs(subtitle=text, y='density') + 
+    theme_bw()
+}
+```
+
+```{r,echo=FALSE,out.width ='.95\\linewidth'}
+power_plot(mu=3) +
+  labs(title='High power regime')
+```
+
+Power is 0.91 and $\mathbb{P}(\text{type 2 error}) = \mathbb{P}(\text{false negative}) = 0.09$
+
+## 
+
+```{r,echo=FALSE,out.width ='.95\\linewidth'}
+power_plot(mu=1.5) +
+  labs(title='Medium power regime')
+```
+
+Power is 0.44 and $\mathbb{P}(\text{type 2 error}) = \mathbb{P}(\text{false negative}) = 0.56$
+
+## 
+
+```{r,echo=FALSE,out.width ='.95\\linewidth'}
+power_plot(mu=0.25) +
+  labs(title='Low power regime')
+```
+
+Power is 0.08 and $\mathbb{P}(\text{type 2 error}) = \mathbb{P}(\text{false negative}) = 0.92$
+
+## Power for one sided test of level 0.05
+
+```{r, echo=TRUE}
+mu = seq(-4, 4, length=51)
+power = 1 - pnorm(1.65, mu, 1)
+plot(mu, power, type='l', lwd=2, col='red', ylim=c(0,1))
+abline(h=0.05)
+```
+
+## Power for two sided test of level 0.05
+
+```{r, echo=TRUE}
+power = pnorm(-1.96, mu, 1) + 1 - pnorm(1.96, mu, 1)
+plot(mu, power, type='l', lwd=2, col='red', ylim=c(0,1))
+abline(h=0.05)
+```
+
+## Now consider what happens if we test many hypotheses
+
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+par(mfrow=c(1,1))
+truth = matrix(0,50,20)
+truth[41:50,11:20] = 1
+truth_col = c("#DDDDAAFF", "#4444DDFF")
+image(truth, axes=FALSE, col=truth_col)
+pu <- par("usr")
+abline(v = seq(pu[1], pu[2], len=51), h = seq(pu[3], pu[4], len=21))
+```
+
+
+- We are interested in 1000 hypotheses
+- Imagine that in truth there are 100 non null hypotheses 
+  - \color[HTML]{DDDDAA}Nothing going on
+  - \color[HTML]{4444DD} Something going on
+
+
+## Generate some data
+
+Suppose tests are such that $\mathbb{P}(\text{false positive})= 0.05$ and $\mathbb{P}(\text{false negative}) = 0.2$
+
+```{r echo=TRUE}
+generate_outcome = function(typeI=0.05, typeII=0.2, Z=NULL) {
+
+   if(is.null(Z)) {
+       # mean of one-sided test with given typeI and typeII errors
+       mean_ZA = qnorm(1 - typeI) - qnorm(typeII)
+       mean_Z = matrix(0, 50, 20)
+       mean_Z[41:50:11:20] = mean_ZA
+       Z = matrix(rnorm(as.numeric(mean_Z)), 50, 20)
+   }		 
+
+   # Randomly selecting within "nothing" (and "something")
+   result = Z > qnorm(1 - typeI)
+
+   # Randomly selecting within "something"
+   result[41:50,11:20] = result[41:50,11:20] + 2
+   return(list(result=result, Z=Z, pval=1-pnorm(Z)))
+}
+typeI = 0.05
+typeII = 0.20
+outcome = generate_outcome(typeI=typeI, typeII=typeII)
+discovery = outcome$pval < 0.05
+```
+
+- How many false discoveries would you expect? 
+
+- How many false negatives? 
+
+- How many true positives? 
+
+## After obtaining observations and testing each of the hypotheses
+
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+discovery_col = c("#AAAAAAFF", "#DD4444FF")
+image(discovery, axes=FALSE,col=discovery_col)
+pu = par("usr")
+abline(v = seq(pu[1], pu[2], len=51), h = seq(pu[3], pu[4], len=21))
+
+```
+For each question, 
+we make a decision: P(false positive)=`r typeI`, P(false negative)=`r typeII`.
+
+These are the decisions we made.
+  
+  - \color[HTML]{DD4444} Discovery, :)
+  - \color[HTML]{AAAAAA} Not a discovery, :(
+
+
+## Measuring errors across the entire set of hypotheses
+
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+outcome_col = c("#777777FF", "#DD4444FF", "#DDDD44FF", "#44DD44FF")
+image(outcome$result, axes=FALSE,col=outcome_col)
+pu = par("usr")
+abline(v = seq(pu[1], pu[2], len=51), h = seq(pu[3], pu[4], len=21))
+TD = sum(discovery) # total discoveries
+TTD = sum(discovery[41:50,11:20]) # true discoveries
+TFD = TD-TTD # False discoveries
+FDP = TFD/TD # False discovery proportion
+```
+
+
+- We made \color[HTML]{44DD44} `r TTD` true discoveries
+- \color{black} We made \color[HTML]{DD4444} `r TFD` false discoveries
+- \color{black} Our *False Discovery Proportion* is `r TFD`/`r TD`=`r round(FDP,2)`.
+
+
+## False Discovery Proportion (FDP)
+
+$$ \text{FDP} =\frac{ \text{ number of false discoveries}}{\text{total number of discoveries}}$$
+
+(When no discoveries are made, we set $\text{FDP}=0$)
+
+
+
+## Measuring errors across the entire set of hypotheses
+
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+outcome_col = c("#777777FF", "#DD4444FF", "#DDDD44FF", "#44DD44FF")
+image(outcome$result, axes=FALSE,col=outcome_col)
+pu = par("usr")
+abline(v = seq(pu[1], pu[2], len=51), h = seq(pu[3], pu[4], len=21))
+``` 
+
+
+```{r echo=FALSE}
+TD = sum(discovery) # total discoveries
+TTD = sum(discovery[41:50,11:20]) # true discoveries
+TFD = TD-TTD # False discoveries
+FDP = TFD/TD # False discovery proportion
+data.frame(TD, TTD, TFD, FDP)
+```
+
+Even with a power of 80%, a good portion of what we would report would be false.
+
+## Let's look at how the results change for a different parameter setting
+
+```{r echo=FALSE, fig.height=5, fig.width=8}
+typeII = 0.4
+outcome = generate_outcome(typeI=typeI, typeII=typeII)
+discovery = outcome$pval < 0.05
+image(outcome$result, axes=FALSE, col=outcome_col)
+pu = par("usr")
+abline(v = seq(pu[1], pu[2], len=51), h = seq(pu[3], pu[4], len=21))
+```
+
+For each study P(false negative)=`r typeII`, P(false positive)=`r typeI`.
+
+```{r echo=FALSE}
+TD = sum(discovery==1) # total discoveries
+TTD = sum(discovery[41:50,11:20]) # true discoveries
+TFD = TD-TTD # False discoveries
+FDP = TFD/TD # False discovery proportion
+data.frame(TD, TTD, TFD, FDP)
+```
+
+With a power of 60%, close to half of what we would report would be false!
+
+## False Discovery Rate 
+
+- We cannot observe the FDP, because this would require knowing, case by case, the true status of each hypothesis
+
+- We can often control its expected value
+
+$$ \text{FDR} = \mathbb{E} (\text{FDP})$$
+
+## Familywise error rate (FWER)
+
+- Another possible measure of global error
+
+- FWER: probability of making at least one wrong rejection
+
+- It is a natural extension of the level of test (probability of Type-I error)
+
+- It is actually the "oldest" measure of global error, but it is considered quite conservative ($\implies$ fewer discoveries)
+
+- With many tests, all having their individual Type-I error at 5% the FWER
+rises quickly to 1.
+
+- In our pictures, we *always* make some false positives $\implies$ FWER is not controlled, likely it is close to 1.
+
+## Let's look at some examples
+```{r, echo=T}
+truth = rep(0, 10000) # 10,000 tests 
+N = 1000 # number of non-zero means
+mu = 2 # signal strength
+truth[1:N] = mu # Non nulls with mean 2
+# Generate data
+y = rnorm(10000, truth, 1)
+pvalue = 2*pnorm(-abs(y)) # two-sided p values
+discovery = pvalue < 0.05 # discoveries
+TD = sum(discovery) # number of discoveries
+TTD = sum(pvalue[1:N]<0.05) # number of true discoveries 
+TFD = TD - TTD # number of false discoveries
+FDP = (TFD)/TD # false discovery proportion
+FWER = as.numeric(TFD > 0)
+data.frame(TFD, FDP, FWER)
+```
+
+## The same example, but controlling FWER 
+
+**Bonferroni's strategy**: to control the probability of making at least one false discovery at level $\alpha$, we declare a discovery when 
+
+$$ \text{p-value} < \frac{\alpha}{\# \text{ of tests}}$$
+
+In our case $\alpha=0.05$, $\# \text{ of tests is } 10,000$.
+
+```{r, echo=T}
+discovery = pvalue<0.05/10000
+TD = sum(discovery)
+TTD = sum(discovery[1:N])
+TFD = TD - TTD
+FDP = 0
+if (TD>0) {FDP = (TFD)/TD}
+data.frame(TFD, FDP)
+```
+
+## We can iterate this 1000 times 
+
+```{r echo=FALSE,out.width ='.9\\linewidth',fig.height=7,fig.width=8}
+Discoveries<-NULL
+TrueDiscoveries<-NULL
+FalseDiscoveryProportion<-NULL
+M<-10000 # number of iterations
+for(i in 1:M)
+{
+	y<-rnorm(10000,truth,1)
+pvalue<-2*pnorm(-abs(y))
+discovery<-pvalue<0.05/10000
+TD<-sum(discovery)
+TTD<-sum(discovery[1:N])
+TFD<-TD-TTD
+if(TD>0){FDP<-(TFD)/TD}
+if(TD==0){FDP<-0}
+Discoveries<-c(Discoveries,TD)
+TrueDiscoveries<-c(TrueDiscoveries,TTD)
+FalseDiscoveryProportion<-c(FalseDiscoveryProportion,FDP)}
+
+par(mfrow=c(2,2))
+hist(Discoveries,main="Total Discoveries")
+hist(TrueDiscoveries, main="Number of true discoveries")
+plot(as.factor(Discoveries -TrueDiscoveries>0), main="At least one false Discovery")
+mtext(paste("FWER=",as.character(round(sum((Discoveries -TrueDiscoveries)>0)/M,3))),side=1,line=2.5)
+hist(FalseDiscoveryProportion, main="False Discovery Proportion",xlab="")
+mtext(paste("FDR=",as.character(round(mean(FalseDiscoveryProportion),3))), side=1,line=2.5)
+```
+
+
+## Following a different strategy
+
+```{r echo=FALSE,out.width ='.9\\linewidth',fig.height=7,fig.width=8}
+
+BH = function(p,alpha)
+  {
+    pw<-na.omit(p)
+    n<-length(pw)
+    pw<-sort(pw)
+    comp<-(pw<(1:n)*alpha/n)
+    outcome<-sum(comp==TRUE)    
+    if(outcome>0){
+      last<-max((1:n)[comp==TRUE])
+      pcut<-pw[last]
+      shr<-p*0
+      shr[p<=pcut]<-1
+      out<-list(shr,sum(shr>0,na.rm=T),pcut)
+      names(out)<-c("Reject","Total.Rej","Pcut")
+    }
+    else
+      {
+        shr<-p*0
+        out<-list(shr,outcome,0)
+        names(out)<-c("Reject","Total.Rej","Pcut")
+      }
+    return(out)
+    
+  }
+
+Discoveries<-NULL
+TrueDiscoveries<-NULL
+FalseDiscoveryProportion<-NULL
+M<-10000 # number of iterations
+for(i in 1:M)
+{
+	y<-rnorm(10000,truth,1)
+pvalue<-2*pnorm(-abs(y))
+discovery = BH(pvalue,0.05)[[1]]
+TD = sum(discovery)
+TTD = sum(discovery[1:N])
+TTD = sum(discovery[1:N])
+TFD = TD - TTD
+FDP = 0
+if(TD>0){
+   FDP = TFD/TD
+}
+Discoveries = c(Discoveries,TD)
+TrueDiscoveries = c(TrueDiscoveries,TTD)
+FalseDiscoveryProportion = c(FalseDiscoveryProportion,FDP)
+}
+
+par(mfrow=c(2,2))
+hist(Discoveries,main="Total Discoveries")
+hist(TrueDiscoveries, main="Number of true discoveries")
+plot(as.factor(Discoveries -TrueDiscoveries>0), main="At least one false Discovery")
+mtext(paste("FWER=",as.character(round(sum((Discoveries -TrueDiscoveries)>0)/M,3))),side=1,line=2.5)
+hist(FalseDiscoveryProportion, main="False Discovery Proportion",xlab="")
+mtext(paste("FDR=",as.character(round(mean(FalseDiscoveryProportion),3))), side=1,line=2.5)
+```
+
+## FDR control
+
+The results of the previous slide are obtained following a strategy that guarantees 
+FDR $< q$ (0.05 in our case)
+
+The strategy was introduced by Benjamini and Hochberg in 1995, together with the definition of FDR.
+
+- It is a more liberal strategy than Bonferroni, and more powerful.
+
+- It is an adaptive strategy, based on comparing the ordered p-values with a decreasing threshold.
+
+Let $M$ be the total number of hypotheses
+
+$$p_{(1)}\leq p_{(2)}\leq p_{(3)}\leq \cdots \leq p_{(M)}$$
+
+Let $j$ be the last value $j=1,\ldots, M$ for which
+
+$$p_{(i)} \leq q \times \frac{i}{M}$$
+
+- Reject all hypotheses whose p-value $p_{i}\leq p_{(j)}$
+
+
+## Benjamini Hochberg rule
+
+```{r here, echo=FALSE, fig.height=7, fig.width=8}
+# Understanding what the BH function does
+
+# Let's consider a vector of true means
+truth<-rep(0,1000) # the majority of means is equal to 0
+N<-100 # number of non-zero means
+mu<-3 # signal strength
+truth[1:N]<-mu # First N means set to mu 
+# Generate data
+y<-rnorm(1000,truth,1) # Generate data 
+pvalue<-2*pnorm(-abs(y)) # Compute p-values
+par(mfrow=c(2,2))
+plot(sort(pvalue),main="Pvalues",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+
+plot(sort(pvalue)[1:200],main="Zooming in",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+plot(sort(pvalue)[1:100],main="Zooming in",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+plot(sort(pvalue)[1:100],main="Zooming in, & selecting",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+```
+
+
+## The cut-off for rejection is ADAPTIVE
+
+```{r echo=FALSE, fig.height=3, fig.width=8}
+par(mfrow=c(1,3))
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-100 # number of non-zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu 
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-200 # number of non-zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+
+Tmean<-rep(0,1000) # the majority is equal to 0
+N<-300 # number of non zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+```
+
+## Another look at BH
+
+- We have pointed out that we cannot observe FDP because we cannot
+observe the numerator `TFD`.
+
+- We *can* give a conservative estimate for any particular Type-I error
+threshold $\alpha$ (pictures for our decision were $\alpha=0.05$):
+$$
+\widehat{TFD}(\alpha) = \text{ Number of  hypotheses} \cdot \alpha.
+$$

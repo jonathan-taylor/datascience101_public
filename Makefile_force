@@ -1,0 +1,60 @@
+# A makefile that will build webpage even if Rmd builds fail somewhere
+
+SHELL = /bin/bash
+MODULE_DIR = modules
+BUILD_DIR = build
+
+LECTURES = $(wildcard $(MODULE_DIR)/*/*-lecture*.Rmd)
+LABS = $(wildcard $(MODULE_DIR)/*/*-lab*.Rmd)
+#$(warning $(LECTURES))
+SLIDES1 = $(patsubst $(MODULE_DIR)/%-lecture01.Rmd, $(MODULE_DIR)/%-lecture01.html, $(wildcard $(MODULE_DIR)/*/*-lecture01.Rmd))
+SLIDES2 = $(patsubst $(MODULE_DIR)/%-lecture02.Rmd, $(MODULE_DIR)/%-lecture02.html, $(wildcard $(MODULE_DIR)/*/*-lecture02.Rmd))  
+SLIDES3 = $(patsubst $(MODULE_DIR)/%-lecture03.Rmd, $(MODULE_DIR)/%-lecture03.html, $(wildcard $(MODULE_DIR)/*/*-lecture03.Rmd))
+LAB1_OUTS = $(patsubst $(MODULE_DIR)/%-lab01.Rmd, $(MODULE_DIR)/%-lab01.html, $(LABS))  
+LAB2_OUTS = $(patsubst $(MODULE_DIR)/%-lab02.Rmd, $(MODULE_DIR)/%-lab02.html, $(LABS))  
+
+Rdeps:
+	python tools/installRdeps.py modules/*/R-requirements.txt
+	python tools/installRgithub.py modules/*/R-github.txt
+
+$(MODULE_DIR)/%-lecture01.html: $(MODULE_DIR)/%-lecture01.Rmd 
+	python tools/build_slides.py --noexit $<;
+
+$(MODULE_DIR)/%-lecture02.html: $(MODULE_DIR)/%-lecture02.Rmd
+	python tools/build_slides.py --noexit $<;
+
+$(MODULE_DIR)/%-lecture03.html: $(MODULE_DIR)/%-lecture03.Rmd
+	python tools/build_slides.py --noexit $<;
+
+$(MODULE_DIR)/%-lab01.html: $(MODULE_DIR)/%-lab01.Rmd
+	python tools/build_slides.py --noexit $<;
+	-python tools/export_jupyter.py $<;
+
+$(MODULE_DIR)/%-lab02.html: $(MODULE_DIR)/%-lab02.Rmd
+	python tools/build_slides.py --noexit $<;
+	-python tools/export_jupyter.py $<;
+
+slides: Rdeps $(SLIDES1) $(SLIDES2) $(SLIDES3)
+
+labs: Rdeps $(LAB1_OUTS) $(LAB2_OUTS)
+
+$(BUILD_DIR)/index.html : index.md
+	@pip install --user notedown nbconvert sphinx; 
+	notedown index.md > index.ipynb;
+	jupyter nbconvert --to=rst index.ipynb --output=index;
+	rm index.ipynb;
+	mv index.rst sphinx;
+	sphinx-build -v -E -b html sphinx _build/html ;
+	-mkdir build;
+	cp -r _build/html/* build;
+
+all:   slides labs $(BUILD_DIR)/index.html
+	cp -r modules/* build
+
+clean:
+	rm -fr $(BUILD_DIR);
+	rm -fr _build;
+	rm -fr $(MODULE_DIR)/*/*lecture*html
+	rm -fr $(MODULE_DIR)/*/*lab*html
+
+

@@ -1,0 +1,11 @@
+---
+title: "Nonparametric lab 2"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+```

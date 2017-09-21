@@ -1,0 +1,12 @@
+---
+title: "Homework for Replicability module"
+author: "Data Science Team"
+output:
+  pdf_document: default
+  html_document:
+    keep_md: yes
+---
+
+```{r message=FALSE}
+library(pacman)
+```

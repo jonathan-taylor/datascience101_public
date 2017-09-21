@@ -1,0 +1,307 @@
+---
+title: "Homework for Data module"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+# Due Friday 21 April, 9:30am via Canvas.
+
+These questions are based on [data-lab01](data-lab01.html), which used the Bay Area Bike Share (BABS) data.
+
+### More analysis of BABS data
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+pacman::p_load(tidyverse, nycflights13)#,ggmap)
+```
+
+
+1. In this part, we'll do some additional analysis of the BABS data. Read in the trip and station data, just as we did in class, and fix the variable names so they don't have spaces.
+
+```{r include=F}
+station <- read_csv(file='data/babs/201508_station_data.csv',
+                    col_types = cols(installation = col_datetime( format = "%m/%d/%Y")))
+trip <- read_csv(file='data/babs/201508_trip_data.csv', 
+                 col_types = cols(`Start Date` = col_datetime( format = "%m/%d/%Y %H:%S"),
+                                  `End Date` = col_datetime( format = "%m/%d/%Y %H:%S")))
+# eliminate spaces
+nm <- names(trip); nm.no.whitespace <- gsub(" ","",nm)
+names(trip) <- nm.no.whitespace
+```
+
+2. Create an aggregated version of the trip dataset that consists of the number of trips starting at each station, as well as the name (or numeric id...your choice) of the start station.
+
+```{r include=F}
+N.trip.start <- trip %>% group_by(StartTerminal) %>% summarise(N.trips.start=n())
+```
+
+3. Do the same for trips **ending** at each station. Rename any variables in the resulting tibble that are inappropriately named.
+
+```{r include=F}
+N.trip.end <- trip %>% group_by(EndTerminal) %>% summarise(N.trips.end=n()) 
+```
+
+4. Any comparisons we make across stations based on the total number of trips starting at/ending at each station could be misleading if some of the stations were constructed during the time period covered by the `trip` dataset. Verify that this is not the case by confirming (programmatically) that the maximum of `installation` in the `station` tibble is smaller than the minimum of `StartDate` in the `trip` tibble (recall the problems that readr had with parsing the dates in this table, and our solution from lab 1, or use a dplyr command to convert these variables after reading the data).
+
+```{r include=F}
+trip.min <- trip %>% summarise(min.tm = min(StartDate))
+install.max <- station %>% summarise(max.tm = max(installation))
+trip.min
+install.max
+```
+
+5. Create a single tibble consisting of one row for each station with one variable giving the number of trips starting at that station and a second variable giving the number of trips ending at that station by **joining** the two tibbles you just made. Check that the data dimensions do not change during joining -- i.e. that there is exactly one entry in each table for each station.
+
+```{r include=F}
+N.trip <- N.trip.start %>% inner_join(N.trip.end, by=c("StartTerminal"="EndTerminal"))
+N.trip <- N.trip %>% rename(station_id=StartTerminal)
+```
+
+6. Compute a new variable called `NetFlux`, defined as the difference between the number of trips starting at the station and the number of trips ending at the station.
+
+```{r include=F}
+N.trip <- N.trip %>% mutate(NetFlux = N.trips.start-N.trips.end)
+```
+
+7. Summarize NetFlux using `summary()`
+
+```{r include=F}
+summary(N.trip$NetFlux)
+```
+
+8. Think about the variable NetFlux that you've just obtained a summary of. What does this variable represent? What are the implications for the day-to-day operation of BABS? Can BABS work smoothly without some "intervention"? What sort of "intervention" do you suspect is already happening?
+
+## Some visualization with BABS data
+
+9. We are now going to dig a little more into the NetFlux variable. In the process of this, you'll learn to make a simple map visualization. First, get the geolocation data together with the flux data by performing another join.
+
+```{r include=F}
+N.trip <- N.trip %>% inner_join(station,by="station_id")
+```
+
+10. Now that we have this, let's figure out the geographic extent of our data. Compute the median of latitude and median of longitude and stick them in a vector. Call it `Location`
+
+```{r include=F}
+Location <- c(lon=median(N.trip$long),lat=median(N.trip$lat))
+```
+
+11. The median location defines the center of the map you are going to make. We will now acquire a map file. Load the `ggmap` package, then use `get_map` to get a map centered on your location. Use [this tutorial](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/ggmap/ggmapCheatsheet.pdf) to help you. I suggest using google as the source. Play with the zoom level to get it to look right.
+
+```{r include=F}
+#library(ggmap)
+#map1 <- get_map(location=Location,source="google",maptype="roadmap",crop=F,zoom=10)
+```
+
+12. Plot your map without layering anything else on it just to check that it looks like it has the right geographic extent.
+
+```{r include=F}
+#ggmap(map1)
+```
+
+13. Now, we are going to layer on top of this a visualization of NetFlux. Use the basic syntax:
+```
+#ggmap(myMap) + geom_point(data=myData,aes(x=long,y=lat))
+```
+to layer points on top of your map at the location of each of the stations. Make the size of the points proportional to `abs(NetFlux)` and the color of the points mapped to `sign(NetFlux)`, so that big points are stations where the net flux is large, and small points are stations where it is small, while the color tells whether the net flow is out of or into the station.
+
+```{r include=F}
+#ggmap(map1) + geom_point(data=N.trip,aes(x=long,y=lat,size=abs(NetFlux),col=factor(sign(NetFlux))),alpha=.6)
+```
+
+14. What can you learn from this map? Comment on (1) which parts of the service area have the largest net flux and (2) which parts seem to have the most stations. How do you think the actions of BABS are likely to have affected the net flux values you calculated?
+
+15. From this, it should be clear that there is one part of your map where most of the "interesting" detail is (San Francisco), but at this zoom level it is hard to see what's going on in this area. Now select out the stations in SF using `filter`. Store it in a new tibble.
+
+```{r include=F}
+N.trip.sf <- N.trip %>% filter(landmark=="San Francisco")
+```
+
+16. Using a similar approach to what you did previously, get a new map of just the stations in SF. Mess with the zoom to get the scale right.
+
+```{r include=F}
+Location.sf <- c(median(N.trip.sf$long),median(N.trip.sf$lat))
+#map.sf <- get_map(Location.sf,source="google",maptype="roadmap",crop=F,zoom=14)
+#ggmap(map.sf)
+```
+
+17. Make a similar plot to what you did for question 12.
+
+```{r include=F}
+#ggmap(map.sf) + geom_point(data=N.trip.sf,aes(x=long,y=lat,size=abs(NetFlux),col=factor(sign(NetFlux))),alpha=.6)
+```
+
+18. Which stations have the largest **negative** net flux? Which have the largest **positive** net flux? For the station with the largest negative net flux, propose a hypothesis for why more people seem to want to travel by bike **starting** at that location than **ending** at that location.
+
+## A bit more on flux
+
+We'll now do a bit more analysis of other factors affecting demand for BABS bikes and how this might impact their logistics and financials. Use the full data, not just the data for the one city that you were recently working with.
+
+19. So far, we have computed the net flux, and used that as a measure of the extent to which demand for rides originating and finishing at any particular station is imbalanced. We used a year of data, and so the net flux we computed is over a period of a year. Make a new variable containing net flux per day.
+
+```{r include=F}
+N.trip <- N.trip %>% mutate(NetFlux.PerDay = NetFlux/365)
+```
+
+20. Compute another variable called "DaysToEmpty" that gives the following: assuming that the station starts out half full, and that the rate of arrivals and departures from the station is constant over time and deterministic, how many days will it take until it is empty (obviously, this calculation only makes sense if the NetFlux is negative). Also create the analogous variable "DaysToFull".
+
+```{r include=F}
+N.trip <- N.trip %>% mutate(DaysToEmpty=ifelse(NetFlux<0,dockcount/abs(NetFlux.PerDay),NA),
+                            DaysToFull=ifelse(NetFlux>0,dockcount/NetFlux.PerDay,NA))
+```
+
+21. Find the stations with the minimum DaysToEmpty and DaysToFull. Which are they? What are their values of DaysToEmpty and DaysToFull?
+
+```{r include=F}
+N.trip %>% filter((DaysToEmpty==min(DaysToEmpty,na.rm=T)) | (DaysToFull==min(DaysToFull,na.rm=T))) %>% select(name,DaysToEmpty,DaysToFull)
+```
+
+22. Suppose BABS wants to **ensure** that none of their stations are **ever** empty or at capacity. Do you think it is possible to do this? Why or why not? (Hint: the assumption that the rate of arrivals/departures is constant and deterministic is obviously wrong...there is some **randomness** in when people show up looking to rent/return a bike at any location.)
+
+23. Suppose instead that BABS is willing to accept that sometimes a station might be empty or at capacity, as long as it does not happen too often. For the two stations you identified in step 21, provide rough guidance as to how often they need to move bikes to/from each station in order to make sure that the station is "rarely" empty/over capacity. (I am looking for a semi-quantitative answer...giving a fully quantitative answer to this question is rather hard. So just make a reasonable suggestion.)
+
+24. Suppose you knew **exactly** the number of bikes at every station at 12am on Septeber 1, 2014 (the day on which the data start). Describe how you could calculate the **exact** number of bikes at each station (and, therefore, whether the station was at capacity or empty) at any future time through 11:59pm on August 31, 2015 (the last day in the data) using variables in the tables `station` and `trip`.
+
+
+<!-- Now, create a version of the trip dataset that contains the latitude and longitude of each `StartStation` and `EndStation` using a series of **two** inner joins. Do the first join to get the information on the **start** station. -->
+
+<!-- ```{r} -->
+<!-- trip <- trip %>% inner_join(station, by=c("StartStation"="name")) -->
+<!-- ``` -->
+
+<!-- Rename the new variables that resulted from the join appropriately so that we know that these variables correspond to the **start** station. Make sure your new variable names don't have any spaces. -->
+
+<!-- ```{r} -->
+<!-- nm <- names(trip); nm[12:17] <- paste("Start",nm[12:17],sep="") -->
+<!-- names(trip) <- nm -->
+<!-- ``` -->
+
+<!-- Now repeat this process for the **end** station. -->
+
+<!-- ### Homework -->
+
+<!-- Don't forget that the nice thing about a pipeline is that you can -->
+<!-- execute the steps incrementally, seeing what happens in each step! -->
+<!-- Also, we provide verbal hints for you. -->
+
+<!-- 1. What percent of the trip in 2015 were by subscribers? Your result -->
+<!-- will be three columns: `SubscriberType`, `trips`, `proportion`. -->
+
+<!-- #### Partial solution -->
+
+<!-- ```{r} -->
+<!-- ## Create a pipeline starting with tripData -->
+<!-- ## Use the piping %>% operator to -->
+<!-- ## Do grouping -->
+<!-- ## summarize count using "trips = n()" -->
+<!-- ## create a new variable called proportion -->
+<!-- ## to get the result -->
+<!-- ``` -->
+
+<!-- 2. Construct a table of the average number of rides per day for each -->
+<!--    city. (We assume a ride took place in the city where it started.) -->
+
+<!-- _Hint:_ This requires one to combine data that is in two data sets: -->
+<!-- `tripData` and `stationData`. To do that, `dplyr` provides a -->
+<!-- `left_join` function. Below, we provide the first few lines you can -->
+<!-- use verbatim. -->
+
+<!-- #### Partial solution -->
+
+<!-- ```{r} -->
+<!-- ## Create a pipeline starting with tripData vebatim below -->
+<!-- ## tripData %>% -->
+<!-- ##    left_join(stationData, by = c("StartTerminal" = "station_id")) %>% -->
+<!-- ##    select(StartTime, City = landmark) %>% -->
+<!-- ## Create a Date variable from StartTime -->
+<!-- ## Do grouping by City and Date -->
+<!-- ## summarize count using n() -->
+<!-- ## summarize using mean -->
+<!-- ``` -->
+
+<!-- 3. Construct the same table in 2, grouped by weekend and not weekend. -->
+
+<!-- _Hint:_ Reuse what we have done above to detect weekend and not -->
+<!-- weekend. -->
+
+<!-- #### Partial solution -->
+
+<!-- ```{r} -->
+<!-- ## Create a pipeline starting with tripData vebatim below -->
+<!-- ## tripData %>% -->
+<!-- ##    left_join(stationData, by = c("StartTerminal" = "station_id")) %>% -->
+<!-- ## Create Date, DayOfWeek, Weekend variable -->
+<!-- ## Select(City = landmark, Weekend, Date) %>% -->
+<!-- ## Do grouping by City, Weekend, and Date -->
+<!-- ## summarize count using n() -->
+<!-- ## summarize using mean -->
+<!-- ``` -->
+
+<!-- 4. Plot the number of trips for each day for the city of San -->
+<!--    Francisco. Use a smooth (`ggplot2::geom_smooth`) to show the trend. -->
+
+<!-- #### Partial solution -->
+
+<!-- ```{r} -->
+<!-- ## Start as follows -->
+<!-- ## library(ggplot2) -->
+<!-- ## tripData %>% -->
+<!-- ##    left_join(stationData, by = c("StartTerminal" = "station_id")) %>% -->
+<!-- ## Create a Date variable -->
+<!-- ## select(City = landmark, Date) %>% -->
+<!-- ## filter on City being "San Francisco" -->
+<!-- ## Do grouping by Date -->
+<!-- ## Summarize count using "trips = n()" -->
+<!-- ## Pipe the above into -->
+<!-- ## geom_point(mapping = aes(x = Date, y = trips)) + -->
+<!-- ## geom_smooth(mapping = aes(x = Date, y = trips)) -->
+<!-- ``` -->
+
+<!-- 4a. Extra credit: Do you think the ridership might be affected by -->
+<!--    weather in SFO? Use the mean daily temperature for your -->
+<!--    calculations. What other factors might affect ridership? -->
+
+<!--    The data for weather is in the file `201508_weather_data.csv`. Here -->
+<!--    you will need the canonical mapping of city to zip codes. This -->
+<!--    happens to be in the `README.txt` file distributed with the -->
+<!--    Bikeshare data. It is easy to put that in a `tibble` for use. -->
+
+<!-- ```{r} -->
+<!-- library(tibble) -->
+<!-- cityZip <- tibble(City = c("San Francisco", "Redwood City", "Palo Alto", "Mountain View", "San Jose"), -->
+<!--                   Zip = c(94107L, 94063L, 94301L, 94041L, 95113L)) -->
+<!-- cityZip -->
+<!-- ``` -->
+
+<!-- Feel free to make use of `cityZip`. (The `L` suffix forces R to -->
+<!-- recognize the values as integers as opposed to general numbers.) -->
+
+<!-- #### Partial solution -->
+
+<!-- ```{r} -->
+<!-- library(readr) -->
+<!-- weatherData <- read_csv("./data/babs/201508_weather_data.csv", -->
+<!--                         col_names = c("date", "maxTemp", "meanTemp", "minTemp", -->
+<!--                                       "maxDewPt", "meanDewPt", "minDewPt", -->
+<!--                                       "maxHum", "meanHum", "minMinHum", -->
+<!--                                       "maxPress", "meanPress", "minPress", -->
+<!--                                       "maxVis", "meanVis", "minVis", -->
+<!--                                       "maxWind", "meanWind", "maxGust", -->
+<!--                                       "precip", "cloud", "events", -->
+<!--                                       "windDir", "zip"), -->
+<!--                         skip = 1, -->
+<!--                         col_types = cols( -->
+<!--                             date = col_date( format = "%m/%d/%Y") -->
+<!--                         )) -->
+<!-- ``` -->
+
+<!-- Focusing on SFO, let us plot the `meanTemp` for each day. -->
+
+<!-- ```{r} -->
+<!-- ## Start with -->
+<!-- ##weatherData %>% -->
+<!-- ##    left_join(cityZip, by = c("zip" = "Zip")) %>% -->
+<!-- ##    select(City, date, meanTemp) %>% -->
+<!-- ``` -->

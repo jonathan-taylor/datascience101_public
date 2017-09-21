@@ -1,0 +1,69 @@
+---
+title: "Data Summaries, Homework"
+author: "Data Science Team"
+output:
+     html_document:
+         keep_md: true
+---
+
+### Due friday April 28, 9:30AM
+
+### 1. Mean and Median
+
+a. Generate a numerical variable with 50 values. To do this you can use one of the functions to generate random numbers in R as rnorm() (if you look up the help for this function you will see other options) or you can just make up the values. Calculate the range (min, max) of this values and call it [a,b]. Calculate the arithmetic mean and median of the values.
+
+b. Now, choose one of the 50 values you have generated (it might as well be the first one $x_1$), and study what happens to the mean and median of the dataset as you change that value. You are going to change $x_1$ to take on, one by one, the values $y_1,\ldots, y_{100}$, where $y_1=a-2(b-a)$ and $y_{100}=a+2(b-a)$, and the rest of the $y_i$ are equispaced in between (you might find the function seq() useful to generate $y$). This will lead you to have 100 different datasets (with the remaining values $x_2,\ldots, x_{50}$ fixed).
+Calculate the mean and median for each of the datasets and show with a graphical display how mean and median change as the values of $x_1$ change. 
+
+c. Describe what one can learn from these calculations.
+
+### 2. Average speed
+
+In testing her new car, your friend takes a trip to Santa Cruz.
+In getting to the 280, she goes at 25mph covering 3.6 miles. Then for 7 miles on 280 she goes at 70mph and for the remaining 8.3 miles she slows down to 60mph. Once on the 17, for the first 5 miles she is down to 55mph, but once the traffic starts to flow again, she really starts the testing, with  intervals of 5 miles at 70mph, 5 miles at 75mph, 5 miles at 80mhp. Finally, she decides to stop pushing her luck and for the last 4 miles she rolls at 60mph.
+
+a. Calculate your friend's average speed. 
+
+b. Explain why this is different from the arithmetic mean of the speeds, or a weighted arithmetic mean.
+
+### 3. Income inequality
+
+In their recent [work](http://science.sciencemag.org/content/344/6186/838), the economists Piketty and Saez  measure inequality using the share of income that goes to the top 10% higher earners.
+
+a. Explain why this quantity can be used as an index of inequality 
+
+b. Including this, you now have three ways of quantifying inequality (the other two being the Gini index and the ratio of income variance to its maximum value ($Var(x)/(\bar{x}^2(n-1))$). Calculate them all using the  2015 CPS household income data we analyzed in class (providing values for the entire population as well as the separate groups "Asian","Black","Hispanic","White"). How are the results different across the indexes?
+
+c. To gain a better understanding of the differences between these three indexes, experiment with fictitional datasets that you generate in R. Once you have a sense of their differences, illustrate them with a graphical display and describe them in a paragraph.
+
+
+### 4. Diversity index
+The Gini/Shannon index for diversity for a variable with possible values $v_1,\ldots,v_m$ recorded with relative frequencies $p_1,\ldots,p_m$ 
+$$\begin{array}{cccc}
+v_1 & v_2& \cdots & v_m\\
+p_1 & p_2 &\cdots & p_m
+\end{array}
+$$
+is defined as follows:
+$$D= 1-\sum_{i=1}^mp_i^2$$
+
+Show, either analytically or by a large enough number of trials, that 
+
+$$D\leq 1-\frac{1}{m}$$
+
+
+### 5. Genetic diversity across human populations
+
+On the Rosenberg Lab web-site, look for the data relative to the [HGDP 2005 microsatellites ](https://rosenberglab.stanford.edu/diversity.html#2005). Specifically, for the following three files
+
+- [Allele frequencies for data used by Rosenberg et al. (2005), 783 microsatellites only](https://rosenberglab.stanford.edu/data/rosenbergEtAl2005/combinedmicrosats-1048.freqs)
+
+- [Population codes in files associated with Rosenberg et al. (2005)](https://rosenberglab.stanford.edu/data/rosenbergEtAl2005/rosenbergEtAl2005.codes.txt)
+
+- [Latitudes, longitudes, and spherical coordinates used by Rosenberg et al. (2005)](https://rosenberglab.stanford.edu/data/rosenbergEtAl2005/rosenbergEtAl2005.coordinates.txt)
+
+Using this more recent dataset,
+
+a. Replicate the analysis of genetic diversity done in class on this new microsatellites dataset.
+
+b. Enrich your conclusions by taking advantage of the latitude/longitute information provided. Please note that you might decide to construct a map display, but this is not your only option (look at the [original paper](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.0010070) for some ideas).

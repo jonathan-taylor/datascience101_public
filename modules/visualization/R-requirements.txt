@@ -1,0 +1,15 @@
+UsingR
+nutshell
+tidyverse
+plyr
+tidyverse
+HistData
+datasets
+weatherData
+lubridate
+nycflights13
+GGally
+Quandl
+datasets
+Hiiragi2013
+magrittr

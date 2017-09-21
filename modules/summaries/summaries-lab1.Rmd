@@ -1,0 +1,290 @@
+---
+title: "Data summaries"
+author: "Data Science Team"
+date: "April 17, 2017"
+output:
+  word_document: default
+  html_document:
+    keep_md: yes
+---
+
+
+## Interest rates data
+
+This data was downloaded from the 
+[Federal Reserve Data Website](https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15)
+selecting the option "Treasury Constant Maturities [csv, All Observations, 792.2 KB ]"
+on April 15, 2017.
+
+After opening the file, it is clear that the first 5 lines contain a description of the data, so that we can actually skip them when reading in.
+
+For interpretation, however, it is important to notice that each column is containing something of the form "Market yield on U.S. Treasury securities at XXX   constant maturity, quoted on investment basis" and that the percent is reported as "Per_Year". The colums differ in XXX, which goes from 1 month to 30 years. 
+
+It is also clear that there are a lot of missing data, presumably due to the availability/record keeping or  not of a certain financial product at different times.
+
+Finally, there are some entries marked as "ND," which might indicate special days (other then week-ends) when the market is closed and there is no recorded values for the market yield. These are technically different from the other missing data, but for our analysis we can consider them all "missing"
+
+We start loading in the data, skipping the first 5 lines, indicating all the missing data symbols, and specifying formats for the columns.
+
+```{r, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+interest<-read_csv(file="data/FRB_H15.csv",na = c("empty","", "ND"), skip = 5,col_types = cols("Time Period" = col_date(format = "%m/%d/%y"),RIFLGFCM01_N.B=col_double(), 	RIFLGFCM03_N.B=col_double(),	RIFLGFCM06_N.B=col_double(),	RIFLGFCY01_N.B=col_double(),	RIFLGFCY02_N.B=col_double(),	RIFLGFCY03_N.B=col_double(),	RIFLGFCY05_N.B=col_double(),	RIFLGFCY07_N.B=col_double(),	RIFLGFCY10_N.B=col_double(),	RIFLGFCY20_N.B=col_double(),	RIFLGFCY30_N.B=col_double()))
+summary(interest)
+```
+
+It seems that this did what we might have wanted, but the dates are not quite right, and the names of the variables are rather cryptic.
+
+```{r, message=FALSE}
+interest$`Time Period`<-as.Date(ifelse(interest$`Time Period` > "2017-04-11", format(interest$`Time Period`, "19%y-%m-%d"), format(interest$`Time Period`)))
+interest<- interest %>% rename(YieldM01=RIFLGFCM01_N.B)
+interest<-interest %>% rename(YieldM03=RIFLGFCM03_N.B)
+interest<-interest %>% rename(YieldM06=RIFLGFCM06_N.B)
+interest<-interest %>% rename(YieldY01=RIFLGFCY01_N.B)
+interest<-interest %>% rename(YieldY02=RIFLGFCY02_N.B)
+interest<-interest %>% rename(YieldY03=RIFLGFCY03_N.B)
+interest<-interest %>% rename(YieldY05=RIFLGFCY05_N.B)
+interest<-interest %>% rename(YieldY07=RIFLGFCY07_N.B)
+interest<-interest %>% rename(YieldY10=RIFLGFCY10_N.B)
+interest<-interest %>% rename(YieldY20=RIFLGFCY20_N.B)
+interest<-interest %>% rename(YieldY30=RIFLGFCY30_N.B)
+interest<-interest %>% rename(Date=`Time Period`)
+summary(interest)
+```
+
+So, now that it really seems we have the data in correctly, let's explore different plotting options.
+
+First we explore what we can do with **ggplot()**. Again, you will learn more about this next week. The gg in the name ggplot stands for "Grammar of graphics".
+Now, it may be the grammar, but it is not the "bible" and I do not believe that the choices made there are always the best ones. However, ggplot2 does provide a flexible plotting environment that you can really use at your advantage.
+One main feature is that you can keep modifying and adding to your plot in a way that enforces documentation. The names of functions are somewhat long, and the code can be rather dense at first sight, so it is useful to learn it bit by bit.
+
+We want to plot all the interest time series. The nice thing is that we can just add one at the time.
+
+```{r, message=FALSE, warning=FALSE}
+p <- ggplot()  + 
+  geom_line(data = interest, aes(x = Date, y = YieldM01)) +
+  geom_line(data = interest, aes(x = Date, y = YieldM03))  +
+  geom_line(data = interest, aes(x = Date, y = YieldM06))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY01))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY02))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY03))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY05))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY07)) +
+  geom_line(data = interest, aes(x = Date, y = YieldY10))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY20))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY30))  +
+  scale_y_continuous(name="Yield", limits=c(0, 20))
+p
+```
+
+Clearly we need some different colors in order to distinguish the various time series.
+Since there is an "order" among them, due to the lenght of their maturity, it makes sense to use color in a scale to convey that information. The following code does this. Note that we are not creating a legend, we are simply going to remember that different shades of red-gray correspond to different maturities (the more red, the shorter). To start, I select the colors and do a simple plot to check that I like the color scale I have produced. Note that I create a longer sequence of colors that I need, just because I want more red-ish colors and less gray ones.
+
+```{r, message=FALSE, warning=FALSE}
+library(colorspace)
+mycol<-sequential_hcl(15,h=3)
+plot(1:15,col=mycol,pch=19)
+```
+
+Now we are ready for the real plot.
+
+```{r, message=FALSE, warning=FALSE}
+p <- ggplot()  + 
+  geom_line(data = interest, aes(x = Date, y = YieldM01, color = I(mycol[1]))) +
+  geom_line(data = interest, aes(x = Date, y = YieldM03, color = I(mycol[2])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldM06, color = I(mycol[3])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY01, color = I(mycol[4])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY02, color = I(mycol[5])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY03, color = I(mycol[6])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY05, color = I(mycol[7])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY07, color = I(mycol[8]))) +
+  geom_line(data = interest, aes(x = Date, y = YieldY10, color = I(mycol[9])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY20, color = I(mycol[10])))  +
+  geom_line(data = interest, aes(x = Date, y = YieldY30, color = I(mycol[11])))  +
+  scale_y_continuous(name="Yield", limits=c(0, 20))
+p
+```
+
+Now, I do want to remind you that ggplot2 is just one package. There are other ways of doing graphics in R. Specifically there is a package call lattice which I think has very nice aesthetic and does authomatically for you lots of the things you might want to.
+
+```{r, message=FALSE, warning=FALSE}
+library(lattice)
+xyplot(YieldM01+YieldM03+YieldM06+YieldY01+YieldY02+YieldY03+YieldY05+YieldY07+YieldY10+YieldY20+YieldY30~Date,data=interest,col=mycol[1:11],ylab="Yield",pch=20)
+```
+
+Now, the real facility of lattice is that you can create many separate plots that arrange themselves nicely on the page
+
+```{r, message=FALSE, warning=FALSE}
+xyplot(YieldM01+YieldM03+YieldM06+YieldY01+YieldY02+YieldY03+YieldY05+YieldY07+YieldY10+YieldY20+YieldY30~Date,data=interest,ylab="Yield",type="l",outer=TRUE,col=mycol[1])
+```
+
+Ok, now that we have loaded in the data and took a quick look, let's try to calculate averages.
+
+Firstly, we want to restrict to a set of dates when all the timeseries have observations, as there are clear time trends in the interest rate values and averaging over different time periods would lead to invalid comparisons.  We can simply to do that by focusing on points with no missing data. But that would restrict us to a small time frame. Alternatively, we can
+ we might decide to elimate from consideration the 1 month and 20 years maturities, as they are the time series with most missing values, and then restrict to complete data. More extremely, we can decide to consider only Y01,Y03, Y05 and Y10 that are the time series recorded for the longer times, and then require no missing data.
+ 
+```{r}
+subinterest<-interest[,c("YieldY01","YieldY03","YieldY05","YieldY10")]
+subinterest<-na.omit(subinterest)
+summary(subinterest)
+```
+
+The summary function, already gives us the arithmetic mean and the median of these time series as a measure of center. We also want to calculate the "interest average" we discussed in class and compare it.
+
+Now, the data are  "market yields" not quite the interest rates, but we can consider them as such. Before doing "averages" however, we need to remember that the interests are expressed in "per cent per year," and this theoretical interest rate changes every day. 
+Firstly, we want to transform these quoted yearly percenteges in the daily interest that they correspond to.
+If a product pays a percentage $r_y$ over one year, we can calculate the equivalente daily interest rate $r_d$ using the following formula:
+
+$$(1+r_d)^{365}=(1+r_y)$$
+which leads to 
+$$r_d=(1+r_y)^{1/365}-1$$
+
+So, we can start from doing this transformation on our data
+
+```{r, message=FALSE, warning=FALSE}
+subinterest<-(1+subinterest)^(1/365)-1
+summary(subinterest)
+```
+
+Now that we have expressed our data in daily interests, let's calculate the geometric averages of these quantities.
+First let's write a function that does the type of average we want
+
+```{r}
+interestaverage<-function(x)
+{
+  n<-length(x)
+  ave<-(prod(1+x))^(1/n)-1
+  return(ave)
+}
+```
+
+Now we can calculate the average daily interst rate and then transform it back to the yearly percentage to compare to the measures of center that we got from the summary() function.
+```{r}
+barr<-apply(subinterest,2,interestaverage)
+
+print("Interest average")
+(1+barr)^(365)-1
+
+print("arithmetic mean")
+apply(interest[,c("YieldY01","YieldY03","YieldY05","YieldY10")],2,mean,na.rm=T)
+```
+
+
+## Income data
+
+This data is obtainted by the  [Current Population Survey](https://www.census.gov/programs-surveys/cps/about.html), a rather important on-going study, whose
+[details](https://www2.census.gov/programs-surveys/cps/techdocs/cpsmar16.pdf) are described in the linked document. 
+
+Specifically, going to the [census website](https://www.census.gov/data/tables/time-series/demo/income-poverty/cps-hinc/hinc-06.html), and downloading the .xls file described as  "Income Distribution to $250,000 or More for Households: 2015 [<1.0 MB]]" on April 14, 2017. The file was then opened in excel and saved in .csv format.
+
+To read it in R, we need to skip the first 7 rows that are descriptive. Here, we actually decide to also skip the 8th row that contains column names (since these are repetitive and would not be adopted as such in R anyway) and the 9th row that reports total values (and so observations that are substantially different from the remaining ones).
+The entries for colums other than the first should be numeric, but often the comma is used to separate thousands. This should raise a flag as this notation is not standard for computing and it might create problems. We will see how read_csv() handles this.
+
+```{r}
+income <- read_csv("data/hinc06.csv", 
+    col_names = FALSE, skip = 9,col_types = cols(X2 = col_number(),X3 = col_number(),X4 = col_number(), 
+        X5 = col_number(),X6 = col_number(),X7 = col_number(),X8 = col_number(), 
+        X9 = col_number(),X10 = col_number(),X11 = col_number(),
+        X12 = col_number(),X13 = col_number(),X14 = col_number(), 
+        X15 = col_number(),X16 = col_number(),X17 = col_number(),X18 = col_number(), 
+        X19 = col_number(),X20 = col_number(),X21 = col_number(),
+        X22 = col_number(),X23 = col_number(),X24 = col_number(), 
+        X25 = col_number(),X26 = col_number(), 
+        X27 = col_number(), 
+        X28 = col_number()
+        ))
+summary(income)
+```
+
+It seems that the numeric columns got interpreted correctly overall. 
+However, we had some error messages and these translated in some missing values: let's get back to the data to look at what has happened. We notice that we have some entries "(B)" in the matrix. It seems that when the number of subjects in an income bracket is low, the average income and its standard error are not calculated -- either for privacy or precision. For the purpose of our analysis (that will consider the average income as the income for that bracket) we could decide to substitue the missing average income with the average income for that bracket in the entire sample.
+
+Another thing to note is that, unfortunately, the columns names are not really informatives, and one needs to remind oneself of what they correspond to.
+The first column contains description of the income brackets.
+The following columns are in group of 3, each three consecutive columns pertinent to a subgroup of the population: in order "All Races",			"White A.O.I.C" (alone or in combination)			"White alone",	"White alone, not Hispanic",			"Black A.O.I.C.",			"Black alone",			"Asian A.O.I.C.",			"Asian alone", 			"Hispanic (any race)".
+Each of these groups of three columns contains 1) total number of subject in an income bracket, 2) average income in the bracket, 3) standard error (the standard deviation of the incomes in a bracket, divided by the square root of the number of subjects in the bracket).
+
+
+Let's take care of the missing values: we are going to go through the columns that are multiple of 3 (the income) and substitute the missing values with the values in the corresponding column for the entire sample.
+
+```{r}
+for(i in 1:9)
+{
+  income[is.na(income[,paste("X",as.character(3*i),sep="")]),paste("X",as.character(3*i),sep="")]<-income[is.na(income[,paste("X",as.character(3*i),sep="")]),"X3"]
+}
+```
+ 
+Let's re-name at least the columns referring to the entire sample.
+
+```{r}
+income<-income %>% rename(Bracket=X1)
+income<-income %>% rename(Frequency=X2)
+income<-income %>% rename(Income=X3)
+```
+
+Since there are some fairly bizantine divisions, we can plot only a subset of the data, looking at the groups: "All Races", "White Alone", "Blacks Alone", "Hispanic (any race)". Note that we specify here a new way of assigning colors to different parts of the plot, this time generating a legend.
+
+```{r}
+p <- ggplot()  + 
+geom_point(data = income, aes(x = Income, y = Frequency/sum(Frequency), colour = "All"),pch=1) +
+geom_point(data = income, aes(x = X9, y = X8/sum(X8), colour = "White")) +
+geom_point(data = income, aes(x = X18, y = X17/sum(X17), colour = "Black")) + 
+geom_point(data = income, aes(x = X24, y = X23/sum(X23), colour = "Asian")) + 
+geom_point(data = income, aes(x = X27, y = X26/sum(X26), colour = "Hispanic"))+ 
+scale_colour_manual("",breaks = c("All", "White", "Black","Asian","Hispanic"), values = c("All"="black", "White"="blue", "Black"="green", "Asian"="yellow","Hispanic"="red"))+ scale_y_continuous(name="Proportion in Income Bracket")+
+scale_x_continuous(name="Average Income in Bracket")
+p
+```
+
+Now let's focus on the "All Races" data. We can start by calculating the mean.
+For income the **arithmetic mean** is a good idea: we need to keep constant the total pie (income in the nation).
+However, we have to be careful to take into account the fact that we have data that has already been summarized. Fortunately, the arithmetic mean does satisfy the **associativity** property, so that we will not loose any information.
+
+```{r}
+mean.income=sum(income$Frequency*income$Income)/sum(income$Frequency)
+mean.income
+```
+
+Notice that we obtain the same value if we expand the data
+```{r}
+mean(rep(income$Income,income$Frequency))
+```
+We can also calculate the median for these data
+```{r}
+cbind(cumsum(income$Frequency)/sum(income$Frequency),income$Income)
+```
+So, there is not one value actually taken on that leaves half the data on one side and half on the other. I would put the median at ~54500.
+
+```{r}
+median(rep(income$Income,income$Frequency))
+```
+
+Finally, let's calculate the standard deviation of the income in the all races group. This is not an exact calculation, as there is variability within the income brackets and we are just pretenting that every one in the same bracket has the same income. Still, it will give us some sense of the variability in income across the entire population.
+
+```{r}
+sqrt(sum(income$Frequency*(income$Income-mean.income)^2)/sum(income$Frequency))
+```
+
+
+## Different loss functions
+
+Following is the code to produce the plot in the slides comparing the shapes of the different loss functions we considered to define a mean.
+```{r}
+library(ggplot2)
+d<-seq(-2,2,by=0.05)
+y<-d^2
+z<-abs(d)
+w<-as.numeric(d!=0)
+p<-ggplot()+
+  geom_line( aes(x = d, y = y, colour = "Square loss"))+
+  geom_line( aes(x = d, y = z, colour = "Absolute loss"))+
+  geom_line( aes(x = d[d<0], y = w[d<0], colour = "0-1 loss"))+
+  geom_line( aes(x = d[d>0], y = w[d>0], color = "0-1 loss"))+
+  geom_point( aes(x = 0, y = w[d==0], color = "0-1 loss"))+ 
+  scale_colour_manual("", breaks = c("Square loss", "Absolute loss", "0-1 loss"),                      values = c("Square loss"="red", "Absolute loss"="blue", "0-1 loss"="cyan"))+
+scale_y_continuous(name="Loss for datapoint = 0")+ 
+scale_x_continuous(name="z")
+p
+
+```

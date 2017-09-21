@@ -1,0 +1,399 @@
+---
+title: "Data Lab 1"
+author: "The Data Science Team"
+date: "March 16, 2016"
+output:
+     html_document:
+         keep_md: true
+---
+
+## Pre Requisites.
+
+This lab uses the following packages.
+
+- `readr`
+- `magrittr`
+- `dplyr`
+- `ggplot2`
+- `xml2`
+- `tibble`
+- `tm`
+- `rvest`
+- `RColorBrewer`
+- `wordcloud`
+
+Install them before proceeding. The `tidyverse` package includes `readr, magrittr, dplyr, ggplot2, tibble`, 
+so we can install all of them with just that one package. `RColorBrewer` is a dependency
+of `wordcloud`, so by default will be intalled when you install `wordcloud`
+
+If you like, you can paste what is
+below into the R console in RStudio and you will be all set.
+
+```{r, eval = TRUE, results = "hide"}
+## Install packages that are needed for the lab if not already there
+#library(stats101)
+#stats101::installIfNeeded(c("magrittr", "dplyr", "ggplot2", "xml2",
+#                            "tibble", "tm",
+#                            "rvest", "RColorBrewer", "wordcloud"))
+#library(tidyverse,xml2,tm,rvest,wordcloud)
+library(pacman)
+pacman::p_load(tidyverse,xml2,tm,rvest,wordcloud)
+```
+
+This clears your memory, to keep your workspace
+uncluttered.
+
+```{r}
+rm(list=ls(all=T))
+```
+
+This command will set your working directory, so you can run line
+by line. **change this** to the directory where you saved the files
+for this week.
+
+## Bay Area Bike Share Data
+
+The [Bay Area Bike share](http://www.bayareabikeshare.com/open-data)
+program has an open data portal that has a large amount of anonymized
+data on bike trips taken by users of the program. The data are quite
+clean.
+
+There
+are many questions we can ask, but we will just focus on computing
+some basic summaries on the data. This will offer a good opportunity
+to use the facilities offered by `dplyr` and other `tidyverse` components.
+
+The data set is reasonably large and so we want to avoid any
+unnecessary processing, unless absolutely essential.  So we will use
+the `readr::read_csv` to import the data.
+
+The main datasets of interest to us, per the README.txt file included
+with the data are:
+
+1. The Station Information (file `201508_station_data.csv`)
+2. The Trip data (file `201508_trip_data.csv`)
+3. The Weather data (file `201508_weather_data.csv`)
+
+### Read the data into R
+
+We first consider the station data. Import data using
+the `readr` function `read_csv`
+
+```{r}
+#library(readr)
+stationData <- read_csv("./data/babs/201508_station_data.csv")
+```
+
+### How many stations?
+
+```{r}
+nrow(stationData)
+```
+
+### The pipe object
+
+Here is another way to compute the above, using a
+special syntax `%>%` from `magrittr` which
+(somewhat) mimics a [pipe](https://en.wikipedia.org/wiki/Pipeline_(Unix)) in Unix. 
+`magrittr` is its own package, but it is a **dependency** of
+`dplyr`, so when we load `dplyr`, it loads `magrittr`
+
+```{r}
+#library(dplyr)
+stationData %>% nrow
+```
+
+- This evaluates the RHS with the LHS as first argument. Hence, we read the
+above as: call the function `nrow` on the object `stationData`. Often, the
+LHS will be a tabular data object, like a `data.frame` or `tibble`
+
+### Renaming variables
+
+Another example 
+```{r}
+stationData %>% distinct(landmark)
+```
+
+In my view, this variable is horribly misnamed. 
+In general, it is good to choose names that convey what exactly the column contains. 
+Particularly if we have a lot of variables, it gets hard to remember what each
+variable actually measures if you don't use good names.
+`landmark` for me conveys, say, the Golden Gate bridge, or Hoover Tower. But this 
+variable apparently contains the city where the station is located. A nice name, then
+would be "city". So let's rename this variable using `dplyr`'s `rename` function
+
+```{r}
+stationData <- stationData %>% rename(city=landmark)
+```
+
+Note that I **assigned** the output of `stationData %>% rename(city=landmark)` to
+`stationData`. This **overwrote** the old `stationData` with a copy of `stationData`
+that is identical except that the variable `landmark` is renamed to `city`
+
+This differs from what we have been doing so far, in which we **did not assign** the output
+of calls to `dplyr` functions previously, we just called the function, which by default
+printed the result into the window
+
+### How many stations are available per city?
+
+The advantages of piping are more obvious when we want to perform a 
+**sequence** of operations or function calls on an object, with
+each function applied to the output of the previous function
+
+So `%>%` is a way of **composing** functions
+
+To get the number of docks by city, we 
+
+1. Start with station data
+2. Group by city
+3. Count the number of distinct station names.
+
+Because we grouped by city in step 2, we will get the number
+of distinct station names **within each** city. 
+
+The syntax for this operation is
+
+```{r}
+stationData %>%
+    group_by(city) %>%
+    summarize(count_stations = n_distinct(name))
+```
+
+using `n_distinct(name)` in this case is better than using `n()`,
+which would have given us the count of the number of rows of
+the dataset by city. While it is natural to assume that each
+row of `stationData` corresponds to exactly one unique station,
+in general assumptions like that could get us into trouble. It is
+always important to think about exactly what you want to calculate
+before writing the code.
+
+In this case, you can see that in fact each row does correspond to
+a unique station, since this
+
+```{r}
+stationData %>%
+    group_by(city) %>%
+    summarize(count_stations = n())
+```
+
+gives the same result
+
+## Trip data
+
+
+Now let's look at the trip data. These data
+are expected to be much larger, as each entry
+should correspond to one trip taken using a
+bike share bike. There must be quite a few.
+
+Read in data, call it tripData.
+
+```{r}
+tripData <- read_csv("./data/babs/201508_trip_data.csv")
+```
+
+This gives us some more information about our data.
+Note you can also do this with the gui (I'll demonstrate)
+
+```{r}
+str(tripData)
+```
+
+Let's figure out what
+period this data covers. To do that, an obvious thing to do is to look
+at the mininum of the `Start Date` and the maximum of the `End Date`.
+
+So we could test the waters by just selecting the `Start Date` for example.
+
+```
+library(dplyr)
+testPart = select(tripData, Start Date)
+```
+
+The above code would bomb if we ran it. This is because the naming of the variables is
+unsuitable for any serious work: it has spaces in it.
+
+That's not the only problem. We also see that the dates and times are
+not properly detected. So we have to help `readr::read_csv` along.
+
+Below, we provide better names (with no spaces) and specify how the
+date values should be parsed. We only need to provide the information
+for those types that are not detected correctly; for us, just the
+dates.
+
+In general, `readr` tries to automatically detect types, including
+dates. But in this case it failed and needs a **format string**
+so that it knows what format the date variable is in.
+
+```{r}
+tripData <- read_csv("./data/babs/201508_trip_data.csv",
+                     col_names = c("TripId", "Duration", "StartTime", "StartStation",
+                                   "StartTerminal", "EndTime", "EndStation", "EndTerminal",
+                                   "BikeNo", "SubscriberType", "ZipCode"),
+                     skip = 1,
+                     col_types = cols(
+                         StartTime = col_datetime( format = "%m/%d/%Y %H:%S"),
+                         EndTime = col_datetime( format = "%m/%d/%Y %H:%S")
+                     ))
+```
+
+Check out the structure again.
+```{r}
+str(tripData)
+```
+
+Note that the types of the date/time variables are now
+`POSIXct`, a IEEE date/time format, instead of `chr`
+(character)
+
+We are now in better shape to answer some questions.
+
+### After fixing names
+
+Let's try our previous code with properly named variables.
+We select out the start time variable, and summarise it.
+```{r}
+#library(dplyr)
+testPart <- tripData %>% select(StartTime)
+summary(testPart)
+```
+
+We appear to have one year worth of data, starting on 
+Sept. 1, 2014 and ending on Aug. 31, 2015. Since POSIXct
+is actually a numeric type, `R` understands how to compute
+things like the `Min.` and `Max.`
+
+### How many trips in the data set?
+
+An obvious try is:
+
+```{r}
+nrow(tripData)
+```
+
+A more defensive and safer thing to do is to use `TripId` since it is
+guaranteed to be distinct for each trip. We do that below, but it
+makes no difference here. Again, this is also a way to **check** that
+the format of the data is what we think it is.
+
+```{r}
+tripData %>% summarise(n.trip = n_distinct(TripId))
+```
+
+### What period does this dataset cover?
+
+```{r}
+tripData %>%
+    summarise(start = as.Date(min(StartTime)), end = as.Date(max(EndTime)))
+```
+
+### What was the total amount of riding time in years?
+
+How many person-years of riding occurred in this year
+of calendar time?
+
+```{r}
+tripData %>%
+    summarize(total = ((sum(Duration) / 3600) / 24) / 365)
+```
+
+To compute this correctly, we needed to know that `Duration`
+is recorded in seconds. Usually this kind of information comes
+from (1) documentation or readme files/data dictionaries or 
+(2) common sense after having viewed some observations of 
+the variable or made a summary of the variable, e.g.
+
+```{r}
+summary(tripData %>% select(Duration))
+```
+
+Hmmmm...someone took a "ride" that lasted
+```{r}
+max.duration <- max(tripData %>% select(Duration))
+12*max.duration/(525600*60)
+```
+months. Is this a **data quality** problem? We'll
+talk more about these kinds of issues later...
+
+### Busiest and Slowest days
+
+We first create a `tripCount` data set to work with.
+`mutate` is the function in `dplyr` that we use
+to create new variables, and `as.Date` extracts the
+date from the date-time variable `StartTime`
+
+```{r}
+tripCounts <- tripData %>%
+    mutate(Date = as.Date(StartTime)) %>%
+    group_by(Date) %>%
+    summarize(trips = n())
+```
+
+Print the first few rows to see what this looks like.
+`filter` is how we get a subset of **observations** in
+a dataset (a subset of the rows) meeting some criteria
+using `dplyr`
+
+```{r}
+tripCounts %>% filter(row_number() %in% 1:20)
+```
+
+Some periodicity here, it seems. Can you guess what is
+going on here?
+
+Now we can compute the busiest and slowest days during the year, respectively
+
+```{r}
+tripCounts %>%
+    arrange(desc(trips)) %>%
+    filter(row_number() == 1 | row_number() == n())
+```
+
+### How many rides per week day, on average? How many per weekend day?
+
+We ignore holidays.
+
+This requires detection of weekdays and weekend days.  The R function
+`base::weekdays` will compute the day of the week for any proper
+date. We create a new variable called `Date` which is just the date
+(no time info). We can then detect weekend days by checking if it is a
+Saturday or Sunday using `Date`. Once that is done, we can group by
+`Date` and `weekend` and count the number of trips by using
+`dplyr::n()` summary.  We create a new trip count data set with these
+variables. The data are still by date, but now we have an indicator
+of whether that particular day was a weekend.
+
+
+```{r}
+tripCounts.Weekend <- tripData %>%
+    mutate(Date = as.Date(StartTime),
+           DayOfWeek = weekdays(Date),
+           Weekend = DayOfWeek %in% c("Saturday", "Sunday")) %>%
+    group_by(Date, Weekend) %>%
+    summarize(trips = n())
+```
+
+So now we have a new variable that tells us whether we have a weekend
+or not.
+
+```{r}
+str(tripCounts.Weekend)
+```
+
+Computing the average rides per weekday and weekends is now a
+straightforward summarization.
+
+```{r}
+tripCounts.Weekend %>%
+    group_by(Weekend) %>%
+    summarize(avgTrips = mean(trips))
+```
+
+
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+

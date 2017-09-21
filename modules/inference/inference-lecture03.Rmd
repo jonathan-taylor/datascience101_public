@@ -1,0 +1,412 @@
+---
+title: "Confidence intervals"
+author: "Data Science 101 Team"
+output: 
+    slidy_presentation:
+        css: styles.css
+        keep_md: true
+
+---
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+```
+
+## Z score revisited
+
+- Recall our $Z$ score for testing a hypothesis like
+$$
+H_0: \theta(F) = \theta_0
+$$
+
+- When $H_0$ was true, we said
+$$
+Z = Z(\theta_0) = \frac{\hat{\theta} - \theta_0}{\hat{SD}(\hat{\theta})}.
+$$
+
+- This $Z$ score is pretty close to
+$$
+\tilde{Z} = \tilde{Z}(\theta_0) = \frac{\hat{\theta} - \theta_0}{SD_F(\hat{\theta})}.
+$$
+
+## Z score revisited
+
+- Well, when $H_0$ was true, this is the same as
+$$
+Z(\theta_0) = Z(\theta(F)) = \frac{\hat{\theta} - \theta(F)}{\hat{SD}(\hat{\theta})}.
+$$
+
+- Under same conditions where bootstrap will work well,
+it turns out that $Z(\theta(F))$ will be close to normal
+**whatever value $\theta(F)$ takes!**
+
+- Note: $Z(\theta(F))$ is unobservable...
+
+## Two statements derived from Z score
+
+### First statement: prediction interval
+
+- Our first 2 SE rule of thumb, based
+on the score $\tilde{Z}$ is
+$$
+\begin{aligned}
+P_F\left( \frac{|\hat{\theta} - \theta(F)|}{SD_F(\hat{\theta})} > 2 \right) 
+&= P_F(|\tilde{Z}(\theta(F))| > 2) \\
+& \approx 5\%.
+\end{aligned}
+$$
+
+- This is the same as saying
+$$
+P_F\left( \theta(F) - 2 \cdot SD_F(\hat{\theta}) < \hat{\theta} < \theta(F) + 2 \cdot SD_F(\hat{\theta}) \right) \approx 95\%.
+$$
+
+- Or,
+$$
+P_F \left(\hat{\theta} \in \theta(F) \pm 2 \cdot SD_F(\hat{\theta}) \right) \approx 95\%
+$$
+
+- In words, the chances that $\hat{\theta}$ are within 2 SD of $\theta(F)$ are about 95%
+(SD refers to the SD of $\hat{\theta}$ under $F$).
+
+## Two statements derived from Z score
+
+### Second statement: confidence interval
+
+- Our first 2 SE rule of thumb, based
+on the score $Z$
+$$
+\begin{aligned}
+P_F\left( \frac{|\hat{\theta} - \theta(F)|}{\hat{SD}(\hat{\theta})} > 2 \right) &=
+P_F(|Z(\theta(F))| > 2) \\
+&\approx 5\%.
+\end{aligned}
+$$
+
+- This is the same as saying
+$$
+P_F\left( \hat{\theta} - 2 \cdot \hat{SD}(\hat{\theta}) < \theta(F) < \hat{\theta} + 2 \cdot \hat{SD}(\hat{\theta}) \right) \approx 95\%.
+$$
+
+- Or,
+$$
+P_F \left(\theta(F) \in \hat{\theta} \pm 2 \cdot \hat{SD}(\hat{\theta}) \right) \approx 95\%
+$$
+
+- In words, the chances that $\theta(F)$ is in the interval
+$\hat{\theta} \pm 2 \cdot \hat{SD}(\hat{\theta})$ are about 95%.
+
+## Two statements derived from Z score
+
+### What's the difference?
+
+- The prediction interval statement says something about
+a *random variable* $\hat{\theta}$ being in some *fixed* interval.
+
+- The confidence interval statement says something about
+a fixed parameter $\theta(F)$ being in some *random* interval.
+
+## Example
+
+- Find a 95% confidence interval for Governor Brown’s approval rating given 549 out of 1000 voting age Californians polled approved of his job performance.
+
+```{R}
+box = c(rep(1,549), rep(0, 451))
+boot_sample = numeric(2000) 
+   for (i in 1:2000) {
+       boot_sample[i] = mean(sample(box, 1000, replace=TRUE))
+}
+boot_sd = sd(boot_sample)
+boot_sd
+```
+- We see the estimated SD of the proportion was approximately 1.6%.
+         
+- A 95% confidence interval is therefore: [54.9-3.2,54.9+3.2] = [51.7,58.1].
+ 
+## Example (continued)
+
+- Suppose Brown's approval was really 57% (we don't know this -- that's why
+we took a poll).
+
+- Our confidence interval does include the 57% (which is his  true approval).
+We say the interval "covers" the true proportion. 
+
+- Not all 95% confidence intervals do: only about 95% of them do.
+
+- The confidence interval statement is a statement about **95% of intervals**.
+
+## Example (continued)
+
+- For a simple random sample of size 1000 from a population with 57% approval, the SD is
+$$
+\sqrt{\frac{0.57 * 0.43}{1000}} \approx 1.6%
+$$
+
+- Therefore, in about 95% of the samples of size 1000, the observed percentage will be within 
+3.2% of 57%.
+
+- This happened for our poll above, but not all will. About 95% of polls will satisfy this.
+
+- The prediciton interval statement is a statement about **95% of polling proportions**.
+
+## Confidence intervals and hypothesis tests
+
+- The confidence interval is the set of parameters whose $Z$ scores for the corresponding
+hypothesis test would be larger than 2. 
+
+- In math notation:
+$$
+\hat{\theta} \pm 2 \hat{SD}(\hat{\theta}) = \left\{\theta: Z(\theta) < 2 \right\}
+$$
+
+- Any parameter $\theta$ outside of the interval would have a $Z$-score larger than
+2 when testing $H_0:\theta(F)=\theta$.
+
+- Hence, we would reject $H_0$ for such a $\theta$ if we thresholded our (two-sided) p-value 
+based on $Z(\theta)$ at 5%.
+
+
+## Using the bootstrap
+
+- Let's try to use the bootstrap for confidence intervals.
+
+- We revisit our example of features
+that were uncorrelated but not independent.
+
+```{R, fig.height=4, fig.width=4}
+parabolic_data = function() {
+    X = rnorm(100)
+    Y = -X^2 + 1 + rnorm(100)
+    return(data.frame(X=X,Y=Y))
+}
+```
+
+## Using the bootstrap
+
+```{R, fig.width=4, fig.height=4}
+P = parabolic_data()
+cor(P)[1,2]
+plot(P[,1], P[,2])
+```
+
+## Using the bootstrap
+
+- Recall that the sample correlation seems to be close to 0 (the true correlation is 0...).
+
+```{R}
+true_sample = numeric(2000)
+for (i in 1:2000) {
+    true_sample[i] = cor(parabolic_data())[1,2]
+}
+sd(true_sample)
+```
+
+- Using this reference distribution (which we only know
+here because we simulated data) we can make a
+**prediction interval** statement: about 95% of the time,
+our sample correlation will be between [-0.36,0.36].
+
+- Interval is $0 \pm 0.36$, the 0 comes from the fact that 
+the true correlation is 0.
+
+## Using the bootstrap
+
+- Let's bootstrap our correlation.
+
+```{R}
+bootstrap_cor = function(XY, B=2000) {
+    n = nrow(XY)
+    bootstrap_sample = numeric(B)
+    for (i in 1:B) {
+       idx = sample(1:n, n, replace=TRUE)
+       XY_star = XY[idx,]
+       bootstrap_sample[i] = cor(XY_star)[1,2]
+    }
+    return(bootstrap_sample)
+}
+```
+
+## Using the bootstrap
+
+```{R}
+bootstrap_sample = bootstrap_cor(P)
+lower = cor(P)[1,2] - 2 * sd(bootstrap_sample)
+upper = cor(P)[1,2] + 2 * sd(bootstrap_sample)
+data.frame(lower, upper)
+```
+
+- Assuming the bootstrap does a good job estimating SD and
+the sampling distribution is close to normal, this should
+be roughly a 95% confidence interval.
+
+- This does not require knowing the true correlation. It requires
+assuming that the bootstrap performs well, and that the
+true sampling distribution is close to normal.
+
+- About 95% of the time, our interval formed from a draw of
+`parabolic_data` 
+will cover 0.
+
+## Using the bootstrap
+
+- Let's check the coverage of our interval.
+
+```{R}
+generate_interval = function() {
+    parabolic_sample = parabolic_data()
+    bootstrap_sample = bootstrap_cor(parabolic_sample)
+    lower = cor(parabolic_sample)[1,2] - 2 * sd(bootstrap_sample)
+    upper = cor(parabolic_sample)[1,2] + 2 * sd(bootstrap_sample)
+    return(c(lower, upper))
+}
+```
+
+## Using the bootstrap
+
+```{R}
+coverage_sample = numeric(100)
+intervals = matrix(0, 100, 2)
+for (i in 1:100) {
+    interval = generate_interval()
+    intervals[i,1] = interval[1]
+    intervals[i,2] = interval[2]
+    coverage_sample[i] = (interval[1] < 0) * (interval[2] > 0) # does it cover 0?
+}
+mean(coverage_sample)
+```
+
+## Visualizing confidence intervals
+
+```{R, fig.height=4, fig.width=4}
+plot(c(1, 100), c(-.7,.7), type='n', ylab='Confidence Intervals', xlab='Sample')
+L = intervals[,1]
+U = intervals[,2]
+for (i in 1:100) {
+   if (coverage_sample[i] == TRUE) {
+       lines(c(i,i), c(L[i],U[i]), col='green', lwd=2)
+   }
+   else {
+      lines(c(i,i), c(L[i],U[i]), col='red', lwd=2)
+   } 
+}
+abline(h=0, lty=2, lwd=4)
+```
+
+## Using the bootstrap
+
+- Recall that the bootstrap distribution also looks like a normal
+distribution.
+
+- It turns out, we can also use the
+percentiles of the bootstrap to form the *percentile bootstrap* interval.
+
+```{R}
+percentile_interval = function() {
+    parabolic_sample = parabolic_data()
+    bootstrap_sample = bootstrap_cor(parabolic_sample)
+    lower = quantile(bootstrap_sample, 0.025)
+    upper =  quantile(bootstrap_sample, 0.975)
+    return(c(lower, upper))
+}
+```
+
+## Using the bootstrap
+
+- Basis of the percentile bootstrap is that the bootstrap distribution is
+centered around $\hat{\theta}$ (in this case `cor(parabolic_sample)[1,2]`),
+looks normal with approximately the correct SD.
+
+- Hence, the bootstrap distribution's quantiles should roughly match
+the corresponding normal quantiles.
+
+- Let's check the coverage.
+
+```{R}
+percentile_sample = numeric(100)
+for (i in 1:100) {
+    interval = percentile_interval()
+    percentile_sample[i] = (interval[1] < 0) * (interval[2] > 0) # does it cover 0?
+}
+mean(percentile_sample)
+```
+
+## Our A/B example
+
+```{R}
+boxA = c(rep(1,90), rep(0, 910))
+boxB = c(rep(1,120), rep(0, 880))
+
+bootstrap_diff = function(boxA, boxB, ndraw=2000) {
+    bootstrap_sample = numeric(ndraw) 
+    for (i in 1:ndraw) {
+        pA_star = mean(sample(boxA, 1000, replace=TRUE))
+        pB_star = mean(sample(boxB, 1000, replace=TRUE))
+        bootstrap_sample[i] = pA_star - pB_star
+    }
+    return(bootstrap_sample)
+}
+bootstrap_sample = bootstrap_diff(boxA, boxB, ndraw=2000)
+lower = quantile(bootstrap_sample, 0.025)
+upper = quantile(bootstrap_sample, 0.975)
+data.frame(lower, upper)
+```
+
+## Using `boot` package
+
+- The bootstrap is widely used, hence there are
+several packages out there to use it.
+
+- Let's bootstrap our correlation using `boot`.
+
+```{R, fig.width=4, fig.height=4}
+library(boot)
+cor_star = function(XY, indices) {
+     XY_star = XY[indices,]
+     return(cor(XY_star)[1,2])
+}
+bootstrap_results = boot(data=P, statistic=cor_star, R=2000)
+```
+
+## Using `boot` package
+
+```{R, fig.width=5, fig.height=5}
+plot(bootstrap_results)
+```
+
+## Using `boot` package
+
+- Also produces several confidence intervals. We've discussed 
+`Normal` and `Percentile`.
+
+```{R, fig.width=4, fig.height=4}
+boot.ci(bootstrap_results)
+```
+
+## Using `boot` package
+
+- Power of packages like `boot` is that
+you can pass in *arbitrary* functions.
+
+- Somewhere down the line, we must rely
+on someone's math and some assumptions
+to assure that the results have some 
+meaning...
+
+- But, it is a pretty powerful concept!
+
+## Summary
+
+- This module, we've talked about some of
+the key tools of inference: hypothesis tests, parameters, and confidence intervals.
+
+- Hypothesis tests require a *null* or *reference* distribution to assess
+evidence against the null -- typically reported as a *p-value*.
+
+- Confidence intervals are for *parameters* $\theta(F)$ of a random process $F$, where
+a parameter is a function of the true data generating distribution $F$.
+
+- Confidence intervals are usually based on a normal approximation
+to the sampling distribution of an estimator $\hat{\theta}$ of $\theta(F)$.
+
+- Bootstrap is a powerful and useful tool in constructing reference distributions
+for testing and appropriate normal approximations for confidence intervals.

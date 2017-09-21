@@ -1,0 +1,250 @@
+---
+title: "Inference lab 1"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+
+library(pacman)
+pacman::p_load(tidyverse,foreach)
+```
+
+
+## Overview
+
+The purpose of today's lab is to construct a hypothesis test and a simulation-based reference distribution, much as we did in the first lecture. 
+
+In lecture, we learned about representing data on two **categorical** variables in a contingency table. Recall that this is a table of counts showing how many observations there were with each possible combination of values of the two variables, like this one from class:
+
+```{r}
+custdata = read.table('./data/custdata.tsv',header=T,sep='\t')
+table(custdata$sex,custdata$marital.stat)
+```
+
+We wanted to test the hypothesis of **independence** of sex and marital status. We did this by way of a **test statistic** that measured how far apart the observed table was from the **expected counts** under independence, and a **reference distribution** that we constructed by simulation. The reference distribution was the distribution of the test statistic **given that the hypothesis of independence was true**. 
+
+Today we'll think about testing a similar hypothesis, but for **continuous** variables. Have a look at custdata. Do any of these variables seem like they are more appropriately considered **continuous** than categorical?
+
+```{r}
+head(custdata)
+```
+
+Suppose we are interested in testing whether income and age are independent. How many unique values of each variable exist in our data?
+```{r}
+N.uniq <- custdata %>% summarise(inc=n_distinct(income),age=n_distinct(age))
+N.uniq
+```
+
+How does that compare to the total numbers of observations?
+
+```{r}
+nrow(custdata)
+```
+
+If we made a contingency table of income vs age, how many cells would it have? As a result, what would most of the entries be?
+
+```{r}
+prod(N.uniq)
+```
+
+## A different test statistic
+
+It should be clear at this point that making a contingency table and doing something along the lines of what we did in class might not work well. We need a different **statistic** to calculate that measures the strength of the relationship between two **continuous** variables. Can you think of one? Estimate it here for these two variables.
+
+```{r}
+cor.obs <- cor(custdata$income,custdata$age)
+cor.obs
+```
+
+Last week in class, you learned how to use bootstrapping to obtain **interval estimates** for the correlation between two variables. Today, we'll use a simulation technique to test the hypothesis that income and age are independent. This is our **null hypothesis**. 
+
+Recall that we need to construct a reference distribution for our statistic when the null is true. How can we simulate under the null? Well, we have data on income and age. The null hypothesis is that they are independent. So one option would be to permute the order of one of the variables and recompute the test statistic. This is similar to what we did for a contingency table where we resampled tables with cell probabilities given by the product of the empirical marginal probabilities (what we would get under independence). To estimate the reference distribution, we need to do this many times. This is called a **permutation test.** 
+
+Write a function here that takes an integer `nrep`, a function that computes a statistic, and data, then performs `nrep` many calculations of the test statistic, each time permuting one of the variables. The return should be the values of the test statistic computed for each replicate.
+
+```{r}
+sim.stat <- function(nrep,test.stat=cor,x,y) {
+  n = length(y)
+  C = numeric(nrep)
+  for (r in 1:nrep) {
+    yr = y[sample.int(n,n,replace=FALSE)]
+    C[r] = test.stat(x,yr)
+  }
+  return(C)
+}
+```
+
+Now call your function to compute 10,000 replicate permutations. Make a histogram of the resulting estimate of the reference distribution under the null. Add a vertical line at the observed value of the test statistic.
+
+```{r}
+cors.ind <- sim.stat(10000,cor,custdata$income,custdata$age)
+df.cors <- data.frame(cors=cors.ind)
+ggplot(df.cors,aes(x=cors)) + geom_histogram() + geom_vline(xintercept=cor.obs,col=2)
+```
+
+Now compute the p-value for this test. Remember the p-value is the "probability of getting a value of the test statistic as or more extreme than the one we observed given that the null is true."
+
+```{r}
+mean(abs(cors.ind)>abs(cor.obs))
+```
+
+Would you interpret this as strong evidence for or against the null?
+
+## Another example
+We'll use another data set on basketball statistics from the R package `SportsAnalytics`. Load the package and attach the data on NBA player statistics from the 2009-2010 season.
+
+```{r}
+pacman::p_load(SportsAnalytics)
+data("NBAPlayerStatistics0910")
+```
+
+Let's have a look at the data
+```{r}
+head(NBAPlayerStatistics0910)
+```
+
+Plot TotalMinutesPlayed vs FieldGoalsAttempted. Does there seem to be a relationship?
+
+```{r}
+ggplot(NBAPlayerStatistics0910,aes(x=TotalMinutesPlayed,y=FieldGoalsAttempted)) + geom_point()
+```
+
+What is the observed value of the correlation?
+
+```{r}
+cor.obs <- cor(NBAPlayerStatistics0910$TotalMinutesPlayed,NBAPlayerStatistics0910$FieldGoalsAttempted)
+cor.obs
+```
+
+This one is arguably so obvious that we don't need to do any testing, but just for fun, let's go ahead and do our permutation test again with these data.
+
+```{r}
+cors.ind <- sim.stat(10000,cor,NBAPlayerStatistics0910$TotalMinutesPlayed,NBAPlayerStatistics0910$FieldGoalsAttempted)
+```
+
+Again make a histogram of the reference distribution, and add a vertical line for the observed value of the test statistic.
+
+```{r}
+df.cors <- data.frame(cors=cors.ind)
+ggplot(df.cors,aes(x=cors)) + geom_histogram() + geom_vline(xintercept=cor.obs,col=2)
+```
+
+Compute the p-value. How small can we really say it is in this case?
+
+```{r}
+mean(abs(cors.ind)>abs(cor.obs))
+```
+
+## A final note
+
+We've been using a particular test statistic to test the hypothesis of independence. How good is this statistic? 
+
+For two **continuous** random variables with **probability density functions**, independence means $f(x,y) = f(x)f(y)$, where $f(x,y)$ is the **joint density** and $f(x),f(y)$ are the **marginal densities**. You've already learned about one density: the normal or Gaussian distribution. So independence of two normally distributed random variables would mean.
+$$f(x,y) = \frac{1}{\sqrt{2\pi \sigma^2_1}} e^{-(x-\mu_1)^2/(2\sigma^2_1)} \frac{1}{\sqrt{2\pi \sigma^2_2}} e^{-(x-\mu_2)^2/(2\sigma^2_2)}$$
+
+We're using an estimate of the correlation as a test statistic for testing independence, so ideally it would be the case that the correlation is zero if and only if two continuous random variables are independent. It turns out that this only goes in one direction: if $X$ and $Y$ are independent random variables, then $\text{cor}(X,Y)=0$. However, $\text{cor}(X,Y) = 0$ **does not necessarily imply independence.** 
+
+Let's consider an example. Let $X$ be a continuous random variable, and let $Y$ conditional on $X$ have a normal distribution with mean $Y^2$ and variance $\sigma^2$. We can simulate data like this in R.  
+
+```{r}
+x <- runif(1000,-1,1)
+y <- rnorm(1000,x^2,.1)
+df <- data.frame(x=x,y=y)
+```
+
+Let's plot the data we simulated.
+
+```{r}
+ggplot(df,aes(x=x,y=y)) + geom_point()
+```
+
+What's the correlation?
+
+```{r}
+cor(x,y)
+```
+
+Wow, that seems really low. The visualization we made belies the fact that the correlation is in this case a terrible measure of the extent of dependence between $x$ and $y$. Here's a different one called the **distance correlation.**
+
+```{r}
+center <- function(D) {
+ mn.row = apply(D,1,mean);mn.col = apply(D,2,mean)
+ D = sweep(sweep(D,1,mn.row),2,mn.col)+mean(D)
+}
+
+dist.cor <- function(x,y) {
+  Dx = as.matrix(dist(x)); Dy = as.matrix(dist(y));  
+  Dx = center(Dx); Dy = center(Dy); 
+  DD = sqrt(mean(Dx*Dy)) 
+  DvX = sqrt(mean(Dx*Dx)); DvY = sqrt(mean(Dy*Dy));
+  dcor = DD/sqrt(DvX*DvY)
+  return(dcor)
+}
+```
+
+This isn't at all "obvious", but the distance correlation is bounded below by 0 and above by 1. So this
+```{r}
+dist.cor(x,y)
+```
+is a non-trivially large value.
+
+Oddly enough, although we started out by saying that our contingency table test wouldn't work for two continuous variables, that's not entirely accurate. Another procedure we could consider is to **discretize** x and y to a few values, for example using `cut`. We could then do our contingency table procedure using the discretized values. 
+
+```{r}
+cx <- cut(x,breaks=quantile(x,seq(from=.1,to=1,by=.1)))
+cy <- cut(y,breaks=quantile(y,seq(from=.1,to=1,by=.1)))
+cross <- table(cx,cy)
+mrg.x <- table(cx)
+mrg.y <- table(cy)
+expected_counts <- outer(mrg.x/sum(mrg.x),mrg.y/sum(mrg.y))*sum(cross)
+```
+
+Recall our functions from lecture.
+
+```{r}
+sample_table = function(expected_counts) {
+   expected_freq = expected_counts / sum(expected_counts)
+   return(as.table(matrix(rmultinom(1, as.integer(sum(expected_counts)), expected_freq),
+                                    nrow=nrow(expected_counts),
+                                    ncol=ncol(expected_counts))))
+}
+
+reference_distribution = function(nsample,expected_counts,deviation_function) {
+    expected_freq = expected_counts / sum(expected_counts)
+    reference_sample = numeric(nsample)
+    for (i in 1:nsample) {
+        reference_sample[i] = deviation_function(sample_table(expected_counts), expected_counts)
+    }
+    return(data.frame(reference_sample))
+}
+```
+
+Let's do our simulation again to get the reference distribution using this table of expected counts.
+
+```{r}
+how_far = function(sample_table, expected_counts) {
+    return(max(abs(sample_table - expected_counts)))
+}
+
+how_far_sample = reference_distribution(2000, expected_counts, how_far)
+```
+
+```{r}
+d.obs <- how_far(cross, expected_counts)
+d.obs
+```
+
+What does the observed value look like relative to the reference distribution?
+
+```{r}
+ggplot(how_far_sample, aes(x=reference_sample)) +
+        geom_histogram(aes(y=..density..)) + geom_vline(xintercept = d.obs,col=2)
+```
+
+Apparently this test also picks up the strong dependence between $x$ and $y$ that we know is there.
+
+

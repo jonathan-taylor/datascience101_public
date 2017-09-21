@@ -1,0 +1,683 @@
+---
+title: "Replicability"
+author: "Data Science 101 Team"
+output:
+  beamer_presentation:
+     fig_caption: no
+     fig_width: 6
+  header-includes:
+     - \usepackage{color}
+  keep_md: true
+---
+
+
+```{r setup,include=F}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="pdf", fig.align="center",fig.width=4.5,fig.height=3.3,out.width ='.85\\linewidth')
+set.seed(5)
+library(pacman)
+pacman::p_load(selectiveInference)
+library(ggplot2)
+
+```
+
+## Replicability III: selection and reproducibility
+
+- We test a lot of hypotheses, but we only report the "significant" results
+
+- This is of course all right -- we do not want to spend time describing relations that did not appear real
+
+- But we need to be aware of this selection when interpreting the strength of the reported results
+
+## Winner's curse
+
+![](figs/AUCTION.jpg)
+
+
+## Let's look what happens when we select by "significance"
+
+```{r, echo=TRUE}
+mu = 0.3 # mean parameter
+N = 1000 # number of obervations
+Tmean = rep(mu,N) # all means are equal to 0.3
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = pvalue < 0.05
+lower = y - 1.96
+upper = y + 1.96
+```
+
+- Note that every hypothesis is non null so that every discovery is true 
+
+- We did not account for multiple testing -- this is OK, it just means
+we will not have a guarantee a multiple testing procedure offers.
+
+- Think of this as a first stage "screening" process.
+
+- For the "discoveries" we now want to give a good description of the effect: produce confidence intervals, for example.
+
+## Recall confidence intervals
+
+```{r,fig.height=4,fig.width=5,echo=FALSE,out.width='.70\\linewidth'}
+library(ggplot2)
+t<-seq(-4,4,length.out=1000)
+s<-seq(-2,2,length.out=500)
+ggplot()+geom_line(aes(x=t,y=dnorm(t,mean=0,sd=1)))+ geom_area(aes(x=s,y=dnorm(s,mean=0,sd=1)),fill="red",alpha=0.5)+ggtitle("Normal distribution")+ylab("Density")+annotate("text",label="95% of values", x = 0, y =dnorm(0,mean=0,sd=1)/3,color="black",size=5)+annotate("text",label="Mean",x = 0, y =-.01,color="black",size=3) +annotate("text",label="Mean-1.96xSD",x = -1.96, y =-.01,color="black",size=3)+annotate("text",label="Mean+1.96xSD",x = 1.96, y =-.01,color="black",size=3)
+
+
+```
+
+Confidence interval for the mean starting from one observation $x$:
+$$
+ (x-1.96\sigma,x+1.96\sigma)
+$$ 
+
+## Let's look what happens when we select by "significance"
+
+```{r, echo=FALSE, fig.width=10, fig.height=3.5,out.width='.99\\linewidth'}
+mu = 0.3
+Tmean[1:N] = mu # first N means are equal to mu 
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = pvalue<0.05
+lower = y-1.96
+upper = y+1.96
+
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All variables",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+
+mtext(paste("true signal =",as.character(mu)),side=3,line=0)
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Average signal =",as.character(round(mean(y[1:N]),3))),side=1,line=2.5)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=4)
+
+plot(y,pch=20,main="Report if p-value<0.05",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. correct sign  =",as.character(round(mean(y[discoveries==1]>=0),3))),side=1,line=2.5)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*
+(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=4)
+
+
+dy = y[discoveries==1]
+dlower = lower[discoveries==1]
+dupper = upper[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Average positive reports=",as.character(round(mean(dy[dy>0]),3))),side=1,line=2.5)
+mtext(paste("Average negative reports ",as.character(round(mean(dy[dy<0]),3))),side=1,line=4)
+```
+
+## Let's look what happens when we select by "significance"
+
+```{r, echo=FALSE, fig.width=10, fig.height=3.5,out.width='.99\\linewidth'}
+mu = 0.3
+Tmean[1:N] = mu # first N means are equal to mu 
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = pvalue<0.05
+lower = y-1.96
+upper = y+1.96
+
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All variables",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+
+mtext(paste("true signal =",as.character(mu)),side=3,line=0)
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Average signal =",as.character(round(mean(y[1:N]),3))),side=1,line=2.5)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=4)
+
+plot(y,pch=20,main="Report if p-value<0.05",ylim=c(min(lower),max(upper)),xlab="")
+lower = y-1.96
+upper = y+1.96
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. correct sign  =",as.character(round(mean(y[discoveries==1]>=0),3))),side=1,line=2.5)
+
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=4)
+
+
+dy = y[discoveries==1]
+dlower = lower[discoveries==1]
+dupper = upper[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Average positive reports=",as.character(round(mean(dy[dy>0]),3))),side=1,line=2.5)
+mtext(paste("Average negative reports ",as.character(round(mean(dy[dy<0]),3))),side=1,line=4)
+```
+
+- When we look at all variables, we see that the coverage is all right (by definition)
+
+- When we look at the selected variables, this is no longer the case
+
+- **Estimated effects are far bigger than they are (over-estimate effect size)**
+
+- Also, **sign error is high**. 
+
+## This is related to  regression towards the mean
+
+
+```{r, echo=T}
+M<-1000
+Tmean<-rnorm(M)
+y<-rnorm(M,Tmean,1)
+```
+
+- Suppose we focus on the observations with largest or smallest values
+
+- These are going to be the ones with largest and smallest means, but also the ones with the largest errors in the same direction.
+
+- few plots in the next slide
+
+##
+
+```{r, echo=FALSE, fig.width=8, fig.height=8,out.width='.99\\linewidth'}
+par(mfcol=c(2,2))
+plot(Tmean,y,xlab="True Means",ylab="Observations",main="Scatterplot, 45d line")
+abline(0,1,col=2,lwd=2)
+
+
+plot(y, Tmean,ylab="True Means",xlab="Observations",main="Other direction, 45d line")
+abline(0,1,col=2,lwd=2)
+
+
+plot(Tmean,y-Tmean,xlab="True Means",ylab="Observed-true",main="Sorting by true means")
+abline(0,0,col="red",lwd=2)
+#points(Tmean,rep(0,1000),col="blue",pch=19)
+
+
+plot(y,y-Tmean,xlab="Observed",ylab="Observed-true",main="Sorting by observations")
+abline(0,0,col="red",lwd=2)
+```
+
+
+
+
+## Now consider a case where many null hypotheses are tested
+
+```{r, echo=FALSE}
+BH<-function(p,alpha)
+  {
+    pw<-na.omit(p)
+    n<-length(pw)
+    pw<-sort(pw)
+    comp<-(pw<(1:n)*alpha/n)
+    outcome<-sum(comp==TRUE)    
+    if(outcome>0){
+      last<-max((1:n)[comp==TRUE])
+      pcut<-pw[last]
+      shr<-p*0
+      shr[p<=pcut]<-1
+      out<-list(shr,sum(shr>0,na.rm=T),pcut)
+      names(out)<-c("Reject","Total.Rej","Pcut")
+    }
+    else
+      {
+        shr<-p*0
+        out<-list(shr,outcome,0)
+        names(out)<-c("Reject","Total.Rej","Pcut")
+      }
+    return(out)
+    
+  }
+```
+
+```{r, echo=T}
+Tmean = rep(0,1000) # the majority of signals are zero
+N = 100 # number of non-zero means
+mu = 2.5 # signal strength
+Tmean[1:N] = mu
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = p.adjust(pvalue, 'BH') < 0.05
+```
+
+* The majority of tested hypotheses is null
+
+* To identify which hypotheses to reject we use BH
+
+* We are now accounting for multiplicity, i.e. we have a guarantee about FDR.
+
+
+## Confidence intervals after BH
+
+```{r, echo=FALSE, fig.height=3.5, fig.width=10,out.width='.99\\linewidth'}
+
+Tmean = rep(0,1000) # the majority is equal to 0
+N = 100 # number of non zero means
+mu = 2.5 # signal strength
+Tmean[1:N] = mu
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = p.adjust(pvalue, 'BH') < 0.05
+
+lower = y-1.96
+upper = y+1.96
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=3)
+
+plot(y,pch=20,main="Selected",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*
+(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+
+
+dy = y[discoveries==1]
+dlower = lower[discoveries==1]
+dupper = upper[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+```
+
+## Confidence intervals after BH
+
+```{r, echo=FALSE, fig.height=3.5, fig.width=10,out.width='.99\\linewidth'}
+
+
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=3)
+
+plot(y,pch=20,main="Selected",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+
+
+dy = y[discoveries==1]
+dlower = lower[discoveries==1]
+dupper = upper[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+```
+
+- When we look at all variables, we see that the coverage is all right (by definition)
+
+- When we look at the selected variables, this is no longer the case $\implies$ correcting for multiplicity does not correct for winner's curse!
+
+- In this context, when we are aware of the selection step, we can account for this effect and produce different confidence intervals achieving the right coverage
+
+- This is a topic of current and exciting research
+
+## Confidence intervals after BH
+
+```{r, echo=FALSE, fig.height=3.5, fig.width=10,out.width='.99\\linewidth'}
+
+
+lower = y - 1.96
+upper = y + 1.96
+lower_FCR = y - qnorm(1 - sum(discoveries) * 0.05 / (2 * length(Tmean)))
+upper_FCR = y + qnorm(1 - sum(discoveries) * 0.05 / (2 * length(Tmean)))
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=3)
+
+plot(y,pch=20,main="Selected",ylim=c(min(lower_FCR),max(upper_FCR)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower_FCR[i],upper_FCR[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower_FCR[discoveries==1])*
+(Tmean[discoveries==1]<=upper_FCR[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+
+
+dy = y[discoveries==1]
+dlower = lower_FCR[discoveries==1]
+dupper = upper_FCR[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower_FCR),max(upper_FCR)),xlab="")
+for(i in 1:length(dy))
+{
+lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower_FCR[discoveries==1])*
+(Tmean[discoveries==1]<=upper_FCR[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+```
+
+- In this example, a simple fix is to make intervals
+wider based on concept of [False Coverage Rate](https://en.wikipedia.org/wiki/False_coverage_rate)
+
+- If desired coverage level is $1-\alpha$, then adjust $\alpha$ by dividing by `N / TD`, the
+ratio of the total number of hypotheses to the number
+of discoveries discovered by BH.
+
+Tmean = rep(0,1000) # the majority is equal to 0
+N = 100 # number of non zero means
+mu = 2.3 # signal strength
+Tmean[1:N] = mu
+y = rnorm(1000,Tmean,1)
+pvalue = 2*pnorm(-abs(y))
+discoveries = p.adjust(pvalue, 'BH') < 0.05
+
+lower = y - 1.96
+upper = y + 1.96
+lower_FCR = y - qnorm(1 - sum(discoveries) * 0.05 / (2 * length(Tmean)))
+upper_FCR = y + qnorm(1 - sum(discoveries) * 0.05 / (2 * length(Tmean)))
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=3)
+
+plot(y,pch=20,main="Selected",ylim=c(min(lower_FCR),max(upper_FCR)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower_FCR[i],upper_FCR[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower_FCR[discoveries==1])*
+(Tmean[discoveries==1]<=upper_FCR[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+
+
+dy = y[discoveries==1]
+dlower = lower_FCR[discoveries==1]
+dupper = upper_FCR[discoveries==1]
+plot(dy,pch=20,main="Zooming in",ylim=c(min(lower_FCR),max(upper_FCR)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower_FCR[discoveries==1])*
+(Tmean[discoveries==1]<=upper_FCR[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+```
+
+## One way to approach selection bias
+
+- Let's go back to our simple selection rule: thresholding at 1.96
+
+- Our data had mean 0.3, but it could have had a different mean. It could have had mean 0.
+
+- Instead of a confidence interval, we might look at $p$-values for testing whether mean was 0.
+
+```{r, echo=TRUE}
+y = rnorm(1000, 0, 1)
+pvalues = 2 * pnorm(-abs(y))
+discoveries = pvalues < 0.05
+selected_pvalues = pvalues[discoveries]
+```
+
+## One way to approach selection bias
+
+<table>
+<tr>
+<td>
+```{r, echo=FALSE}
+plot(ecdf(selected_pvalues), xlim=c(0,1))
+abline(0, 1, col='red', lty=2, lwd=2)
+```
+</td>
+<td>
+No longer uniform!
+</td>
+</tr>
+</table>
+
+## One way to approach selection bias
+
+```{r, echo=TRUE}
+corrected_pvalues = 2 * pnorm(-abs(y[discoveries])) / (0.05)
+plot(ecdf(corrected_pvalues)) #, xlim=c(0,1))
+abline(0, 1, col='red', lty=2, lwd=2)
+```
+
+## One way to approach selection bias
+
+Let's try a larger sample size
+
+<table>
+<tr>
+<td>
+```{r, echo=TRUE}
+y = rnorm(100000, 0, 1)
+pvalues = 2 * pnorm(-abs(y))
+discoveries = pvalues < 0.05
+corrected_pvalues = pvalues[discoveries] / 0.05
+plot(ecdf(corrected_pvalues), xlim=c(0,1))
+abline(0, 1, col='red', lty=2, lwd=2)
+```
+</td>
+<td>
+<ul>
+<li>Uniform again!
+</ul>
+</td>
+</tr>
+</table>
+
+## One way to approach selection bias
+
+- This approach is called *conditioning* on what we have observed.
+
+- We corrected a *p*-value, similar corrections can be made for confidence intervals.
+
+- Can one do this after selection by BH? Yes, though it quickly gets a little beyond our pay grade.
+
+- In this approach we record what aspects of the data we have observed: *in silico* this means
+keeping track of which functions we have applied to our data and what we have observed. 
+
+- A record of this is something a scientist (and / or a *data scientist*) should do in
+any case.
+
+- As data analysis gets more complicated, so does this record. *Calculations start to become difficult.*
+
+## Winner's curse in regression
+
+- A common way to fit models is to use *model selection*: an algorithm choose a model
+that seems *best* by some measure.
+
+- Simple example: forward stepwise model selection
+```{r echo=TRUE}
+n = 100 # number of cases
+p = 10  # number of features
+X = scale(matrix(rnorm(n*p), n, p), TRUE, TRUE)
+Y = rnorm(n)
+best_var = which.max(abs(t(X) %*% Y)) # highest correlation
+summary(lm(Y ~ X[,best_var]))
+```
+
+## Winner's curse in regression
+
+```{r, echo=FALSE}
+best_pvalue = function(n=100, p=10) {
+    X = scale(matrix(rnorm(n*p), n, p), TRUE, TRUE)
+    Y = rnorm(n)
+    best_var = which.max(abs(t(X) %*% Y)) # highest correlation
+    return(summary(lm(Y ~ X[,best_var]))$coef[2,4])
+}
+```
+
+I wrapped the above up into a function to return the p-value for the best variable.
+
+<table>
+<tr>
+<td>
+```{r, echo=TRUE, fig.height=4, fig.width=7}
+pvalues = c()
+for (i in 1:500) {
+    pvalues = c(pvalues, best_pvalue())
+}
+plot(ecdf(pvalues), xlim=c(0,1))
+abline(0, 1, col='red', lty=2)
+```
+</td>
+<td>
+<ul>
+<li>Not uniform!
+<li>Thresholding *p*-value at 0.05 yields a Type I error of `r round(mean(pvalues < 0.05), 2)`!
+<li>This chose only from 10 explanatory variables!
+</ul>
+</td>
+</tr>
+</table>
+
+## Winner's curse in regression
+
+
+<table>
+<tr>
+<td>
+```{r, echo=TRUE, fig.height=4, fig.width=7}
+pvalues = c()
+for (i in 1:500) {
+    pvalues = c(pvalues, best_pvalue(p=50))
+}
+plot(ecdf(pvalues), xlim=c(0,1))
+abline(0, 1, col='red', lty=2)
+```
+</td>
+<td>
+<ul>
+<li>Not uniform!
+<li>Thresholding *p*-value at 0.05 yields a Type I error of `r round(mean(pvalues < 0.05), 2)`!
+<li>This chose only from 50 explanatory variables!
+</ul>
+</td>
+</tr>
+</table>
+
+
+## Winner's curse in regression
+
+- It is possible to construct a reference distribution in a similar way
+to how fixed our simple example.
+
+- We could also do a simple permutation test for this
+*best p-value*, but it is not clear how to do permutation test for 2nd best p-value.
+
+- Conditional approach extends beyond just this first step.
+
+```{r, echo=TRUE, message=FALSE}
+library(selectiveInference)
+fsfit = fs(X, Y, maxsteps=1)
+out = fsInf(fsfit)
+out$pv
+```
+
+```{r, echo=FALSE}
+corrected_pvalue = function(n=100, p=10) {
+    n = 100 # number of cases
+    p = 10  # number of features
+    X = scale(matrix(rnorm(n*p), n, p), TRUE, TRUE)
+    Y = rnorm(n)
+    fsfit = fs(X, Y, maxsteps=1)
+    out = fsInf(fsfit)
+    return(out$pv)
+}
+```
+
+## Winner's curse in regression
+
+<table>
+<tr>
+<td>
+```{r, echo=TRUE, fig.height=4, fig.width=7}
+pvalues = c()
+for (i in 1:500) {
+    pvalues = c(pvalues, corrected_pvalue())
+}
+plot(ecdf(pvalues), xlim=c(0,1))
+abline(0, 1, col='red', lty=2)
+```
+</td>
+<td>
+<ul>
+<li>Uniform again!
+<li>Ongoing and active research.
+</ul>
+</td>
+</tr>
+</table>

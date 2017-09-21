@@ -1,0 +1,461 @@
+---
+title: "Assessing evidence about parameters"
+author: "Data Science 101 Team"
+date: "March 16, 2016"
+output: 
+    slidy_presentation:
+        css: styles.css
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+source('http://stats101.stanford.edu/profile.R')
+```
+
+## Assessing evidence
+
+- Our examples of hypothesis tests from first lecture were all based
+building a *null model* of behavior.
+
+- Using this null model, we assessed the evidence 
+by computing the *chances* of our observations assuming
+this null model was true.
+
+- When these chances were small, this served as evidence against the null model being correct.
+
+- None of these scenarios required us to describe what happens if the null model was **not true.**
+
+## A second scenario
+
+- [A/B testing](http://getdatadriven.com/ab-significance-test) is a tool used by companies to determine the effectiveness of different strategies to attract customers.
+
+- Here is an [example](http://getdatadriven.com/ab-significance-test) found with an easy web search.
+
+- A company tries two strategies: 
+     * 1000 customers shown content A, with 90 successful outcomes (i.e. "clickthroughs").
+     * 1000 customers shown content B, with 120 successful outcomes (i.e. "clickthroughs").
+
+- Is there a difference between the strategies?
+
+```{r}
+strategy_A = c(rep(0,910), rep(1,90))
+strategy_B = c(rep(0,880), rep(1,120))
+```
+
+## A second scenario
+
+- We can phrase this question in terms of *parameters* for each strategy.
+
+- For strategy A, there is some underlying true **clickthrough rate** $p_A$ that we are trying to estimate. Similarly, strategy B has some underlying true clickthrough rate $p_B$.
+
+- Our question about there being a difference can be stated as: "Is $p_A$ the same as $p_B$"?
+
+- This allows for the possibility that $p_A \neq p_B$. Our modelling here
+will ultimately describe what happens even $p_A \neq p_B$ when we discuss **confidence intervals**.
+
+## Mental model
+
+- Suppose that the 1000 customers in each group are randomly sampled from some population. (*This assumption might not be true in practice! It is notoriously hard to obtain a random sample from a population...*)
+
+- Suppose there is no difference between the two strategies. (*This is the null hypothesis in this example.*)
+
+- Then, if we make one big data set of size 2000 with 210 successes and then randomly assign 1000 to `A` and the rest to `B` we will have outcomes 
+that were as likely as the observed outcome.
+
+- This is another *permutation test*.
+
+- What summary should we use? A reasonable summary would seem to be the difference between the successes between arms `A` and `B`.
+
+## Mental model
+
+```{r}
+pooled = c(strategy_A, strategy_B)
+number_trial = 10000
+difference = numeric(number_trial)
+
+for (i in 1:number_trial) {
+    pooled_sample = sample(pooled, length(pooled), replace=FALSE)
+    outcome_A = pooled_sample[1:1000] # first 1000 entries are A
+    outcome_B = pooled_sample[1001:2000] # the rest are B
+    difference[i] = sum(outcome_A) - sum(outcome_B)
+}
+```
+
+## Mental model
+
+```{r fig.height=4, fig.width=4}
+library(ggplot2)
+(ggplot(data.frame(difference), aes(x=difference)) +
+        geom_histogram(aes(y=..density..), bins=20))
+```
+
+## What are the chances?
+
+- We observed a difference with absolute value |120-90| = 30.
+
+- Out of our 5000 different reorderings, how often was the difference in the number of successes greater than or equal to 30 (in absolute value)?
+
+```{r}
+mean(abs(difference) >= 30)
+```
+
+This is pretty unlikely. Maybe our null hypothesis is not true...
+
+## A different method
+
+- If we knew the relative success in each arm, we might be able evaluate the chances above in a different way.
+
+- For instance, suppose the true success rate in arm A was 10% in arm B it was 11%. (*We are picking these numbers arbitrarily for the moment.*)
+
+- In arm A the number of click-throughs can be described by tossing 1000 coins each with a 10% chance of heads.
+
+- In arm B the number of click-throughs can be described by tossing 1000 coins each with a 11% chance of heads.
+
+## A different method
+
+```{r}
+trialA = c(1, rep(0, 9))
+trialB = c(rep(1, 11), rep(0, 89))
+sample_box = function(box, ndraw) {
+    return(function() {sum(sample(box, ndraw, replace=TRUE))})
+}
+armA = sample_box(trialA, 1000)
+armB = sample_box(trialB, 1000)
+armAB_difference = function() {abs(armA() - armB())}
+```
+
+## A different method
+
+```{r fig.height=4, fig.width=4}
+sample_differences = numeric(50000)
+for (i in 1:50000) {
+    sample_differences[i] = armAB_difference()
+}
+(ggplot(data.frame(sample_differences), aes(x=sample_differences)) +
+        geom_histogram(aes(y=..density..), bins=30))
+```
+
+## What are the chances?
+
+- We see that if this were the true model that generated the data
+there would be about a 8% chance of seeing an absolute difference of more than 30.
+
+- In this example, the absolute difference is our **test statistic**.
+
+- With models for arm A and arm B we are able to create a **sampling distribution** for the test statistic.
+
+- Using the sampling distribution we can evaluate the chances of seeing such a large number of differences.
+
+```{r}
+mean(sample_differences >= 30)
+```
+
+## What is the right model?
+
+- In our hypothetical example, we assumed that arm A had a success rate of 10%, and arm B had a success rate of 11%. 
+
+- In practice, we will not know this. 
+
+- If we had to estimate a success rate in arm A our best guess would be 9%, and 12% in arm B.
+
+- What if we had to estimate a success rate **if we believe the two arms have the same success rate**?
+
+- We would probably estimate it to be 10.5%, the average of the two success rates.
+
+
+## What is the right model?
+
+```{r}
+pooled_data = c(rep(1, 210), rep(0, 1790))
+armA = sample_box(pooled_data, 1000)
+armB = sample_box(pooled_data, 1000)
+armAB_difference = function() { return(abs(armA() - armB())) }
+```
+
+## What is the right model?
+
+```{r}
+sample_differences = numeric(50000)
+for (i in 1:50000) {
+    sample_differences[i] = armAB_difference()
+}
+```
+
+## What is the right model?
+
+```{r fig.height=4, fig.width=4}
+(ggplot(data.frame(sample_differences), aes(x=sample_differences)) +
+        geom_histogram(aes(y=..density..), bins=30))
+```
+
+```{r}
+mean(sample_differences >= 30)
+```
+
+## Mental model
+
+- We saw that we get a very similar result for computing the chances
+this way as with the permutation method.
+
+- We came up with a way to generate data that matched
+our observed data **assuming the success probabilities in the two arms are the same.**
+
+- This assumption made us propose using each arm having 10.5% success as our best guess at the *true model* under this assumption.
+
+- This is our **null model**: what the typical differences
+look like if both success probabilities were the same.
+
+## Plugin principle
+
+- Note that the typical difference also depends on the success rate, that's why we used 10.5%.
+
+- Using this 10.5% is similar to our use of `expected_counts` when considering
+`marital_status` and `sex`. 
+
+- The value 10.5% is a value for which the null hypothesis is true (i.e.
+clickthrough rate is same in both arms) and close to what we observed.
+
+- If we were asked to estimate the overall clickthrough assuming it was
+the same in both arms, we would probably use 10.5%.
+
+## Using the bootstrap
+
+- How might we do this with the bootstrap?
+
+- Recall that the bootstrap effectively "automagically"
+computes the variability of random variables.
+
+- We have two random variables here: $\hat{p}_A$ and $\hat{p}_B$
+the probability of success under each strategy.
+
+- Our null hypothesis says that $p_A=p_B$. Hence, 
+$\hat{p}_A-\hat{p}_B$ should have *expected value* 0. 
+
+- We may not be surprised if its sampling distribution
+looks normal.
+
+## Using the bootstrap
+
+- Bootstrap to obtain an estimate of the distribution of $\hat{p}_A-\hat{p}_B$
+
+```{r}
+boxA = c(rep(1,90), rep(0, 910))
+boxB = c(rep(1,120), rep(0, 880))
+
+bootstrap_diff = function(boxA, boxB, ndraw=2000) {
+    bootstrap_sample = numeric(ndraw) 
+    for (i in 1:ndraw) {
+        pA_star = mean(sample(boxA, 1000, replace=TRUE))
+        pB_star = mean(sample(boxB, 1000, replace=TRUE))
+        bootstrap_sample[i] = pA_star - pB_star
+    }
+    return(data.frame(bootstrap_sample))
+}
+```
+
+## Using the bootstrap
+
+```{r fig.height=4, fig.width=4}
+bootstrap_sample = bootstrap_diff(boxA, boxB, ndraw=20000)
+(ggplot(bootstrap_sample, aes(x=bootstrap_sample)) +
+        geom_histogram(aes(y=..density..), bins=30))
+```
+
+- Where is the histogram centered? 
+
+- Clearly, it won't in general be at zero...
+
+## Using the bootstrap
+
+- To make computation of tail probabilties/p-values more intuitive, it is often good to center the bootstrap distribution at zero 
+
+```{r fig.height=4, fig.width=4}
+bootstrap_sample$corrected = bootstrap_sample$bootstrap_sample - (mean(boxA) - mean(boxB))
+(ggplot(bootstrap_sample, aes(x=corrected)) +
+        geom_histogram(aes(y=..density..), bins=30))
+```
+
+## Using the bootstrap
+
+- Now that we have centered the distribution, we can compute bootstrap p values
+- There are multiple ways to do this
+- One way is to compute an estimate of the probability of observing something as extreme or more extreme than we did observe using the bootstrap distribution directly
+- Another way is to use the bootstrap distribution just to compute the standard deviation of $\hat{p}_A-\hat{p}_B$ (this is called the **standard error**) and use a normal approximation
+
+```{r}
+pA_hat = mean(boxA)
+pB_hat = mean(boxB)
+bootstrap_pval = mean((pA_hat-pB_hat) > bootstrap_sample$corrected)
+bootstrap_pval = 2 * min(bootstrap_pval, 1 - bootstrap_pval)
+normal_pval = pnorm((pA_hat - pB_hat), sd=sd(bootstrap_sample$bootstrap_sample)) 
+normal_pval = 2 * min(normal_pval, 1 - normal_pval)
+data.frame(bootstrap_pval, normal_pval)
+```
+
+- What we do below implicitly assumes that the bootstrap distribution is symmetric (why)?
+
+## General approach
+
+- Our previous example considers testing
+whether the parameter $p_A-p_B$ is 0.
+
+- We assessed the evidence by looking at our estimated difference
+$\hat{p}_A-\hat{p}_B$ and compared it to (an estimate of) its 
+SD.
+
+- The simplest way to estimate the SD in this case is the bootstrap.
+*For more complicated scenarios, this may need to be adjusted.*
+
+- We compared our estimated difference $\hat{p}_A-\hat{p}_B$
+to a reference distribution that was normal with SD given
+by our bootstrap estimate of SD.
+
+- The quantity `normal_pval` assesses how strong the
+evidence against our null hypothesis $H_0:p_A-p_B=0$ is.
+
+## Bootstrap correction
+
+- We can also use the bootstrap sample itself
+to assess significance.
+
+- However, as we saw, the bootstrap sample must first be properly centered.
+
+- This centering correction is described and predicted by the bootstrap world analogy.
+
+- Bootstrap samples $p^*_A$ are centered around $\hat{p}_A$, similarly for $p^*_B$ and
+$\hat{p}_B$.
+
+- Therefore, bootstrap samples $p^*_A-p^*_B$ are centered around $\hat{p}_A-\hat{p}_B$.
+
+## General approach
+
+- Suppose we are interested in some underlying
+parameter $\theta(F)$ of a random process $F$.
+
+- For example, we might be interested in the correlation 
+between two features. Is the correlation 0?
+
+- We have access to an estimate $\hat{\theta}$
+based on a sample $[X_1, \dots, X_n]$
+
+- The $X_i$'s could themselves
+be vectors. If we are interested in correlation 
+of two features, each $X_i$ would be $[X_{i,1}, X_{i,2}]$
+and we are interested in
+$\text{Cor}(X_1,X_2)$.
+
+## General approach
+
+- *We will also assume* that the estimator
+$\hat{\theta}$ is amenable to bootstrapping. 
+
+- We make this assumption to provide us with a good
+estimate of $SD(\hat{\theta})$. Call this estimate
+$\hat{SD}(\hat{\theta})$.
+
+- We also implicitly assume that $E[\hat{\theta}]\approx \theta(F)$.
+
+## General approach
+
+- Some additional notation: we might want to write
+$$
+E_F[\hat{\theta}] \approx \theta(F)
+$$
+because the expectation $E$ we are interested in
+is the *true* random process $F$.
+
+- We also might write $SD_F(\hat{\theta})$
+as its SD depends on the true random process $F$.
+
+- Therefore we are assuming that $\hat{SD}(\hat{\theta})$ is a good estimate of
+$SD_F(\hat{\theta})$.
+
+## General approach
+
+- Hypotheses about parameters are 
+phrased numerically
+$$
+H_0: \theta(F) = 3
+$$
+(or 0, or 1, ...)
+
+- Note the difference between this and *Lady Tasting Tea*, or *Cell Phone and Driving* examples,
+in which questions were more like: *Is there any difference?*
+ 
+- Often people will write
+$$
+H_0: \theta(F) = \theta_0
+$$
+where $\theta_0$ is some *special value*.
+
+## General approach -- Z score
+
+- Given an observed value $\hat{\theta}_{obs}$, this is generally answered using
+$$
+Z = \frac{\hat{\theta} - \theta_0}{\hat{SD}(\hat{\theta})}.
+$$
+
+- Why do we subtract $\theta_0$?
+
+- Under our hypothesis, this is our presumed mean
+of our estimator.
+
+- If our observed estimate is far from $\theta_0$, this is evidence our
+hypothesis is false.
+
+## General approach
+
+- How far from $\theta_0$? 
+
+- Well, when the bootstrap works, the random variable $Z$
+has a density close to normal, centered at 0 and SD of 1.
+
+- The 2-SE rule of thumb says that when $\theta(F)=\theta_0$
+(i.e. when $H_0$ is true) there should only be about a 95% chance
+of observing $Z$ greater than 2.
+
+- Having an observed $Z$ greater than 2 is strong evidence against 
+$H_0$.
+
+## General approach
+
+- Here's a possibly helpful [picture](http://stackoverflow.com/questions/21434709/visualize-the-rejection-region-in-a-probability-distribution-curve)
+
+```{R, warning=FALSE, fig.height=4, fig.width=4}
+gg = data.frame(x=seq(-3,3,0.05))
+gg$y = dnorm(gg$x)
+normal_2SE = (ggplot(gg) + 
+  geom_path(aes(x,y)) +
+  geom_linerange(data=gg[abs(gg$x)>2,],
+                 aes(x, ymin=0, ymax=y),
+                 colour="red"))
+```
+
+## General approach
+
+```{R, warning=FALSE, fig.height=4, fig.width=4}
+normal_2SE
+```
+
+## General approach
+
+- If we wanted to make the chances exactly 95%
+(when $Z$ is exactly normal centered at 0 and SD 1 -- which never
+exactly happens).
+
+```{R, warning=FALSE, fig.height=4, fig.width=4}
+gg = data.frame(x=seq(-3,3,0.05))
+gg$y = dnorm(gg$x)
+normal_95 = (ggplot(gg) + 
+  geom_path(aes(x,y)) +
+  geom_linerange(data=gg[abs(gg$x)>qnorm(0.975),],
+                 aes(x, ymin=0, ymax=y),
+                 colour="blue"))
+```
+
+## General approach
+
+```{R, warning=FALSE, fig.height=4, fig.width=4}
+normal_95
+qnorm(0.975)
+```

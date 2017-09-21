@@ -1,0 +1,271 @@
+---
+title: "Replicability Lab 1"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+# Underlying truth
+
+par(mfrow=c(1,1))
+truth<-matrix(-1,20,10)
+truth[1:5,1:5]<-1
+image(-(truth), axes = F,main="Truth")
+pu <- par("usr")
+abline(v = seq(pu[1], pu[2], len=21), h = seq(pu[3], pu[4], len=11))
+mtext("Red: true discovery",side=1,line=1)
+mtext("Cream: nothing going on",side=1,line=2)
+
+
+
+# Calculating the test results
+
+draw_outcome = function(typeI=0.05, typeII=0.2) {
+
+   # Randomly selecting the False Positive
+   flip = matrix(rbinom(20*10, 1, typeI), 20, 10) 
+
+   # Randomly selecting the False Negatives
+   flip[1:5,1:5] = matrix(rbinom(25, 1, typeII), 5, 5)
+   return(truth*(-1)*flip + truth*(1-flip))
+}
+outcome = draw_outcome()
+   
+#total discoveries
+TD<-sum(outcome==1)
+
+#true discoveries
+TTD<-sum(outcome[c(1:5),c(1:5)])
+
+# False discoveries
+TFD<-TD-TTD
+# False discovery proportions
+TFD/TD
+
+# Graphical representation
+
+image(-(outcome), axes = F,main="Study outcomes")
+#mtext(paste("FDP=",as.character(round(TFD/TD,2))),side=3, line=.3)
+mtext("For each study",side=1,line=0.5)
+mtext(paste("P(false negative)=",as.character(beta)),side=1,line=1.5)
+mtext(paste("P(false positive)=",as.character(alpha)),side=1,line=2.5)
+pu <- par("usr")
+abline(v = seq(pu[1], pu[2], len=21), h = seq(pu[3], pu[4], len=11))
+
+# Calculating the test results, with different parameter settings
+alpha<-0.05 # setting the probability of type I error
+# Randomply selecting the False Positive
+flip<-matrix(rbinom(20*10,1,alpha),20,10) 
+beta<-0.4 # setting the probability of type II error
+# Randombly selecting the False Negatives
+flip[1:5,1:5]<-matrix(rbinom(25,1,0.2),5,5)
+outcome<-truth*(-1)*flip + truth*(1-flip)
+
+#total discoveries
+TD<-sum(outcome==1)
+
+#true discoveries
+TTD<-sum(outcome[c(1:5),c(1:5)])
+
+# False discoveries
+TFD<-TD-TTD
+# False discovery proportions
+TFD/TD
+
+# Graphical representation
+image(-(outcome), axes = F,main="Study outcomes")
+mtext(paste("FDP=",as.character(round(TFD/TD,2))),side=3, line=.3)
+mtext("For each study",side=1,line=0.5)
+mtext(paste("P(false negative)=",as.character(beta)),side=1,line=1.5)
+mtext(paste("P(false positive)=",as.character(alpha)),side=1,line=2.5)
+
+pu <- par("usr")
+abline(v = seq(pu[1], pu[2], len=21), h = seq(pu[3], pu[4], len=11))
+dev.print(file="outcomes2.pdf", dev=pdf)
+
+# let's now actually consider a procedure that generates p-values rather than simply giving us the outcome of the test
+
+# Let's consider a vector of true means called Tmean
+Tmean<-rep(0,10000) # the majority of means shall be equal to 0
+N<-1000 # number of non-zero means
+mu<-2 # signal strength
+Tmean[1:N]<-mu # First N means equal to mu 
+# Generate data
+y<-rnorm(10000,Tmean,1) # Generate Gaussian variables with mean mu
+pvalue<-2*pnorm(-abs(y)) # Compute p values
+# count discoveries
+TD<-sum(pvalue<0.05)
+# count true discoveries
+TTD<-sum(pvalue[1:N]<0.05)
+TFD<-TD-TTD # total false discoveries
+FDP<-(TFD)/TD # False discovery proportion
+TFD
+FDP
+
+# How can we control this?
+# count discoveries differently, making the probability of at least one false discovery 0.05 == FWER
+Discovery<-pvalue<0.05/10000
+TD<-sum(Discovery)
+TTD<-sum(Discovery[1:N])
+TFD<-TD-TTD
+if(TD>0){FDP<-(TFD)/TD}
+if(TD==0){FDP<-0}
+
+# Let's do this over a few times
+Discoveries<-NULL
+TrueDiscoveries<-NULL
+FalseDiscoveryProportion<-NULL
+M<-10000 # number of iterations
+for(i in 1:M)
+{
+	y<-rnorm(10000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+Discovery<-pvalue<0.05/10000
+TD<-sum(Discovery)
+TTD<-sum(Discovery[1:N])
+TFD<-TD-TTD
+if(TD>0){FDP<-(TFD)/TD}
+if(TD==0){FDP<-0}
+Discoveries<-c(Discoveries,TD)
+TrueDiscoveries<-c(TrueDiscoveries,TTD)
+FalseDiscoveryProportion<-c(FalseDiscoveryProportion,FDP)}
+
+par(mfrow=c(2,2))
+hist(Discoveries,main="Total Discoveries")
+hist(TrueDiscoveries, main="Number of true discoveries")
+plot(as.factor(Discoveries -TrueDiscoveries>0), main="At least one false Discovery")
+mtext(paste("FWER=",as.character(round(sum((Discoveries -TrueDiscoveries)>0)/M,3))),side=1,line=2.5)
+hist(FalseDiscoveryProportion, main="False Discovery Proportion",xlab="")
+mtext(paste("FDR=",as.character(round(mean(FalseDiscoveryProportion),3))), side=1,line=2.5)
+dev.print(file="Bonferroni.pdf",dev=pdf)
+
+# How can we control this?
+# Count discoveries differently, making the average False Discovery Proportion == FDR  0.05
+
+# To do this we will rely on the BH procedure, coded in the following function
+
+BH = function(p,alpha)
+  {
+    pw<-na.omit(p)
+    n<-length(pw)
+    pw<-sort(pw)
+    comp<-(pw<(1:n)*alpha/n)
+    outcome<-sum(comp==TRUE)    
+    if(outcome>0){
+      last<-max((1:n)[comp==TRUE])
+      pcut<-pw[last]
+      shr<-p*0
+      shr[p<=pcut]<-1
+      out<-list(shr,sum(shr>0,na.rm=T),pcut)
+      names(out)<-c("Reject","Total.Rej","Pcut")
+    }
+    else
+      {
+        shr<-p*0
+        out<-list(shr,outcome,0)
+        names(out)<-c("Reject","Total.Rej","Pcut")
+      }
+    return(out)
+    
+  }
+
+
+Discovery<-BH(pvalue,0.05)[[1]]
+TD<-sum(Discovery)
+TTD<-sum(Discovery[1:N])
+TFD<-TD-TTD
+if(TD>0){FDP<-(TFD)/TD}
+if(TD==0){FDP<-0}
+
+
+
+#Let's do this over a few times
+Discoveries<-NULL
+TrueDiscoveries<-NULL
+FalseDiscoveryProportion<-NULL
+M<-10000 # number of iterations
+for(i in 1:M)
+{
+	y<-rnorm(10000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+Discovery<-BH(pvalue,0.05)[[1]]
+TD<-sum(Discovery)
+TTD<-sum(Discovery[1:N])
+TTD<-sum(Discovery[1:N])
+TFD<-TD-TTD
+if(TD>0){FDP<-(TFD)/TD}
+if(TD==0){FDP<-0}
+Discoveries<-c(Discoveries,TD)
+TrueDiscoveries<-c(TrueDiscoveries,TTD)
+FalseDiscoveryProportion<-c(FalseDiscoveryProportion,FDP)}
+
+par(mfrow=c(2,2))
+hist(Discoveries,main="Total Discoveries")
+hist(TrueDiscoveries, main="Number of true discoveries")
+plot(as.factor(Discoveries -TrueDiscoveries>0), main="At least one false Discovery")
+mtext(paste("FWER=",as.character(round(sum((Discoveries -TrueDiscoveries)>0)/M,3))),side=1,line=2.5)
+hist(FalseDiscoveryProportion, main="False Discovery Proportion",xlab="")
+mtext(paste("FDR=",as.character(round(mean(FalseDiscoveryProportion),3))), side=1,line=2.5)
+dev.print(file="BHcontrol.pdf", dev=pdf)
+
+# Understanding what the BH function does
+
+# Let's consider a vector of Tmean
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-100 # number of non-zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu # First N means set to mu 
+# Generate data
+y<-rnorm(1000,Tmean,1) # Generate data 
+pvalue<-2*pnorm(-abs(y)) # Compute p-values
+par(mfrow=c(2,2))
+plot(sort(pvalue),main="Pvalues",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+
+plot(sort(pvalue)[1:200],main="Zooming in",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+plot(sort(pvalue)[1:100],main="Zooming in",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+plot(sort(pvalue)[1:100],main="Zooming in, & selecting",pch=20,ylab="Sorted p-values",xlab="Order (i)")
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+
+dev.print(file="BHrule.pdf",dev=pdf)
+
+# So now let's compare two different collection of hypotheses with a different proportion of non nulls
+
+par(mfrow=c(1,3))
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-100 # number of non-zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu 
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-200 # number of non-zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+
+Tmean<-rep(0,1000) # the majority is equal to 0
+N<-300 # number of non zero means
+mu<-3 # signal strength
+Tmean[1:N]<-mu
+# Generate data
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+plot(sort(pvalue)[1:250],main=paste("Proportion of non null = ",as.character(round(N/1000,2))),pch=20,ylab="Sorted p-values",xlab="Order (i)",ylim=c(0,0.025))
+lines(1:1000,0.05*(1:1000)/1000,col=2)
+points((1:1000)[sort(pvalue)<BH(pvalue,0.05)$Pcut], sort(pvalue)[sort(pvalue)<BH(pvalue,0.05)$Pcut],col=2,pch=20)
+dev.print(file="BHadaptive.pdf",dev=pdf)

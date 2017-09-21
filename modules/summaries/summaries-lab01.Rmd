@@ -1,0 +1,63 @@
+---
+title: "Summarizing your data lab 1"
+author: "Data Science 101 Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE,cache = TRUE)
+```
+
+# Lab 1: Robustness of summaries
+
+## Question 1: how many numbers do you need to change in order to change the mean?
+
+Let us start with 20 values generated from uniform distribution.
+
+```{r}
+sample = runif(20,2,5)
+sample
+sample_mean = mean(sample)
+sample_mean
+```
+How many numbers among the 20 values do we need to change if we want the new sample mean to be 4?
+
+How about the following example? How many numbers among the 30 values do we need to change if we want the new sample mean to be 2?
+
+```{r}
+sample1 = rnorm(10,0,1)
+sample1
+sample1_mean = mean(sample1)
+sample1_mean
+```
+So what's your answer to Question 1?
+
+## Question 2: how many numbers do we need to change in order to change the median?
+
+We will look at the same data.
+```{r}
+sample_median = median(sample)
+sample_median
+ordered_sample = sort(sample)
+ordered_sample
+```
+- How is this sample_median calculated?
+- If we change just one number in this sequence to be 3.5, how many possibiities are there for value of the new median?
+- If we change the largest value to be 10, does the median change? If we change the smallest value to be 0, does the median change?
+- In general, can we get an arbitrary value of median by changing just one value in this sequence? 
+- How many numbers do we need to change/add if we want a specific median? For example, please answer this question for scenarios: new_median = 2.072841, 3.127627, 4.075274, 5.
+
+
+## Question 3: which one is more robust, mean or median?
+
+## Trimmed mean
+
+```{r}
+mean(sample, trim = 0)
+mean(sample, trim = 0.1)
+mean(sample, trim = 0.2)
+```
+

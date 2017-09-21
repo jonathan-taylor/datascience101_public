@@ -1,0 +1,250 @@
+---
+title: "The sign test and the permutation test"
+author: "Data Science Team"
+output: 
+       slidy_presentation:
+        css: styles.css
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(pacman)
+pacman::p_load(combinat)
+```
+
+## Sign tests are useful
+
+- when we want to do inference on the median
+- when we want a non-parametric test that makes very few assumptions about the distribution of the data
+
+## Inference on the median: an example on wiki
+
+In a clinical trial, the survival time (weeks) is collected for 10 subjects with non-Hodgkins lymphoma. The exact survival time was not known for one subject who was still alive after 362 weeks, when the study ended (this is called "censoring") The subjects' survival times were
+
+
+49, 58, 75, 110, 112, 132, 151, 276, 281, 362+
+
+
+The plus sign indicates the subject was still alive at the end of the study.
+
+- Question: Was the median survival time less than or greater than 200 weeks?
+
+- Let us set our null hypothesis: median survival is 200 weeks.
+
+
+## Transform the original data to '+' and '-'
+
+- We compare the survival times to 200; thus it is either below 200 (assign a '-' sign) or above 200 (assign a '+' sign)
+
+- new data series: -,-,-,-,-,-,-,+,+,+
+
+- If the null hypothesis is true, i.e., the median survival time is 200 weeks, in a random sample of size 10, how many '+' or '-' signs do you expect to see?
+
+- We see 7 '-' signs and 3 '+' signs in our sample. How unlikely is this scenario if our null is correct?
+
+## How extreme is this case? calculate the chances
+
+- With true null hypothesis, the number of '-'s will have a binomial distribution with mean 0.5
+
+- Thus the probability of observing $k$ '-' in 10 objects (same as getting $k$ heads from 10 tosses of a fair coin), with p ('-') = 0.5, is given by the binomial formula:
+
+$$ Pr(\text{Number of '-'} = k) = \binom{10}{k} × 0.5^{10}$$
+
+- Below are the probabilities for $k=1,\cdots, 10$:
+
+| 0 | 1 | 2  | 3  | 4  | 5 | 6| 7  | 8  | 9  | 10  | 
+| ------------- |:-------------:| -----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
+| 0.0010      | 0.0098 | 0.0439|0.1172|0.2051|0.2461|0.2051|0.1172|0.0439|0.0098|0.0010|
+
+## How extreme is this case? calculate the chances
+
+- To get a result as extreme as 7 '-' out of 10 trials, (a two-sided test), we need to calculate the probability of getting three or fewer '-' or seven or more '-'.
+- This probability is the sum of their individual probabilities:
+
+0.0010 + 0.0098 + 0.0439 + 0.1172 + 0.1172 + 0.0439 + 0.0098 + 0.0010 = 0.3438.
+
+- So observing 3 or less or 7 or more '-' is not significantly different from 5, at the .05 level of significance.
+
+In general,  when should we use  a one- or two-tailed test?
+
+## Conducting the sign test in R
+
+```{r}
+binom.test(3, 10, p = 0.5, alternative = c("two.sided"))
+```
+
+
+How would you carry out a normal (z) test of the hypothesis that the median is zero?
+Or the mean?
+
+
+## Another sign test example: taste testing
+
+-A food product company has developed a new product, and would like to know whether it will be as popular as the current favorite product. 
+
+-The research department recruits 18 participants for taste testing. 
+
+-In the experiment, each participant tries both products in random order before giving his or her opinion. (Why random order?)
+
+-It turns out that 5 of the participants like the new product better, and the rest prefer the old one. At the 0.05 significance level, can we reject the hypothesis that the two products are equally popular?
+
+- To carry out this testing problem in R, what are the parameters in binom.test?
+
+
+## Taste testing example
+
+```{r}
+binom.test(5, 18)
+```
+-what is your conclusion?
+
+-where does the .09625 come  from: is it a one-sided or two sided?
+
+
+## Permutation test (randomization or re-randomization tests)
+
+Question: When we don't know the distribution of the test statistic, how do we  calculate a p-value?
+
+Answer: calculate all possible values of the test statistic under rearrangements of the labels on the observed data points; and find the relative location of the original test statistics in this newly generated set of values.
+
+- The only underlying assumption is:  the labels are exchangeable under the null hypothesis.
+
+## Permutation test: general procedure
+
+1. Compute a test statistic between two (or more) groups. This could be the difference between two proportions, the difference between the means of the two groups etc. 
+
+2. Now randomly shuffle the data assigned to each group.
+
+3. Measure the test statistic again on the shuffled data.
+
+4. Repeat step 2 and 3 many times.
+
+5. Look at the value of the test statistic in step 1 compared to  the test statistics from  shuffled data.
+
+## Count the number of permutations
+
+```{r}
+library(combinat)
+v = c(2,3,4)
+permn(v)
+```
+
+In general, for a sequence of $n$ distinct values, how many different permutations do we get?
+
+## Conducting permutation test through R, non-paired data
+
+Let us compare the means of two groups. We generate data from log-normal distributions with the same sample size, same mean and same standard deviation. We set random seed so that our experiment is repeatable.
+
+```{r}
+# Setup the data
+set.seed(1) 
+group1 <- round(rlnorm(200, 5)) 
+group2 <- round(rlnorm(200, 5)) 
+```
+
+## Let us calculate the difference between the means of the two groups.
+
+```{r}
+groups <- c(rep(1, length(group1)), rep(2, length(group2)))
+data <- c(group1, group2)
+ 
+diff(by(data, groups, mean))
+```
+How likely is this to have happened just by chance?
+
+## Randomly shuffle the data between the two groups
+
+```{r}
+s <- sample(groups, length(groups), replace=FALSE)
+diff(by(data, s, mean))
+```
+
+## Let us do this many times
+
+```{r}
+max.iter <- 10000
+examples <- unlist(lapply(1:max.iter, function(x) {
+  diff(by(data, sample(groups, length(groups), FALSE), mean))  
+}))
+```
+
+## Relative position
+
+```{r}
+test.diff <- diff(by(data, groups, mean))
+par(mfrow=c(1,1))
+hist(examples, col = "red", breaks = 100, main="Random Permutations", xlab="")
+abline(v = test.diff, col = "black", lwd = 4)
+```
+
+By looking at this picture, what is your conclusion?
+
+## Calculate the p-values
+
+```{r}
+# one-tailed test
+(sum(examples > test.diff) + 1) / (max.iter + 1)  
+# two-tailed test
+(sum(abs(examples) > abs(test.diff)) + 1) / (max.iter + 1)  
+```
+
+Carry out an example like the one above, but for paired data
+
+
+## Paired data: Zea Mays data
+
+- Charles Darwin and Ronald Fisher
+
+- Darwin was born in 1809 in Shrewsbury, England. At 16 went to Edinburgh University to study medicine, but did not finish. Later,he went to Cambridge University, where he received his degree studying to become a clergyman. Darwin worked as an unpaid naturalist on a five-year scientific expedition to South America 1831. His research led to his book, on the Origin of Species by Means of Natural Selection, published in 1859.
+
+- Fisher was born in East Finchley, London in 1890. He went to Cambridge University and received a degree in mathematics. Fisher had many fundamental contributions in statistics including maximum likelihood, analysis of variance, sufficiency, and was a pioneer of the design of experiments.
+
+
+## Paired data: Zea Mays data
+
+- Darwin performed extensive investigations of the effects of cross- and self-fertilization on plants. 
+
+- In the Zea Mays data set, Darwin paired 15 cross-fertilized and 15 self-fertilized seedlings and let the pairs grow in four different pots. The aim was to control different soil, watering and light conditions. After a few weeks, the stalk height of each plant was measured.
+
+- The null hypothesis is that, there is no difference between cross-fertilized and self-fertilized seedlings.
+
+## Paired data: Zea Mays data
+
+```{r}
+zea=scan(text= "188 96 168 176 153 172 177 163 146 173 186 168 177 184 96
+139 163 160 160 147 149 149 122 132 144 130 144 102 124 144")
+
+zea=matrix(zea,ncol=2)
+zea
+```
+
+## The difference vector
+```{r}
+diffz=zea[,2]-zea[,1]
+diffz
+```
+Total difference:
+
+```{r}
+sum(diffz)
+```
+
+## Fisher's argument
+
+- There are 15 differences with a total difference of -314 between the cross- and self- fertilized plants. 
+- Under the null hypothesis, the cross- and self-fertilized plants are random
+ samples from the same distribution. Thus, each difference could have appeared with positive or negative sign with equal probability.
+- There are a total of  $2^{15}= 32768$ possible arrangements of signs with the 15 differences obtained. 
+- Assuming all are equally likely, only 863 of those arrangements give differences of 314 or less, giving a probability of 2.634% for one-sided test. 
+
+## Remark
+
+-In this example, we did randomization in a  different way than in our geneal procedure. 
+
+-Indeed, we could instead pool the original measurements from both columns, and then  carry out a two sample unpaired permutation test as we did above.
+
+-This would give us $30 \choose 15$  permutations in total. However, we would have ignored the fact that the Zea Mays dataset is paired.
+
+-Is it bad thing to ignore the pairing? 

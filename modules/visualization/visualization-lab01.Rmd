@@ -1,0 +1,334 @@
+---
+title: "Visualization lab 1"
+author: "Data Science 101 Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+pacman::p_load(tidyverse, nutshell)#, ggmap)
+```
+
+The goal of this lab is to help you get familiar with the "grammar of graphics"" philosophy implemented in the ``R`` package ``ggplot2``. 
+
+The documentation for this package is available at http://docs.ggplot2.org/. 
+
+We will be going through some of the topics here:
+http://docs.ggplot2.org/
+You may want to keep the website open as a reference throughout this tutorial.
+
+Today's visualizations will explore data about births in the USA in 2006.  First, load this data.
+
+```{r dataload, tidy=FALSE}
+data(births2006.smpl)
+births.big <- births2006.smpl
+```
+
+Q: How many observations are there in this dataset?
+
+```{r}
+# add a new variable to include whether it is a weekend or not
+births.big <- births.big %>% mutate(WEEKEND=DOB_WK %in% c(1,7))
+```
+
+Q: What does the above line of code realize?
+
+```{r}
+# courser health score based on APGAR 5 score
+births.big <- births.big %>% mutate(HEALTH=ifelse(APGAR5<3.5,"CritLow",
+                                           ifelse(APGAR5>=6.5,"Normal","Low")))
+#births.big$HEALTH <- c("CritLow","Low","Normal")[(
+#  findInterval(births2006.smpl$APGAR5, c(3.5, 6.5))) + 1]
+```
+
+Q: What does function 'findInterval' do? What happen to the NAs in vector APGAR5?
+
+```{r}
+# Sometimes, we want to work with a smaller sample (just first 10000 instead of 427323)
+births.big$ESTGEST <- replace(births.big$ESTGEST, births.big$ESTGEST==99, NA)
+births.small <- births.big[1:10000, ]
+```
+
+Plot Creation and Geometries in the Grammar of Graphics
+------------------------------------------------
+
+The function ``ggplot()`` is used to construct a plot incrementally, using the ``+`` operator to add layers to the existing `ggplot` object. 
+
+This is advantageous in that the code is explicit about which layers are added and the order in which they are added. The layers that we add are geometric objects, or "geoms". 
+
+You can think of the call ``ggplot`` as taking out a piece of paper and the call ``geom_something`` draws something on the piece of paper. For example, ``geom_bar`` draws a bar plot. 
+
+The first argument in ``ggplot`` is the data that is going to be visualized. We also need to describe the aesthetics of the plot and we do this with the function ``aes()``. The aesthetics of a plot are the specifics about which variables are used to create the visualization. 
+
+This can be included in the initialization ``ggplot(data=..., aes(...))`` or in the geometric object ``geom(aes(...))``.
+
+For example, let's look at the number of births on each day of the week in our sample data. First set up our plot with the data ``births``.
+```{r birth_init_ggplot}
+ppp <- ggplot(births.big)  # plot with a subset of the data (faster)
+```
+
+Note that this doesn't actually plot anything (just like if you wrote ``junk <- 7`` doesn't output anything until you write ``junk``. 
+
+Q: What happens here when you type ``ppp``?
+
+The number of births per day of the week can be shown easily in a barplot, so let's use that. To create a geometric object layer for a barplot we use the function ``geom_bar()``. 
+
+In order for it to know what part of the data we want to actually plot, we need to give an aesthetic. We can do this by declaring the aesthetic for the x-axis is the day of the week of the birth. The column ``DOB_WK`` gives the day of the week that each birth happened as a numeric value 1 (Sunday) through 7 (Saturday). 
+
+We can tell ``R`` that this is actually a factor variable by putting the variable name in the function ``factor()``. Putting this all together, we get ``geom_bar(aes(x=factor(DOB_WK))``. Finally, to draw this layer on top of the initialized graph, we will add the geometric object layer with the ``+`` operator. 
+```{r birth_wk_hist}
+ppp + geom_bar(aes(x=factor(DOB_WK)))
+```
+
+Doctors are able to delay birth with anti-contraction medications or labor suppressors called tocolytics. That might be one reason we see fewer births on day 1 of the week (Sunday) and day 7 (Saturday).
+
+We can get further information from this geom if we add more aesthetics. For example, maybe we can fill each bar with different colors corresponding to what type of birth it was ("C-section", "Vaginal", or "Unknown"). 
+
+We can do this by just including another ``aes`` in the geometric object. Start with the same initialization, but add a geometric object with the x-axis and also fill color defined.
+
+```{r birth_wk_hist_color}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC))
+```
+
+When we made that plot, we used a default value for the ``position`` argument of the barplot geometric object. We could have rewritten the above command as follows.
+
+```{r birth_wk_hist_stack, eval=FALSE}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC), position="stack")
+```
+
+Another option is to use the ``position="dodge"``. Note that this is an argument to ``geom_bar`` and not to ``aes``.
+
+```{r birth_wk_hist_dodge}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC), position="dodge")
+```
+
+Now it's a bit clearer to see that about 1/2 as many C-sections on an average weekend as there are on an average weekday, whereas there are about 3/4 as many vaginal births on an average weekend as there are on an average weekday.
+
+Facets in the Grammar of Graphics
+---------------------------------
+
+Let's continue looking at the birth data on a day to day basis.  We might conjecture that older women are less likely to take a tocolytic since they are more likely to have had other complications already. One way we can do this is to "facet" the graph and display day of the week versus women's age.
+
+First, let's make a histogram of all women's ages to get an idea of what this overall distribution looks like.
+
+```{r birth_age_hist}
+ppp + geom_histogram(aes(x=MAGER), binwidth=1)
+```
+
+We use the argument ``binwidth=1`` to say the width of the bins in this histogram.
+
+Using the grammar of graphics, it is easy to facet this single graph to make multiple graphs along a dimension. 
+
+In this case, we're interested in breaking this up along the dimension of day of birth ``DOB_WK``. We will add this facet with the command  ``facet_grid`` or ``facet_wrap``. 
+
+In ``facet_grid``, the argument we use is a formula with the rows (of the tabular display) on the LHS and the columns (of the tabular display) on the RHS. A formula is separated in ``R`` with the tilde character ``~``.  A dot in the formula is used to indicate there should be no faceting on this dimension (either row or column). 
+
+The formula can also be provided as a string instead of a classical formula object. In ``facet_wrap``, we have the same sort of argument, but we only include a RHS of the formula. We'll use both of them in an example so you can see the difference.
+
+Now let's look at this faceting on that variable. Again, we will use the ``+`` operator. Here, we also see that we can save the geometric objects in the plot and just add facets at the end.
+
+```{r birth_age_facet}
+ppp1 <- ppp + geom_histogram(aes(x=MAGER, fill=DMETH_REC), binwidth=1)
+```
+
+```{r}
+ppp1 + facet_wrap(DOB_WK ~ SEX)
+```
+
+```{r}
+ppp1 + facet_grid(DOB_WK ~ SEX)
+```
+
+What is the differences between ``facet_wrap`` and ``facet_grid``?
+
+Here is an interesting perspective of the data.
+
+```{r birth_age_facet_color, tidy=FALSE}
+# exclude the Unknown delivery method data
+ppp.big <- ggplot(subset(births.big, DMETH_REC %in% c("C-section","Vaginal"))) 
+ppp.big + 
+  geom_histogram(aes(x=MAGER, fill=factor(TBO_REC)), binwidth=1) +
+  facet_grid(WEEKEND ~ DMETH_REC, scale="free_y", drop=TRUE) +
+  geom_vline(xintercept=seq(15,45,by=5), alpha=0.2, color="white") +
+  labs(title="Births in USA 2006", fill="Birth\nOrder")
+```
+
+Finally, let's look for factors that influence the health of the baby, measured by the APGAR5 score (higher=healthier).
+
+Low birthweight is often associated with poor outcomes and health. We can visualize the relationship between APGAR5 and birthweight.
+
+```{r}
+ggplot(births.big,aes(x=factor(APGAR5),y=DBWT)) + geom_boxplot()
+```
+
+Low birthweight does appear to be associated with low APGAR5, though there is considerable variation at the lower score values. For higher values of APGAR5 (or where it is NA), the distribution is considerably tighter, but there are also a lot of outliers. Let's look at the distribution of APGAR5.
+
+```{r}
+ggplot(births.big,aes(x=factor(APGAR5))) + geom_bar()
+```
+
+It wasn't obvious in the boxplot, but the low APGAR5 scores represented proportionally little data. Let's look at APGAR5 again, this time compared to maternal age.
+
+```{r}
+ggplot(births.big,aes(x=factor(APGAR5),y=MAGER)) + geom_boxplot()
+```
+
+It's not clear there is any relationship here. 
+
+"Appendix" on another plot type: density plots and violins. A density plot is like a "smoothed" histogram
+
+```{r}
+ggplot(births.big,aes(x=DBWT)) + geom_density()
+```
+
+Compare this to a histogram
+```{r}
+ggplot(births.big,aes(x=DBWT)) + geom_histogram()
+```
+
+The information displayed is similar...we can think of the density plot as what we get from the histogram as the bin widths grow small, assuming that the function is smooth. 
+
+An alternative to the boxplot is the "violin" plot, which is essentially a density plot turned on its side, and reflected about the vertical axis.
+
+```{r}
+ggplot(births.big,aes(x=factor(APGAR5),y=DBWT)) + geom_violin()
+```
+
+The information is similar to a boxplot, but it is easier to see the shape of the distribution. On the other hand, we lose the direct interpretation of the extent of the box and whiskers.
+
+## Using data from multiple tables
+
+Sometimes we need to use data from multiple data frames or tibbles to make a visualization. The simplest case in which this occurs is when there is a special "threshold" or value of a variable that we may want to highlight, either through added points, lines, or other geometries. 
+
+The example we'll show here is somewhat artificial (there are other ways to do this that don't require two tibbles), but it gets the point across. Suppose we calculate the mean birth weight by maternal age.
+
+```{r}
+mean.bw <- births.big %>% group_by(MAGER) %>% summarise(DBWT=mean(DBWT,na.rm=TRUE))
+```
+
+Now, we plot age against birthweight again using a violin.
+
+```{r}
+plt <- ggplot(births.big,aes(x=factor(MAGER),y=DBWT)) + geom_violin() +
+  theme(axis.text.x = element_text(angle=90))
+plt
+```
+
+One of the shortcomings of the violin was that it didn't explicitly show any summary statistics of the data, the way that the boxplot did. However, we can add such summaries, and we can make them appear as we like. For example, we can add points representing mean birthweight by maternal age.
+
+```{r}
+plt + geom_point(data=mean.bw,aes(x=factor(MAGER),y=DBWT),col=2)
+```
+
+If we also wanted the first and third quartiles as points, we could do that as well.
+
+```{r}
+qtile.bw <- births.big %>% group_by(MAGER) %>% summarise(DBWT.Q1=quantile(DBWT,.25,na.rm=TRUE),
+DBWT.Q3=quantile(DBWT,.75,na.rm=TRUE))
+
+qtile.bw <- qtile.bw %>% gather(BWquantile,value,-MAGER)
+```
+
+Now add both the mean and 1st and 3rd quartiles to the plot.
+
+```{r}
+plt + geom_point(data=mean.bw,aes(x=factor(MAGER),y=DBWT),col=2) +
+  geom_point(data=qtile.bw,aes(x=factor(MAGER),y=value),col=4)
+```
+
+## More on birthweight
+
+Just a few more visualizations having to do with birthweight. How does birthweight relate to plural births?
+
+```{r}
+ggplot(births.big,aes(x=factor(DPLURAL),y=DBWT)) + geom_boxplot() +
+  theme(axis.text.x=element_text(angle=90))
+```
+
+Unsurprising, though the magnitude of the effect is perhaps larger than I would have thought. How about length of gestation (should be very related).
+
+```{r}
+ggplot(births.big,aes(x=ESTGEST,y=DBWT)) + geom_point(alpha=0.2) +
+  geom_smooth()
+```
+
+Do we "believe" the smoothing for very high and low gestational periods?
+
+## A new dataset
+
+Data on San Francisco home sales for the period between 2/13/2008 and 7/14/2009
+```{r}
+data(sanfrancisco.home.sales)
+sf.home <- sanfrancisco.home.sales
+```
+
+What's in this?
+```{r}
+str(sf.home)
+```
+
+Let's look at price by neighborhood.
+```{r}
+ggplot(sf.home,aes(x=factor(neighborhood),y=price)) + geom_violin() +
+  theme(axis.text.x=element_text(angle=90))
+```
+
+The heavy tails make it hard to see much. One thing we haven't considered is changing scales. We could use a log scale here for price.
+
+```{r}
+ggplot(sf.home,aes(x=factor(neighborhood),y=price)) + geom_violin() +
+  theme(axis.text.x=element_text(angle=90)) + scale_y_log10() 
+```
+
+That does look nicer. Boxplots also can be better when tails are heavy, since the extent of the box and whiskers is less sensitive to very large values.
+
+```{r}
+ggplot(sf.home,aes(x=factor(neighborhood),y=price)) + geom_boxplot() +
+  theme(axis.text.x=element_text(angle=90))
+```
+
+This is nice, since we can really see all of the very expensive sales.
+
+Of course, we might want to make some kind of map visualization. We'll use ggmap.
+
+```{r}
+#map.sf <- get_map(location="San Francisco",source="google",maptype="roadmap",crop=T,zoom=12)
+```
+
+ggmap usually recognizes place names and gives us a reasonable map to work with. Let's check this one out.
+
+```{r}
+#plt.sales <- ggmap(map.sf)
+#plt.sales
+```
+
+Not bad, though there is some wasted space on the top right. I ignore this for now. Let's add the location of all of the sales onto the map.
+
+```{r}
+#plt.sales + geom_point(data=sf.home,aes(x=longitude,y=latitude),alpha=.3)
+```
+
+The few points with high density of sales are probably big condo buildings selling a bunch of units. 
+
+This plot is something like geom_smooth, but in 2D.
+
+```{r}
+#plt.sales <- ggmap(map.sf)
+#plt.sales + stat_density2d(aes(x = longitude, y = latitude, fill = ..level.., alpha = ..level..),
+#bins = 5, geom = "polygon",
+#data = sf.home) + scale_fill_gradient(low = "black", high = "red")
+```
+
+We can visualize price overlaid on the location of sales using color and size.
+
+```{r}
+#plt.sales + geom_point(data=sf.home,aes(x=longitude,y=latitude,col=price-min(price),size=price-min(price)),alpha=0.2)
+```
+
+This is kind of busy. We'd like to do a bit better here by spatially smoothing the price variable. However, that visualization is a bit tough, 
+and often requires some modeling.

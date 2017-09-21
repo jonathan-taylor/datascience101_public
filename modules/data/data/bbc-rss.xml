@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xsl" href="/shared/bsp/xsl/rss/nolsol.xsl"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+    <channel>
+        <title><![CDATA[BBC News - Home]]></title>
+        <description><![CDATA[BBC News - Home]]></description>
+        <link>http://www.bbc.co.uk/news/</link>
+        <image>
+            <url>http://news.bbcimg.co.uk/nol/shared/img/bbc_news_120x60.gif</url>
+            <title>BBC News - Home</title>
+            <link>http://www.bbc.co.uk/news/</link>
+        </image>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Tue, 27 Sep 2016 20:50:20 GMT</lastBuildDate>
+        <copyright><![CDATA[Copyright: (C) British Broadcasting Corporation, see http://news.bbc.co.uk/2/hi/help/rss/4498287.stm for terms and conditions of reuse.]]></copyright>
+        <language><![CDATA[en-gb]]></language>
+        <ttl>15</ttl>
+        <item>
+            <title><![CDATA[Presidential debate: Trump says he might 'hit Hillary harder']]></title>
+            <description><![CDATA[After the first US presidential debate, Donald Trump complains about moderator Lester Holt and says he might be tougher on Hillary Clinton next time.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37486320</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37486320</guid>
+            <pubDate>Tue, 27 Sep 2016 20:47:01 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/16134/production/_91402409_hi035556582.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Reality Check - who was fibbing? ]]></title>
+            <description><![CDATA[Fact checking the first presidential debate between Hillary Clinton and Donald Trump.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37480990</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37480990</guid>
+            <pubDate>Tue, 27 Sep 2016 16:13:12 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/11DF9/production/_91390237_check_afp976.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Who is 'Miss Housekeeping'?]]></title>
+            <description><![CDATA[Former Miss Universe Alicia Machado claims Donald Trump, who owned the beauty contest, called her "Miss Piggy" after she gained weight.]]></description>
+            <link>http://www.bbc.co.uk/news/world-us-canada-37488060</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-us-canada-37488060</guid>
+            <pubDate>Tue, 27 Sep 2016 18:20:42 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/AB17/production/_91399734_c745a7a2-8fee-4acf-8e1c-d0ec6e80005c.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Elon Musk outlines Mars colony vision]]></title>
+            <description><![CDATA[Entrepreneur Elon Musk outlines his vision for establishing a human colony on Mars for people that can afford a $200,000 ticket price.]]></description>
+            <link>http://www.bbc.co.uk/news/science-environment-37486372</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/science-environment-37486372</guid>
+            <pubDate>Tue, 27 Sep 2016 17:12:15 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/979A/production/_91401883_mediaitem91401881.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Sam Allardyce: England manager leaves after one match in charge]]></title>
+            <description><![CDATA[Sam Allardyce leaves his post as England manager by mutual agreement with the FA after one match and 67 days in charge.]]></description>
+            <link>http://www.bbc.co.uk/sport/football/37483344</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/sport/football/37483344</guid>
+            <pubDate>Tue, 27 Sep 2016 20:43:02 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/AAB3/production/_91399634_lnp_allardyce_pma_01.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Porsche-driving lawyer Nathan DeSai was Houston gunman]]></title>
+            <description><![CDATA[A "disgruntled" Porsche-driving lawyer wearing Nazi emblems has been named by police as the gunman who opened fire on a Texas street, injuring nine people.]]></description>
+            <link>http://www.bbc.co.uk/news/world-us-canada-37491076</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-us-canada-37491076</guid>
+            <pubDate>Tue, 27 Sep 2016 20:30:42 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/B48C/production/_91402264_88a79c7d-6ab3-4097-979f-3a0fe2cad1bb.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Syria conflict: Aleppo evacuation corridors needed, WHO says]]></title>
+            <description><![CDATA[The World Health Organisation wants safe routes to be set up immediately to evacuate sick and wounded Syrians from besieged parts of Aleppo.]]></description>
+            <link>http://www.bbc.co.uk/news/world-middle-east-37482693</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-middle-east-37482693</guid>
+            <pubDate>Tue, 27 Sep 2016 20:31:47 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/6DEB/production/_91393182_mediaitem91393181.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Louisiana under-21 strippers sue for right to dance]]></title>
+            <description><![CDATA[Strippers in Louisiana are suing the US state, claiming a new law banning dancers under the age of 21 from working hinders freedom of expression.]]></description>
+            <link>http://www.bbc.co.uk/news/world-us-canada-37490538</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-us-canada-37490538</guid>
+            <pubDate>Tue, 27 Sep 2016 18:26:20 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/EE52/production/_91401016_gettyimages-98302221.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Blast in Bronx 'drug lab' kills New York firefighter]]></title>
+            <description><![CDATA[An explosion at a drug lab inside a home in New York City kills at least one firefighter, authorities say.]]></description>
+            <link>http://www.bbc.co.uk/news/world-us-canada-37485310</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-us-canada-37485310</guid>
+            <pubDate>Tue, 27 Sep 2016 15:23:34 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/8709/production/_91396543_mediaitem91396542.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[First 'three person baby' born using new method]]></title>
+            <description><![CDATA[The world's first baby has been born using a new "three person" fertility technique, heralding a new era in medicine, say experts.]]></description>
+            <link>http://www.bbc.co.uk/news/health-37485263</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/health-37485263</guid>
+            <pubDate>Tue, 27 Sep 2016 17:13:22 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/AD0C/production/_91400344_hi035552031.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[When Tom Hanks runs into your wedding photos]]></title>
+            <description><![CDATA[The Oscar-winning actor literally runs into a happy couple in Central Park, takes a selfie, and offers his blessing.]]></description>
+            <link>http://www.bbc.co.uk/news/entertainment-arts-37487360</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/entertainment-arts-37487360</guid>
+            <pubDate>Tue, 27 Sep 2016 17:33:22 GMT</pubDate>
+            <media:thumbnail width="548" height="308" url="http://c.files.bbci.co.uk/15B93/production/_91397988_mediaitem91397987.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Sexism row grips German politics and shakes CDU]]></title>
+            <description><![CDATA[German CDU politician Jenna Behrends sparks a furore about sexism after a male colleague called her a "sweet mouse".]]></description>
+            <link>http://www.bbc.co.uk/news/world-europe-37482029</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-europe-37482029</guid>
+            <pubDate>Tue, 27 Sep 2016 12:16:53 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/14577/production/_91391338_mediaitem91391337.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Theme park fined for rollercoaster crash]]></title>
+            <description><![CDATA[Alton Towers operator Merlin Attractions is fined £5m over the Smiler rollercoaster crash.]]></description>
+            <link>http://www.bbc.co.uk/news/uk-england-stoke-staffordshire-37481825</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/uk-england-stoke-staffordshire-37481825</guid>
+            <pubDate>Tue, 27 Sep 2016 12:26:14 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/EB9F/production/_91391306_court.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[TB drug designed for children launched in Kenya]]></title>
+            <description><![CDATA[Kenya launches the world's first child-friendly drug, raising hopes for thousands affected by the world's deadliest infectious disease.]]></description>
+            <link>http://www.bbc.co.uk/news/world-africa-37485202</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-africa-37485202</guid>
+            <pubDate>Tue, 27 Sep 2016 16:50:06 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/ACD9/production/_91394244_tb2afp.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Saudi Arabia unveils first public sector pay cuts]]></title>
+            <description><![CDATA[Saudi Arabia unveils pay cuts for government employees for the first time, as it attempts to further rein in spending at a time of low oil prices.]]></description>
+            <link>http://www.bbc.co.uk/news/world-middle-east-37482690</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-middle-east-37482690</guid>
+            <pubDate>Tue, 27 Sep 2016 16:30:47 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/B823/production/_91393174_mediaitem91393173.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Key moments from the US presidential debate]]></title>
+            <description><![CDATA[Here are the key moments from the presidential debate between Hillary Clinton and Donald Trump.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37481535</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37481535</guid>
+            <pubDate>Tue, 27 Sep 2016 09:15:23 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/C93F/production/_91391515_mediaitem91391513.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Girl rebukes Charlotte mayor over police shootings]]></title>
+            <description><![CDATA[Girl rebukes Charlotte mayor over police shootings]]></description>
+            <link>http://www.bbc.co.uk/news/world-us-canada-37491074</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-us-canada-37491074</guid>
+            <pubDate>Tue, 27 Sep 2016 19:24:12 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/2652/production/_91401890_p0497vh7.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Drone footage of Aleppo under siege]]></title>
+            <description><![CDATA[In one part of rebel-held Aleppo, nearly all families have left, the ones who remain face starvation.]]></description>
+            <link>http://www.bbc.co.uk/news/world-middle-east-37489404</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-middle-east-37489404</guid>
+            <pubDate>Tue, 27 Sep 2016 17:41:21 GMT</pubDate>
+            <media:thumbnail width="1920" height="1080" url="http://c.files.bbci.co.uk/FA00/production/_91400046_aleppostill.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Eels swim through flooded hospital]]></title>
+            <description><![CDATA[Heavy rain and flooding has left hospital staff chasing eels in the corridors of a hospital in Vietnam.]]></description>
+            <link>http://www.bbc.co.uk/news/world-asia-37489645</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-asia-37489645</guid>
+            <pubDate>Tue, 27 Sep 2016 17:06:24 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/E285/production/_91398975_p04979xl.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[When Tom Hanks photobombs your wedding]]></title>
+            <description><![CDATA[The Oscar-winning actor literally runs into a happy couple in Central Park, takes a selfie, and offers his blessing.]]></description>
+            <link>http://www.bbc.co.uk/news/entertainment-arts-37487365</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/entertainment-arts-37487365</guid>
+            <pubDate>Tue, 27 Sep 2016 17:17:10 GMT</pubDate>
+            <media:thumbnail width="640" height="360" url="http://c.files.bbci.co.uk/12173/production/_91399047_hanks.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[What China made of the US debate]]></title>
+            <description><![CDATA[Chinese people who watched the debate between presidential candidates Hillary Clinton and Donald Trump tell the BBC who they thought won and why.]]></description>
+            <link>http://www.bbc.co.uk/news/world-asia-china-37487400</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-asia-china-37487400</guid>
+            <pubDate>Tue, 27 Sep 2016 14:35:48 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/11737/production/_91397417_p0496rj2.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Huge blue topaz stone on loan to Natural History Museum]]></title>
+            <description><![CDATA[A blue topaz stone, thought to be the largest-ever, is to go on permanent loan to the Natural History Museum in London.]]></description>
+            <link>http://www.bbc.co.uk/news/uk-37487475</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/uk-37487475</guid>
+            <pubDate>Tue, 27 Sep 2016 19:12:43 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/1211A/production/_91401047_p0497t6q.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Americans watch the Clinton-Trump presidential debate]]></title>
+            <description><![CDATA[People watching in Seattle react to the Clinton-Trump presidential debate.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37484941</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37484941</guid>
+            <pubDate>Tue, 27 Sep 2016 11:07:14 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/17015/production/_91392249_mediaitem91392248.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[What did black voters make of US presidential debate?]]></title>
+            <description><![CDATA[We asked African-American voters in Harlem what they made of the US presidential debate.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37481531</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37481531</guid>
+            <pubDate>Tue, 27 Sep 2016 08:16:35 GMT</pubDate>
+            <media:thumbnail width="640" height="360" url="http://c.files.bbci.co.uk/A8DD/production/_91392234_mediaitem91392232.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Debate dissected]]></title>
+            <description><![CDATA[The first debate was arguably the key event of the US presidential race so far: and we have plenty of analysis all here in one place.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37485301</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37485301</guid>
+            <pubDate>Tue, 27 Sep 2016 15:52:52 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/14A59/production/_91396548_mediaitem91396547.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Ahmad al-Faqi al-Mahdi: The vandal of Timbuktu]]></title>
+            <description><![CDATA[Ahmad al-Faqi al-Mahdi has pleaded guilty to destroying sacred sites in Timbuktu, Mali, in the first case concerning cultural artefacts at the International Criminal Court (ICC).]]></description>
+            <link>http://www.bbc.co.uk/news/world-africa-37438360</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-africa-37438360</guid>
+            <pubDate>Mon, 26 Sep 2016 23:05:52 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/35B4/production/_91384731_sidiyahiacomposite.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Disposable women]]></title>
+            <description><![CDATA[Women in South Asia are being used and abandoned by the British Asian men who marry them. Should their treatment be classed as a form of domestic violence?]]></description>
+            <link>http://www.bbc.co.uk/news/uk-37472233</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/uk-37472233</guid>
+            <pubDate>Mon, 26 Sep 2016 22:56:02 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/5364/production/_91384312_henna2.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Dreams and disasters]]></title>
+            <description><![CDATA[A Japanese animated film has earned more than 10bn yen in just 28 days since its release. But what exactly is it about this film that has been drawing in the crowds?]]></description>
+            <link>http://www.bbc.co.uk/news/world-asia-37469662</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-asia-37469662</guid>
+            <pubDate>Tue, 27 Sep 2016 04:12:24 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/52CD/production/_91379112_eaddaa52-ba97-4aff-b3cb-b540e46e87b1.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA['People are dying']]></title>
+            <description><![CDATA[The lucrative counterfeit drugs trade causes hundreds of thousands of deaths every year. Technology can help fight it, but are big pharma and governments doing enough?]]></description>
+            <link>http://www.bbc.co.uk/news/business-37470667</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/business-37470667</guid>
+            <pubDate>Mon, 26 Sep 2016 23:04:42 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/1D2C/production/_91386470_hi032006663.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Cheek by jowl]]></title>
+            <description><![CDATA[Colombia-based photographer Nicolas Bedoya, a co-founder of photojournalism collective Vela Colectivo, visits an area in Colombia's Antioquia province where rebels will gather to disarm following the peace agreement signed on 26 September between the Farc and the Colombian government.]]></description>
+            <link>http://www.bbc.co.uk/news/world-latin-america-37472891</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-latin-america-37472891</guid>
+            <pubDate>Mon, 26 Sep 2016 23:05:20 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/812C/production/_91386033_santa_lucia-1.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Grim odyssey]]></title>
+            <description><![CDATA[Asylum seekers - mainly Afghan and Pakistani men - leave Austria for Italy, but they face bleak conditions in the city of Udine, Bethany Bell reports.]]></description>
+            <link>http://www.bbc.co.uk/news/world-europe-37475086</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-europe-37475086</guid>
+            <pubDate>Mon, 26 Sep 2016 23:25:31 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/11132/production/_91383996_mediaitem91383995.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Caught in the crossfire]]></title>
+            <description><![CDATA[As Syria's government tries to recapture all of Aleppo, we ask why are children are so badly affected in the battle for the northern city.]]></description>
+            <link>http://www.bbc.co.uk/news/world-middle-east-37472975</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-middle-east-37472975</guid>
+            <pubDate>Mon, 26 Sep 2016 14:27:03 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/75C4/production/_91384103_90048cdf-a1ba-4106-9b64-fdb317c25734.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Rob Cameron: Battle of words over 'EU army']]></title>
+            <description><![CDATA[The idea of beefing up a EU military prompts a warning from the UK's defence secretary but reassurance from Germany and Nato.]]></description>
+            <link>http://www.bbc.co.uk/news/world-europe-37482773</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-europe-37482773</guid>
+            <pubDate>Tue, 27 Sep 2016 16:40:47 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/F135/production/_91394716_gettyimages-489614581.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Where the US candidates stand]]></title>
+            <description><![CDATA[This election campaign has so far been driven more by personality clashes than differences in policy. But what are the key issues and where do Hillary Clinton and Donald Trump stand?]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37468751</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37468751</guid>
+            <pubDate>Tue, 27 Sep 2016 10:49:39 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/5779/production/_89639322_clinton_afp_trump_afp.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Presidential debate 2016: US media on who won Clinton-Trump clash]]></title>
+            <description><![CDATA[The US media gives their verdict on who won the first debate, with most awarding victory to Democratic candidate Hillary Clinton.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37482512</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37482512</guid>
+            <pubDate>Tue, 27 Sep 2016 10:02:40 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/131F9/production/_91392387_c7217307-81aa-46b9-8db4-1486889116b2.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[How did moderator Lester Holt do?]]></title>
+            <description><![CDATA[NBC's Lester Holt moderated the first presidential debate after a row about how much fact-checking a moderator should do. So how did he do?]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37475696</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37475696</guid>
+            <pubDate>Tue, 27 Sep 2016 12:49:14 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/E4A5/production/_91333585_4ee999db-ae4c-4c4c-9bda-cb3090409e4b.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[The six lives of Boko Haram's leader]]></title>
+            <description><![CDATA[Abubakar Shekau, leader of Islamist group Boko Haram has once more released a video to reject reports that he had been killed. He has been reported dead five times already.]]></description>
+            <link>http://www.bbc.co.uk/news/world-africa-37476453</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-africa-37476453</guid>
+            <pubDate>Mon, 26 Sep 2016 23:31:39 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/F697/production/_91372136_mediaitem91372131.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[How hawk became dove in Colombia]]></title>
+            <description><![CDATA[A profile of Juan Manuel Santos, the Colombian President who negotiated a peace deal with the Farc rebel group to put an end to more than 50 years of conflict.]]></description>
+            <link>http://www.bbc.co.uk/news/world-latin-america-37445224</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-latin-america-37445224</guid>
+            <pubDate>Mon, 26 Sep 2016 10:31:44 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/6987/production/_91351072_gettyimages-458042754.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Journalist Noor Tagouri to become first Muslim to appear in Playboy with a hijab]]></title>
+            <description><![CDATA[American journalist Noor Tagouri is to become the first Muslim to appear in Playboy magazine wearing a hijab.]]></description>
+            <link>http://www.bbc.co.uk/newsbeat/articles/37483996</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/newsbeat/articles/37483996</guid>
+            <pubDate>Tue, 27 Sep 2016 12:17:23 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/9375/production/_91394773_noor.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Japanese ad showing girl turning into an eel gets pulled]]></title>
+            <description><![CDATA[A Japanese ad to promote sustainable fishing which showed a teenage girl turning into an eel is pulled after being called sexist and "perverted".]]></description>
+            <link>http://www.bbc.co.uk/news/world-asia-37481107</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-asia-37481107</guid>
+            <pubDate>Tue, 27 Sep 2016 09:48:14 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/BB2F/production/_91391974_de191197-f7f3-46d7-84fd-4864c0be73c2.png"/>
+        </item>
+        <item>
+            <title><![CDATA[Animals in the frame]]></title>
+            <description><![CDATA[A selection of the winners and finalists in he ZSL Animal Photography Prize.]]></description>
+            <link>http://www.bbc.co.uk/news/in-pictures-37376723</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/in-pictures-37376723</guid>
+            <pubDate>Mon, 26 Sep 2016 00:41:16 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/7AE5/production/_91216413_judgeschoiceandadultcat3winnerreadysetgo-cpratikpradhan.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Your pictures]]></title>
+            <description><![CDATA[Each week, we publish a gallery of readers' pictures on a set theme. This week, we asked for your pictures on the theme of "dance".]]></description>
+            <link>http://www.bbc.co.uk/news/in-pictures-37450359</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/in-pictures-37450359</guid>
+            <pubDate>Fri, 23 Sep 2016 09:58:54 GMT</pubDate>
+            <media:thumbnail width="777" height="437" url="http://c.files.bbci.co.uk/1225/production/_91354640_mediaitem91354637.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Week in pictures: 17-23 September 2016]]></title>
+            <description><![CDATA[A selection of the best news photographs from around the world, taken over the past week.]]></description>
+            <link>http://www.bbc.co.uk/news/in-pictures-37451272</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/in-pictures-37451272</guid>
+            <pubDate>Sat, 24 Sep 2016 00:16:24 GMT</pubDate>
+            <media:thumbnail width="967" height="544" url="http://c.files.bbci.co.uk/6C11/production/_91356672_92d53a5c-e247-4134-a364-167f3e93c43c.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Eternal flames]]></title>
+            <description><![CDATA[Indian photographer Ronny Sen is awarded the second annual Getty Images Instagram grant for his work on a coal town in India where underground fires have burned for more than 100 years.]]></description>
+            <link>http://www.bbc.co.uk/news/world-asia-india-37426714</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-asia-india-37426714</guid>
+            <pubDate>Wed, 21 Sep 2016 06:25:22 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/F692/production/_91322136_ronny-sen-jharia-the-end-08.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Africa's top shots: 16-22 September 2016]]></title>
+            <description><![CDATA[A selection of the best photos from across Africa this week.]]></description>
+            <link>http://www.bbc.co.uk/news/world-africa-37442852</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/world-africa-37442852</guid>
+            <pubDate>Fri, 23 Sep 2016 11:17:40 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/360B/production/_91353831_rain.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Sam Allardyce: England a laughing stock - Alan Shearer]]></title>
+            <description><![CDATA[England are the "laughing stock of world football" following Sam Allardyce's exit after just 67 days in charge, says ex-captain Alan Shearer.]]></description>
+            <link>http://www.bbc.co.uk/sport/football/37490396</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/sport/football/37490396</guid>
+            <pubDate>Tue, 27 Sep 2016 20:49:46 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/9998/production/_91402393_alan_shearer_getty.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Chris Froome: TUE system 'open to abuse' and athletes must take responsibility]]></title>
+            <description><![CDATA[Three-time Tour de France winner Chris Froome says the TUE system is "open to abuse" and athletes must not "push the boundaries of the rules".]]></description>
+            <link>http://www.bbc.co.uk/sport/cycling/37482568</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/sport/cycling/37482568</guid>
+            <pubDate>Tue, 27 Sep 2016 13:16:14 GMT</pubDate>
+            <media:thumbnail width="1024" height="576" url="http://c.files.bbci.co.uk/A293/production/_91391614_froome_index_getty.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Did Trump use the word ‘bigly’?]]></title>
+            <description><![CDATA[The Republican candidate appeared to use an unusual adverb in his debate against Hillary Clinton. Or did he?]]></description>
+            <link>http://www.bbc.co.uk/news/magazine-37483869</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/magazine-37483869</guid>
+            <pubDate>Tue, 27 Sep 2016 11:56:02 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/E843/production/_91395495_trump_ap.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Did Trump's interruptions backfire?]]></title>
+            <description><![CDATA[Jessica Lussenhop in Washington DC looks at how gender featured in the first debate between Donald Trump and Hillary Clinton.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37481754</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37481754</guid>
+            <pubDate>Tue, 27 Sep 2016 08:19:15 GMT</pubDate>
+            <media:thumbnail width="2048" height="1152" url="http://c.files.bbci.co.uk/6CAB/production/_91391872_gettyimages-610602458.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Five Twitter takeaways]]></title>
+            <description><![CDATA[Huge interest in the first presidential debate was reflected in a phenomenal amount of discussion online.]]></description>
+            <link>http://www.bbc.co.uk/news/blogs-trending-37472503</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/blogs-trending-37472503</guid>
+            <pubDate>Tue, 27 Sep 2016 05:28:13 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/1387E/production/_91389997_gettyimages-610602712.jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Who's ahead in the polls?]]></title>
+            <description><![CDATA[Follow the opinion polls as Donald Trump and Hillary Clinton go to head-to-head in the run up to the US election on 8 November.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37450661</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37450661</guid>
+            <pubDate>Tue, 27 Sep 2016 01:00:12 GMT</pubDate>
+            <media:thumbnail width="624" height="351" url="http://c.files.bbci.co.uk/E3C4/production/_91380385_us_election_2016_polltracker_online_promo.png"/>
+        </item>
+        <item>
+            <title><![CDATA[A-Z guide to political jargon]]></title>
+            <description><![CDATA[Use our A-Z guide to find out more about some of the well-used but often misunderstood terms in US politics.]]></description>
+            <link>http://www.bbc.co.uk/news/election-us-2016-37385625</link>
+            <guid isPermaLink="true">http://www.bbc.co.uk/news/election-us-2016-37385625</guid>
+            <pubDate>Tue, 20 Sep 2016 17:41:19 GMT</pubDate>
+            <media:thumbnail width="976" height="549" url="http://c.files.bbci.co.uk/EFC3/production/_91297316_us_glossary_promo.png"/>
+        </item>
+    </channel>
+</rss>

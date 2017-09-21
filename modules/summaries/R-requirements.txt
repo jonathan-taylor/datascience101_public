@@ -1,0 +1,8 @@
+vcd
+devtools
+ggplot2
+reshape2
+knitr
+kernlab
+ISLR
+reldist

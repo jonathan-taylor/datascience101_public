@@ -1,0 +1,272 @@
+---
+title: "Sampling variability"
+author: "Data Science Team"
+output: 
+  beamer_presentation:
+    fig_caption: false
+    fig_width: 3
+---
+
+```{r setup,include=F}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="pdf", fig.align="center",fig.width=4.5,fig.height=3.3,out.width ='.85\\linewidth')
+```
+
+## What we have learned so far
+
+- Often the data is a sample from a population and we want to use it to learn something about this bigger population
+
+- A summary of the data is a reasonable estimate for the corresponding summary of the population (as the sample size grows bigger, the sample summary becomes very close to the population value)
+
+- When the sample size is limited, there is a considerable variability of sample summaries
+
+- We can use the Bootstrap to learn about the variability of sample summaries using one sample only
+
+## Looking back on the examples we looked at
+
+```{r,echo=FALSE,include=FALSE}
+library(readr)
+Stanford <- read_delim("./data/Stanford.txt", 
+    "\t", escape_double = FALSE, trim_ws = TRUE)
+Stanford<-Stanford[,c(1,3)]
+names(Stanford)<-c("Race/Ethnicity","Number")
+Stanford<-Stanford[-10,]
+UGRace<-rep(Stanford$"Race/Ethnicity",Stanford$Number)
+```
+
+```{r,echo=FALSE,include=FALSE}
+ssize<-100
+B<-1000
+
+SamplePropH<-NULL
+for(i in 1:B)
+{
+observation<-sample(UGRace,ssize,replace=FALSE)
+SamplePropH<-c(SamplePropH,
+  sum(observation=="Hispanic/Latino")/ssize)
+}
+```
+
+```{r,echo=FALSE,include=FALSE}
+values = c("00", 0:36)
+play<-sample(values,1)
+red_values = c( 1,  3,  5,  7,  9,  12, 14, 16, 18,
+               21, 23,  25, 27, 28, 30, 32, 34,  36)
+red_bet = function(spin_value) {
+    return(spin_value %in% red_values)}
+
+ssize2<-100
+B<-1000
+x<-NULL
+y<-NULL
+for(i in 1:B)
+{
+y<-c(y,mean(red_bet(sample(values, ssize2, replace=TRUE))))
+}
+```
+ 
+```{r,echo=FALSE,include=FALSE}
+ ssize<-50
+B<-1000
+smean<-NULL
+for(i in 1:B)
+{
+      X<-runif(ssize,min=50,max=100)
+      smean<-c(smean,mean(X))
+  }
+```
+
+```{r,fig.height=2.5,fig.width=8,out.width='.99\\linewidth',echo=F}
+par(mfrow=c(1,3))
+hist(SamplePropH,main="Proportion of Hispanic/Latino",xlab="Sample Proportion",freq=FALSE)
+lines(sort(SamplePropH),dnorm(sort(SamplePropH),mean(SamplePropH),sqrt(var(SamplePropH))),col="red")
+hist(y,main="Probability of red wins",xlab="Sample Proportion",freq=FALSE)
+lines(sort(y),dnorm(sort(y),mean(y),sqrt(var(y))),col="red")
+hist(smean,main="Mean of a U[50,100]",freq=FALSE,xlab="Sample Mean")
+lines(sort(smean),dnorm(sort(smean),mean(smean),sqrt(var(smean))),col="red")
+```
+
+- We have not commented on this before, but a number of the histograms of the estimates derived by multiple samples look like Normal distributions
+
+## As the sample size increases
+
+Looking at the problem of estimating the mean for U[50,100]
+```{r,fig.height=2.5,fig.width=8,out.width='.99\\linewidth',echo=F}
+ssize<-c(10,50,100)
+B<-1000
+smean<-matrix(NA,nrow=B,ncol=length(ssize))
+for(i in 1:B)
+{
+  for(j in 1:length(ssize))
+      {
+      X<-runif(ssize[j],min=50,max=100)
+      smean[i,j]<-mean(X)
+  }
+}
+par(mfrow=c(1,3))
+for(i in 1:3)
+{hist(smean[,i],freq = FALSE,xlab="Sample mean",main=paste("Sample of size",as.character(ssize[i])),xlim=c(60,90))
+lines(sort(smean[,i]),dnorm(sort(smean[,i]),mean(smean[,i]),sqrt(var(smean[,i]))),col="red")}
+```
+
+- We have noted that as the sample size increases the variability of the sample estimates decreases
+
+## One more pattern
+
+We estimate the mean of Uniform distributions centered at 75, but with different spread (different variance, see summary-lab02.Rmd)
+
+```{r, fig.height=2.5,fig.width=8,out.width='.99\\linewidth',echo=F}
+Umin<-c(10,40,60)
+B<-1000
+smean<-matrix(NA,nrow=B,ncol=length(Umin))
+for(i in 1:B)
+{
+  for(j in 1:length(Umin))
+      {
+      X<-runif(50,min=Umin[j],max=75+75-Umin[j])
+      smean[i,j]<-mean(X)
+  }
+}
+par(mfrow=c(1,3))
+for(i in 1:3){
+hist(smean[,i],freq = FALSE,xlab="Sample mean",main=paste("Samples from Unif",paste(as.character(Umin[i]), as.character(150-Umin[i]),sep="-")),xlim=c(60,90))
+lines(sort(smean[,i]),dnorm(sort(smean[,i]),mean(smean[,i]),sqrt(var(smean[,i]))),col="red")
+  }
+```
+- As the population variance decreases, the sample variability decreases
+
+## Sample average
+
+- These are not just coincidences 
+
+- In all these examples, the sample summary we looked at was an **average**
+$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
+(note that the sample proportion is just an average of 0 or 1)
+
+- There are a few things we can prove mathematically about the averages and that relate their variability to that of the population from which the sample comes from
+
+## Sample average
+
+- We have a  population with mean $\mu$ and variance $\sigma^2$
+
+- Let $(X_1,\ldots,X_n)$ a random sample of size $n$ from that population
+
+- Let $\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$ be the sample mean
+
+- Then, the **average value of $\bar{X}$ across all the possible samples** we might take is equal to $\mu$ 
+
+- and the **variance of $\bar{X}$ across all the possible samples** is equal to $\sigma^2/n$.
+
+- For a sample size $n$ "big enough," the **histogram of $\bar{X}$ across all possible samples**  has the shape of a Normal distribution
+
+$$\bar{X}\sim {\cal N}(\mu,\frac{\sigma}{\sqrt{n}})$$
+NOTE: ``all possible samples'' represent our thought experiments and is  an abstract population
+
+## An important characteristic
+
+```{r,fig.height=4,fig.width=5,echo=FALSE}
+library(ggplot2)
+t<-seq(-4,4,length.out=1000)
+s<-seq(-2,2,length.out=500)
+ggplot()+geom_line(aes(x=t,y=dnorm(t,mean=0,sd=1)))+ geom_area(aes(x=s,y=dnorm(s,mean=0,sd=1)),fill="red",alpha=0.5)+ggtitle("Normal distribution")+ylab("Density")+annotate("text",label="95% of values", x = 0, y =dnorm(0,mean=0,sd=1)/3,color="black",size=5)+annotate("text",label="Mean",x = 0, y =-.01,color="black",size=3) +annotate("text",label="Mean-2xSD",x = -1.96, y =-.01,color="black",size=3)+annotate("text",label="Mean+2xSD",x = 1.96, y =-.01,color="black",size=3)
+
+
+```
+
+- mean and variance tell you everything 
+
+## The Normal distribution
+
+- Taking sums of many independent quantities we obtain a normal distribution (this is known at the Central Limit Theorem)
+
+- This can be used as a definition of what the normal distribution is and where it comes from
+
+- Ex. measurements errors  are expected to be the sum of many independent processes we do not control and have a Normal distribution
+
+- It is also know as Gaussian, as Gauss derives it in *Theoria motus corporum coelestium in sectionibus conicis solem ambientium* (1809) (a fairly impressive work)
+
+## The central limit theorem in [action](https://www.youtube.com/watch?v=5_HVBhwhwV8): Quincunx
+- Obstacle arranged in a Quincunx pattern (used to plant trees)
+- Each ball dropped can go right or left (+1 or -1) with equal chance, independently of which path it took before
+
+![](./figs/galton.pdf)
+
+## Sampling variance I: the bootstrap
+Sample: $(X_1,\ldots,X_n)$; 
+
+Sample summary:  $S(X_1,\ldots,X_n)$ which we use to estimate the corresponding value in the population $S_{pop}$.
+
+- Resample with replacement to obtain bootstrap samples $(X_1^{b},\ldots,X_n^{b}),$ $b=1,\ldots,B$
+- Calculate the summaries of the bootstrap samples $S_b=S(X_1^{b},\ldots,X_n^{b}),$ $b=1,\ldots,B$ 
+-  The variance of the bootstrap samples is an estimate of the variance of $S(X_1,\ldots,X_n)$ across all possible samples
+\begin{eqnarray*} \text{Average}((S(X_1,\ldots,X_n)-S_{pop})^2) & \approx &\sum_{b=1}^B\frac{(S_b-\bar{S})^2}{B} \\
+  \text{Standard Error} (S(X_1,\ldots,X_n)) & \approx & \sqrt{\sum_{b=1}^B\frac{(S_b-\bar{S})^2}{B}}
+  \end{eqnarray*} 
+  
+## Sampling variance II:
+
+Sample: $(X_1,\ldots,X_n)$; 
+
+Sample summary:  $S(X_1,\ldots,X_n)=\sum_{i=1}^nX_i/n$, which we 
+use to estimate the corresponding value in the population $S_{pop}=\mu$.
+
+- The variance of the sample  gives us a way to estimate  of the variance of $S(X_1,\ldots,X_n)$ across all possible samples 
+\begin{eqnarray*}\!\!\!\! \!\!\!\! \text{Average}((S(X_1,\ldots,X_n)-S_{pop})^2) &\approx & \frac{1}{n}\sum_{i=1}^n\frac{(X_i-\bar{X})^2}{n}\\
+  \text{Standard Error} (S(X_1,\ldots,X_n))& \approx & \sqrt{\frac{1}{n}\sum_{i=1}^n\frac{(X_i-\bar{X})^2}{n}}\\
+  & = &\frac{1}{\sqrt{n}}\text{Sample Standard Deviation}
+\end{eqnarray*}
+
+## How do we use all of this?
+
+```{r,include=FALSE}
+library(boot)
+data("claridge")
+sample.cor<-cor(claridge$dnan,claridge$hand)
+B<-10000
+ssize<-nrow(claridge)
+bcorr<-NULL
+for(i in 1:B)
+{
+ bsample<-claridge[sample(1:ssize,ssize,replace=TRUE),] 
+bcorr<-c(bcorr,cor(bsample[,1],bsample[,2]))
+}
+bcorr<-data.frame(bcorr)
+```
+
+```{r,echo=FALSE,fig.height=3,fig.width=7, out.width='.95\\linewidth'}
+library(ggplot2)
+plot1= ggplot(claridge,aes(x=dnan,y=hand))+geom_count(alpha=0.5,col="blue")+ylab("Propensity to use left hand")+xlab("DNA variant")+ggtitle("Claridge data")+ theme_bw()
+
+plot2 = ggplot(data = bcorr, aes(x = bcorr)) + geom_histogram(bins = 20,fill="cornflowerblue",alpha=.8) + labs(x = "Correlation in Bootstrap sample", title="Variability of sample correlation")+ theme_bw()
+library(gridExtra)
+grid.arrange(plot1,plot2,ncol=2)
+```
+
+## Report both the estimate and its standard error
+
+**Standard error**: square root of the variance of our estimate across all the possible samples (thought experiments)
+
+- we can estimate the standard error via Bootstrap or using the sample standard deviation and dividing it by the square root of the sample size.
+
+- For the claridge data, we can only use Bootstrap (summary is not an average)
+
+```{r,echo=FALSE}
+report<-c(sample.cor,sqrt(var(na.omit(bcorr))))
+names(report)<-c("Sample Correlation","Standard Error (Bootstrap)")
+report
+```
+
+## Interval estimation
+
+- The idea is to report not one number estimate, but a range of possible values that you expect to cover the true value of the population summary
+
+- There are multiple ways of coming up with these intervals and a proper justification of why they work and in which sense is beyond what we can cover here
+
+- Two rules that we can write out and guarantee that, in repeated experiments, the intervals cover the true value of the population summary 95% of the times
+
+\begin{eqnarray*}
+\!\!\!\!\text{For Averages} && (\bar{X}-2\text{SD}(X_1,\ldots,X_n)/\sqrt{n},\bar{X}+2\text{SD}(X_1,\ldots,X_n)/\sqrt{n})\\
+&& \\
+\text{Bootstrap} && (\text{Quantile}_{Boot Sample}(.025),\text{Quantile}_{Boot Sample}(.975))
+\end{eqnarray*}

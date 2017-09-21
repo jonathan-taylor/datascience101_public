@@ -1,0 +1,35 @@
+sudo: false
+language: python
+cache: packages
+r: 
+  - release
+notifications:
+  email: false
+before_install:
+  - export TZ=US/Pacific
+  - sudo apt-get -qq update
+# Install packages
+install:
+  #- make pydeps
+  #- wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  #- chmod +x miniconda.sh
+  #- ./miniconda.sh -b
+  #- export PATH=/home/travis/miniconda2/bin:$PATH
+  #- conda update --yes conda
+  #- conda install --yes ipython jupyter sphinx nbformat
+  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+  #- sudo rm -rf /dev/shm
+  #- sudo ln -s /run/shm /dev/shm
+  #- pip install notedown 
+# Run test
+script:
+  - sudo apt-get install software-properties-common
+  - sudo add-apt-repository -y ppa:marutter/rrutter
+  - sudo apt-get update
+  - sudo apt-get install -y r-base r-base-dev r-cran-ggmap r-cran-dplyr pandoc
+  - sudo apt-get install libgmp3-dev
+  - sudo make pydeps
+  - sudo Rscript -e "install.packages('devtools', repos='http://cran.r-project.org'); library(devtools); devtools::install_github('IRkernel/IRkernel'); IRkernel::installspec()"
+  - sudo make Rdeps
+  - make all
+

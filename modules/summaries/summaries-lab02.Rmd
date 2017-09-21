@@ -1,0 +1,332 @@
+---
+title: "Data Summaries, lab 2"
+author: "Data Science 101 Team"
+date: "April 20, 2017"
+
+output:
+  html_document:
+    keep_md: yes
+---
+```{r setup}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(dev="png",dpi=300, out.width=500,  fig.align="center",fig.width=5,fig.height=4)
+library(pacman)
+pacman::p_load(reldist,gridExtra,tidyverse)
+```
+
+## Lorenz curve
+Following is the code used to draw the [Lorenz curves](https://en.wikipedia.org/wiki/Lorenz_curve) we used for illustration in lectures.
+
+```{r,fig.height=4,fig.width=4}
+x<-c(1,2,3,10,15,15,30,50)
+n<-length(x)
+F<-(1:n)/n
+Q<-cumsum(x)/sum(x)
+F<-c(0,F)
+Q<-c(0,Q)
+lorenz<-data.frame(F,Q)
+#library(ggplot2)
+ggplot(lorenz,aes(x=F))+
+  geom_line(aes(x=F,y=Q),color=I("blue")) +geom_point(aes(x=F,y=Q),color=I("blue"))  + geom_abline(intercept=0, slope=1) 
+```
+
+
+```{r, fig.height=3,fig.width=6,fig.align="center"}
+x<-c(1,2,3,10,15,15,30,50)
+tot<-sum(x)
+n<-length(x)
+F<-(1:n)/n
+x<-rep(tot/8,8)
+Q<-cumsum(x)/sum(x)
+F<-c(0,F)
+Q<-c(0,Q)
+lorenz<-data.frame(F,Q)
+p1<-ggplot(lorenz,aes(x=F))+
+  geom_line(aes(x=F,y=Q),color=I("blue")) +geom_point(aes(x=F,y=Q),color=I("blue"))  + geom_abline(intercept=0, slope=1) +ggtitle("Perfect equality") 
+  
+
+x<-c(rep(0,7),tot)
+Q<-cumsum(x)/sum(x)
+Q<-c(0,Q)
+lorenz<-data.frame(F,Q)
+p2<-ggplot(lorenz,aes(x=F))+
+  geom_line(aes(x=F,y=Q),color=I("blue")) +geom_point(aes(x=F,y=Q),color=I("blue"))  + geom_abline(intercept=0, slope=1) +ggtitle("Maximal inequality")
+  
+#library(gridExtra)
+grid.arrange(p1,p2,ncol=2)
+```
+
+```{r,fig.height=4,fig.width=4}
+ggplot(lorenz,aes(x=F))+
+  geom_line(aes(x=F,y=Q),color=I("blue")) +geom_point(aes(x=F,y=Q),color=I("blue"))  + geom_abline(intercept=0, slope=1) + geom_ribbon(aes(ymin = Q, ymax = F),fill="cyan",alpha=0.5)
+
+```
+
+## Income Data
+
+#### Data loading and display
+We load in the income dataset and do the massaging we described in the first lab for this module (see there for details on where the data comes from)
+
+```{r, message=FALSE}
+#library(readr)
+#library(dplyr)
+#library(ggplot2)
+income <- read_csv("data/hinc06.csv", na=c("(B)"),
+    col_names = FALSE, skip = 9,col_types = cols(X2 = col_number(),X3 = col_number(),X4 = col_number(), 
+        X5 = col_number(),X6 = col_number(),X7 = col_number(),X8 = col_number(), 
+        X9 = col_number(),X10 = col_number(),X11 = col_number(),
+        X12 = col_number(),X13 = col_number(),X14 = col_number(), 
+        X15 = col_number(),X16 = col_number(),X17 = col_number(),X18 = col_number(), 
+        X19 = col_number(),X20 = col_number(),X21 = col_number(),
+        X22 = col_number(),X23 = col_number(),X24 = col_number(), 
+        X25 = col_number(),X26 = col_number(), 
+        X27 = col_number(), 
+        X28 = col_number()
+        ))
+for(i in 1:9)
+{
+  income[is.na(income[,paste("X",as.character(3*i),sep="")]),paste("X",as.character(3*i),sep="")]<-income[is.na(income[,paste("X",as.character(3*i),sep="")]),"X3"]
+}
+income<-income %>% rename(Bracket=X1)
+income<-income %>% rename(Frequency=X2)
+income<-income %>% rename(Income=X3)
+```
+
+And for reference, let's plot again the frequencies for the different races as a reference.
+```{r}
+income$Bracket
+```
+
+```{r}
+p <- ggplot()  + 
+geom_point(data = income, aes(x = Income, y = Frequency/sum(Frequency), colour = "All"),pch=1) +
+geom_point(data = income, aes(x = X9, y = X8/sum(X8), colour = "White")) +
+geom_point(data = income, aes(x = X18, y = X17/sum(X17), colour = "Black")) + 
+geom_point(data = income, aes(x = X24, y = X23/sum(X23), colour = "Asian")) + 
+geom_point(data = income, aes(x = X27, y = X26/sum(X26), colour = "Hispanic"))+ 
+scale_colour_manual("",breaks = c("All", "White", "Black","Asian","Hispanic"), values = c("All"="black", "White"="blue", "Black"="green", "Asian"="yellow","Hispanic"="red"))+ scale_y_continuous(name="Proportion in Income Bracket")+
+scale_x_continuous(name="Average Income in Bracket")+ggtitle("US 2015 household income, CPS")
+p
+```
+
+#### Lorenz curves
+
+Now let's create Lorenz's curves for all of the races for which we recorded income.
+
+```{r}
+F<-cumsum(income$Frequency)/sum(income$Frequency)
+Q<-cumsum(income$Income*income$Frequency)/sum(income$Income*income$Frequency)
+lorenz<-data.frame(c(0,F),c(0,Q))
+F<-cumsum(income$X8)/sum(income$X8)
+Q<-cumsum(income$X9*income$X8)/sum(income$X9*income$X8)
+lorenz<-data.frame(lorenz,c(0,F),c(0,Q))
+F<-cumsum(income$X17)/sum(income$X17)
+Q<-cumsum(income$X18*income$X17)/sum(income$X18*income$X17)
+lorenz<-data.frame(lorenz,c(0,F),c(0,Q))
+F<-cumsum(income$X23)/sum(income$X23)
+Q<-cumsum(income$X24*income$X23)/sum(income$X24*income$X23)
+lorenz<-data.frame(lorenz,c(0,F),c(0,Q))
+F<-cumsum(income$X26)/sum(income$X26)
+Q<-cumsum(income$X27*income$X26)/sum(income$X27*income$X26)
+lorenz<-data.frame(lorenz,c(0,F),c(0,Q))
+names(lorenz)<-c("F","Q","F.w","Q.w","F.b","Q.b","F.a","Q.a","F.h","Q.h")
+lorenz
+```
+
+We now plot all of these Lorenz curves.
+```{r}
+ggplot(lorenz,aes(x=F))+
+  geom_line(aes(x=F,y=Q,colour="All"))+
+  geom_line(aes(x=F.w,y=Q.w,colour="White"))+
+  geom_line(aes(x=F.b,y=Q.b,colour="Black"))+
+  geom_line(aes(x=F.a,y=Q.a,colour="Asian"))+
+   geom_line(aes(x=F.h,y=Q.h,colour="Hispanic"))+ scale_colour_manual("",breaks = c("All", "White", "Black","Asian","Hispanic"), values = c("All"="black", "White"="blue", "Black"="green", "Asian"="yellow","Hispanic"="red")) +ggtitle("Lorenz curve, US 2015 household income")
+```
+
+#### Gini index
+
+We use a little function for going from Lorenz curves to Gini indexes (note that in general it would probably be more appropriate to write a function that goes from data to Gini index, and outputs Lorenz curves as well).
+
+```{r}
+mygini<-function(F,Q){
+  n<-length(F)
+  gini<-1-sum((F[-1]-F[-n])*(Q[-1]+Q[-n]))
+  return(gini)
+}
+```
+
+We now apply this function to all the populations data, and display the results we get.
+```{r}
+GiniL<-c(mygini(lorenz$F,lorenz$Q),mygini(lorenz$F.w,lorenz$Q.w),mygini(lorenz$F.b,lorenz$Q.b),mygini(lorenz$F.a,lorenz$Q.a),mygini(lorenz$F.h,lorenz$Q.h))
+Gini<-data.frame(c("All","White","Black","Asian","Hispanic"),GiniL)
+names(Gini)<-c("Race","Index")
+Gini
+```
+
+```{r,fig.height=2,fig.width=5}
+ggplot(Gini)+ geom_point(aes(x=Race,y=Index)) +
+  coord_flip() +
+  theme( # remove the vertical grid lines
+    panel.grid.major.x = element_blank() ,
+    # explicitly set the horizontal lines (or they will disappear too)
+    panel.grid.major.y = element_line(linetype=3, color="darkgray"),)+ylab("Gini Index") +ggtitle("2015 US household income, CPS")
+```
+
+It turns out that there is a package in R with a function that calculates the Gini index, so we can try to use that and see if we get the same results
+```{r}
+#library(reldist)
+
+Gini2<-c(gini(income$Income,income$Frequency/sum(income$Frequency)),gini(income$X9,income$X8/sum(income$X8)),gini(income$X18,income$X17/sum(income$X17)),gini(income$X24,income$X23/sum(income$X23)),gini(income$X27,income$X26/sum(income$X26)))
+Gini2<-data.frame(c("All","White","Black","Asian","Hispanic"),Gini2)
+names(Gini2)<-c("Race","Index")
+```
+
+Let's take the occasion of the need to compare Gini and Gini2 to review some of the merge/join options that we have
+
+```{r}
+cbind(Gini,Gini2)
+merge(Gini,Gini2,by.x=c("Race"),by.y=c("Race"))
+inner_join(Gini, Gini2,by=c("Race"))
+```
+
+## Genetic Diversity
+
+The following dataset comes from the research effort known as
+[Human Genome Diversity Panel](https://rosenberglab.stanford.edu/diversity.html).
+Specifically, from the web page of Dr. Rosenberg lab, clicking on the year [2002](https://rosenberglab.stanford.edu/diversity.html#2002), one is directed to data on HGDP 2002 microsatellites (377 autosomal microsatellites in 1056 individuals from 52 populations). After taking a lood at the [Readme](https://rosenberglab.stanford.edu/data/rosenbergEtAl2002/diversityreadme.txt), and we focus on two files containing summary data: [diversitycodes](https://rosenberglab.stanford.edu/data/rosenbergEtAl2002/diversitycodes.txt) and [diversitydata.freqs](https://rosenberglab.stanford.edu/data/rosenbergEtAl2002/diversitydata.freqs)
+
+```{r}
+diversitycodes <- read_delim("./data/diversitycodes", " ", escape_double = FALSE, col_names = FALSE, 
+    trim_ws = TRUE)
+head(diversitycodes)
+```
+To see a bit better what we got, let's see what are the unique values of each column
+```{r}
+apply(diversitycodes,2,unique)
+```
+
+Now, let's name things in an intuitive fashion
+
+```{r}
+names(diversitycodes)<-c("Code","Population","Location","Continent")
+```
+
+We now move to read in the second file, for which the readme documents states:
+
+This file contains the count estimates of allele frequencies based on
+the individual data.  Each line gives the frequency of an allele in a
+population.  Locus names are the same as in diversityloci.txt.  The
+columns of this file include the following information:
+
+(1) Locus name.
+(2) Allele (measured in base pairs).
+(3) Population.
+(4) Estimated frequency.
+
+
+```{r}
+diversitydata <- read_delim("./data/diversitydata.freqs", 
+    " ", escape_double = FALSE, col_names = FALSE, 
+    col_types = cols(X2 = col_character(), 
+        X4 = col_double()), trim_ws = TRUE)
+  head(diversitydata)
+```
+
+Recall the description of the data set: **377 autosomal microsatellites** in 1056 individuals from 52 populations. We already found the 52 populations, and they are repeated here (in the 3rd colums). Let's look at what are the unique values of the first variable
+
+```{r}
+length(unique(diversitydata$X3))
+length(unique(diversitydata$X1))
+```
+
+Column 1 contains 377 distinct values that correspond to the 377 [microsatellites](https://en.wikipedia.org/wiki/Microsatellite) markers. Genetic markers are locations of known position in the genome that are polymorphic, that is, they are present in different forms (alleles) in different individuals in the population. In the case of microsatellites, these alleles are different numbers of repeats of a short sequence. So, the alleles for microsatellites are indicated with the lenght in base pairs of the sequence of these repeats.
+
+Let's name the variables appropriately and make sure we understand the data with some subsetting
+
+```{r}
+names(diversitydata)<-c("Marker","Allele","Population","Frequency")
+filter(diversitydata, Marker == "D10S1208", Allele== "167") 
+filter(diversitydata, Marker == "D10S1208", Population=="Adygei") 
+```
+
+It is useful to keep track of the names of the different markers
+```{r}
+MARKER<-unique(diversitydata$Marker)
+POP<-unique(diversitydata$Population)
+```
+
+Now let's calculate the [diversity index](https://en.wikipedia.org/wiki/Diversity_index#Gini.E2.80.93Simpson_index) for each marker in each population
+```{r}
+Diversity<-matrix(NA,ncol=377,nrow=52)
+for(i in 1:52)
+{
+for(j in 1:377)
+{
+Diversity[i,j]<-1-sum(filter(diversitydata, Marker==MARKER[j],Population==POP[i])[,4]^2)
+}
+}
+colnames(Diversity)<-MARKER
+rownames(Diversity)<-POP
+```
+
+While we have summarized things substantially, there is still a lot of information here, at a level of detail that might be hard to parse. 
+One of the beautiful things about having calculated an index that makes all markers-population pairs comparable is that we can take averages. Taking averages by columns gives us general information on markers; averaging by rows gives us information on populations.
+
+Let's start and see what we can learn about markers
+```{r}
+markdiv<-(apply(Diversity,2,mean))
+markdiv<-sort(markdiv)
+hist(markdiv,xlab="Diversity",main="Average Marker diversity across populations")
+```
+We might be curious about which markers are the least or the most diverse
+
+```{r}
+markdiv[1]
+markdiv[377]
+```
+And we might want to check what is the number of alleles that each of these markers have.
+
+```{r}
+filter(diversitydata, Marker == names(markdiv[1]), Population=="Adygei") 
+filter(diversitydata, Marker == names(markdiv[377]), Population=="Adygei") 
+```
+
+
+We are going to use this diversity data to learn something about these different human populations, so we are going to summarize the information on diversity across markers and organize it as a dataframe that allows us to join with the information on populations we got from the diversitycode data.
+
+
+```{r}
+Diversity<-data.frame(POP,apply(Diversity,1,mean),Diversity)
+names(Diversity)<-c("Population","Average",MARKER)
+Diversity<-inner_join(diversitycodes,Diversity,by=c("Population"))
+```
+
+In thinking about how we are going to display the data, it seems that might be useful to have one color per continent.  We first look at which continents we have information on, and decide on how we want to assign color to them: for simplicity, I then make the color assignement one of the variables in the data frame.
+
+```{r}
+sort(unique(Diversity$Continent))
+```
+
+```{r}
+contcol<-data.frame(sort(unique(Diversity$Continent)),c("green","red","orange","yellow","azure","beige","blue"))
+names(contcol)=c("Continent","Color")
+rownames(contcol)<-contcol$Continent
+Diversity<-inner_join(Diversity,contcol,by=c("Continent"))
+Diversity<-Diversity[order(Diversity$Continent,Diversity$Location),]
+```
+
+Plotting with the native R function barplot. Note that I am going to use the **par()** option **mar** to increase the space under the plot so that there is space for all the names. Be careful that the operation below changes the margins for every other plot that you might want to do, and so, you might need to change it back.
+
+```{r,fig.height=4,fig.width=8,out.width=600}
+par(mar=c(8,4,4,2))
+barplot(Diversity$Average,names=Diversity$Population,col=as.character(Diversity$Color),cex.lab=.3, las=3,main="Average diversity")
+```
+
+It seems that the variation in diversity between populations in the same continent is much smaller than the variation in diversity between population in different continents. So, let's aggregate across continents, and plot those diversities directly.
+
+```{r,fig.height=4,fig.width=7}
+contdiv<-tapply(Diversity$Average,Diversity$Continent,mean)
+
+par(mar=c(5,15,4,2))
+barplot(contdiv[order(contdiv)],col=as.character(contcol[names(contdiv[order(contdiv)]),2]),main="Continental Diversity",horiz = T,las=1)
+```

@@ -1,0 +1,132 @@
+---
+title: "Homework for Visualization module"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup}
+library(pacman)
+pacman::p_load(tidyverse,nycflights13)
+rm(list=ls(all=T))
+```
+
+# Due Friday May 5, 9:30 am via canvas
+
+
+## Warmup: 'diamonds' dataset included in the ``ggplot2`` package
+
+1. Load in the data with command
+```{r}
+data(diamonds,package = "ggplot2")
+```
+
+2. Is there a relationship between weight of the diamond and price? Draw a plot and comment.
+3. Same question as in last part, but use only diamonds with ``weight`` between 1 and 2. Use argument ``alpha`` to adjust the transparency.
+4. Use the ``geom_smooth`` function to add a smoothed line to plot in the previous part.
+5. Draw a barplot to exam feature 'clarity'. 
+6. Fill each bar in 5 with different colors corresponding to 'cut'. 
+7. Facet the plot in 4 by ``color`` and ``clarity``, what does this show about the relationship among the variables?
+
+## Flights
+
+- Load the package `nycflights13`. This package contains data on flights that departed from the three major NYC airports (LGA, EWR, and JFK) in 2013. The table `flights` has the main data, but you will want to use other tables (see https://cran.r-project.org/web/packages/nycflights13/nycflights13.pdf for a description of the tables) and join operations to make useful visualizations. Make visualizations that address the following. For each visualization, include a sentence or two that summarize your answer to the question and how it is supported by your visualization.
+
+```{r }
+head(flights)
+head(airlines)
+
+flights <- flights %>% inner_join(airlines,by="carrier")
+```
+
+1. Which airline has the longest delays (measured by arrival delay) and which has the shortest? (In this question and the following questions, I am intentionally leaving them somewhat open-ended so that you can demonstrate the ability to think of an appropriate way to answer the type of question a non-specialist might ask you and make an appropriate viz to support your answer.)
+
+```{r }
+ggplot(flights, aes(x=factor(name),y=arr_delay)) + geom_bar(stat="summary",fun.y="mean") + 
+  theme(axis.text.x=element_text(angle=90))
+```
+
+2. What does the *distribution* of arrival delays look like across different airlines? Taking into account this viz and the previous one, which airlines would you avoid flying (assuming you do not like long delays)? How does knowing what the distribution look like change how you think about your likely on-time experience with each airline? You may want to limit the y axis to make the viz more interpretable. This comment on limiting the axis extent using ylim and/or xlim applies to most of the questions in this assignment. 
+
+```{r }
+ggplot(flights,aes(x=factor(name),y=arr_delay)) + geom_violin() + theme(axis.text.x=element_text(angle=90)) + 
+  ylim(c(-100,250))
+```
+
+3. Join the flight data to the plane data to obtain information on the *size* of the plane for each flight (measured by the number of seats). Create a categorical variable `plane_size` by binning the number of seats into bins of width 50. How does the size of the *plane* (as measured by number of seats) relate to typical arrival delays? Speculate as to why plane size is related to delays. Note that you might want to limit the y axis and/or add some additional layers to the plot with summary statistics to avoid missing important structure. 
+
+```{r }
+flights <- flights %>% left_join(planes,by="tailnum") 
+flights <- flights %>% mutate(plane_size=cut(seats,breaks=seq(from=0,to=max(seats,na.rm=T),by=50)))
+ggplot(subset(flights,seats<401),aes(y=arr_delay,x=factor(plane_size))) + geom_boxplot()
+
+qtile.delay <- flights %>% group_by(plane_size) %>% summarise(qt25=quantile(arr_delay,.25,na.rm=T),
+                                                              med=median(arr_delay,na.rm=T),
+                                                              qt75=quantile(arr_delay,.75,na.rm=T))
+qtile.delay <- qtile.delay %>% gather(qtile,value,-plane_size)
+
+ggplot(subset(flights,seats<401),aes(y=arr_delay,x=factor(plane_size))) + geom_violin() + geom_point(data=qtile.delay,aes(x=factor(plane_size),y=value),col=2) + ylim(c(-100,100))
+
+```
+
+4. Join the flight data to the weather data to obtain information on weather conditions at the origin around the time the flight took off. How are flight *departure* delays related to the wind speed around the scheduled departure time? Do you notice any possible data quality problems in this visualization? You may find that effective visualization is aided in this case by (1) limiting one of the axes using xlim or ylim and (2) binning the max gust variable. Make sure your visualization includes the mean delay, in addition to other information about the distribution of flight delays as a function of wind gusts.
+
+```{r }
+flights <- flights %>% left_join(select(weather,-year,-month,-day,-hour),by=c("time_hour"="time_hour","origin"="origin"))
+flights <- flights %>% mutate(wind_bin = cut(wind_speed,breaks=seq(from=-5,to=50,by=5)))
+
+mn.delay <- flights %>% group_by(wind_bin) %>% summarise(dep_delay=mean(dep_delay,na.rm=T))
+
+ggplot(flights[flights$wind_gust<=50,],aes(x=factor(wind_bin),y=dep_delay)) + geom_boxplot() + theme(axis.text.x = element_text(angle=90)) + ylim(c(-100,100)) + geom_point(data=mn.delay,aes(x=factor(wind_bin),y=dep_delay),col=2)
+```
+
+5. Similarly, how are departure delays related to precipitation?
+
+```{r}
+flights <- flights %>% mutate(rain_bin=cut(precip,breaks=seq(from=-0.1,to=.4,by=.05)))
+mn.delay <- flights %>% group_by(rain_bin) %>% summarise(dep_delay=mean(dep_delay,na.rm=T))
+```
+
+6. Finally, does the *direction* of the wind matter in terms of departure delays? Does your answer depend on which airport the flight leaves from?
+
+## Uncertainty and sampling variability in graphics
+
+1. Take a random sample of 100 flights from the `flights` table, and make a density plot of the arrival delay in minutes.
+
+```{r }
+head(flights)
+flight.samps <- flights %>% sample_n(100) %>% mutate(samp.size=100)
+ggplot(flight.samps,aes(x=arr_delay)) + geom_histogram()
+```
+
+2. Now take another random sample of size 1000 from the flights table, and make the same graphic.
+
+```{r }
+flight.samps <- rbind(flight.samps,flights %>% sample_n(1000) %>% mutate(samp.size=1000))
+ggplot(flight.samps,aes(x=arr_delay,col=factor(samp.size))) + geom_density()
+```
+
+3. Do this once more with a sample of size 5000. What differences do you notice between the three plots you just made? Why do they differ? If our goal is to represent the distribution of length of delay, which plot do you think is the most accurate and why?
+
+```{r }
+flight.samps <- rbind(flight.samps,flights %>% sample_n(5000) %>% mutate(samp.size=5000))
+ggplot(flight.samps,aes(x=arr_delay,col=factor(samp.size))) + geom_density()
+```
+
+4. Get a tibble of all of the destination airports in the flight data and the number of flights in the data that went to those destinations. Sort the tibble in ascending order, then keep every tenth row of the tibble, starting with row 5. Join this to the flight data, and create a binary variable in the flight data indicating whether the destination of the flight is one that appeared in the tibble of number of flights after keeping only every tenth row. 
+
+```{r }
+flight.samps <- rbind(flight.samps,flights %>% mutate(samp.size=n()))
+subset.dests <- flights %>% group_by(dest) %>% summarise(ct=n()) %>% arrange(ct) %>% slice(seq(from=5,to=n(),by=10))
+```
+
+5. Now, visualize the distribution of arrival delays for flights going to each of this subset of destinations. Do this by making "small multiples" of your chosen visualization, where the first is made with a random sample of 100 observations, the second with a random sample of 1000, the third with a random sample of 5000, and the last with all of the data. Describe how these summaries of the distribution are similar or different, and discuss which factors you think contributed to a graphical summary being more or less sensitive to the sample size.
+
+```{r }
+flights <- flights %>% left_join(subset.dests, by="dest") %>% mutate(include.dest=!is.na(ct))
+flight.samps <- flight.samps %>% left_join(subset.dests, by="dest") %>% mutate(include.dest=!is.na(ct))
+
+ggplot(filter(flight.samps,include.dest),aes(x=factor(dest),y=arr_delay)) + geom_boxplot() + facet_wrap(~samp.size) + ylim(c(-100,250))
+```
+

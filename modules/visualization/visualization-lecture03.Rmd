@@ -1,0 +1,264 @@
+---
+title: "Visualizing Data"
+author: "Data Science 101 Team"
+output:
+  slidy_presentation:
+    css: styles.css
+    keep_md: yes
+  ioslides_presentation: default
+---
+
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE,cache = TRUE)
+library(pacman)
+pacman::p_load(Hiiragi2013,tidyverse)
+```
+## Two packages
+
+- Base R
+- ggplot
+
+<p></br></p>
+<p></br></p>
+<p></br></p>
+
+---------------------------------
+The materials of this lecture are taken from the book 'Modern statistics for modern biology' by Susan Holmes and Wolfgang Huber.
+---------------------------------
+
+## Base R plotting
+
+- Data from an enzyme-linked immunosorbent assay (ELISA) assay.
+
+```{r}
+head(DNase)
+plot(DNase$conc,DNase$density)
+```
+
+## Base R plotting: a customized version
+
+```{r}
+plot(DNase$conc, DNase$density,
+  ylab = attr(DNase, "labels")$y,
+  xlab = paste(attr(DNase, "labels")$x, attr(DNase, "units")$x),
+  pch = 3,
+  col = "blue")
+```
+
+## Base R plotting: histogram and boxplot
+
+```{r basicplotting3, fig.width=5.6, fig.height=3.5}
+hist(DNase$density, breaks=25, main = "")
+```
+
+```{r basicplotting4, fig.width=5.6, fig.height=3.5}
+boxplot(density ~ Run, data = DNase)
+```
+
+## ggplot: Grammar of graphics
+
+- Layering out the graphics
+- Plot 1D, 2D, 3-5D data
+- Faceting
+
+## An example dataset
+```{r loadHiiragi, warning = FALSE,message = FALSE,}
+library("Hiiragi2013")
+data("x")
+dim(exprs(x))
+head(pData(x),n=2)
+```
+
+## An example dataset - continued
+```{r groupSize, warning = FALSE,message = FALSE,}
+library("dplyr")
+library("ggplot2")
+groups = group_by(pData(x), sampleGroup) %>%
+  summarise(n = n() , color = unique(sampleColour))
+groups
+ggplot(data = groups, aes(x = sampleGroup, y = n)) +
+  geom_bar(stat = "identity")
+```
+
+## An example dataset - a better picture
+```{r}
+groupColor = setNames(groups$color, groups$sampleGroup)
+ggplot(groups, aes(x = sampleGroup, y = n, fill = sampleGroup)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = groupColor, name = "Groups") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+## Layers
+```{r}
+dftx = data.frame(t(exprs(x)), pData(x))
+ggplot( dftx, aes( x = X1426642_at, y = X1418765_at)) +
+  geom_point( shape = 1 ) +
+  geom_smooth( method = "loess" )
+```
+
+```{r}
+ggplot( dftx, aes( x = X1426642_at, y = X1418765_at ))  +
+  geom_point( aes( color = sampleColour), shape = 19 ) +
+  geom_smooth( method = "loess" ) +
+  scale_color_discrete( guide = FALSE )
+```
+
+## Visualization of 1D Data
+
+- Barplots
+- Boxplots
+- Violin plots
+- Dot plots and beeswarm plots
+- Density plots
+
+## Visualization of 1D Data
+
+A common task in biological data analysis is the comparison between several samples
+of univariate measurements. As an example to visulize and compare such samples, we'll use the intensities of a set of four genes Fgf4, Gata4, Gata6 and Sox2. On the array, they are represented by
+
+```{r genes2ps1}
+selectedProbes = c( Fgf4 = "1420085_at", Gata4 = "1418863_at",
+                   Gata6 = "1425463_at",  Sox2 = "1416967_at")
+```
+
+Convert them into a dataframe:
+
+```{r melt}
+library("reshape2")
+genes = melt(exprs(x)[selectedProbes, ], varnames = c("probe", "sample"))
+head(genes)
+```
+
+For good measure, we also add a column that provides the gene symbol along with the probe identifiers.
+
+```{r symbol}
+genes$gene = names(selectedProbes)[ match(genes$probe, selectedProbes) ]
+```
+
+## Barplots and Boxplots
+
+- What information do we get from the graphs?
+
+```{r onedbp1, fig.width = 3, fig.height = 3.75}
+ggplot(genes, aes( x = gene, y = value)) +
+  stat_summary(fun.y = mean, geom = "bar")
+```
+
+```{r onedboxpl, fig.width = 3.75, fig.height = 3.75}
+p = ggplot(genes, aes( x = gene, y = value, fill = gene))
+p + geom_boxplot()
+```
+
+
+## Violin plots
+
+A variation of the boxplot idea, but with an even more direct representation of the shape of the data distribution, is the violin plot. Here, the shape of the violin gives a rough impression of the distribution density.
+
+```{r onedviolin, fig.width = 3.75, fig.height = 3.75}
+p + geom_violin()
+```
+
+## Dot plots
+
+When the number of data points is not too large, it is possible to show the data points directly.
+
+```{r oneddot, fig.width = 5, fig.height = 5}
+p + geom_dotplot(binaxis = "y", binwidth = 1/6,
+       stackdir = "center", stackratio = 0.75,
+       aes(color = gene))
+```
+
+## Density plots
+
+Choice of size of smoothing window
+
+- small: capture peaks in the dense regions, but may lead to instable (``wiggly'') estimates elsewhere
+- big:  sharp peaks, may be smoothed out.
+
+```{r oneddens, fig.width = 4.75, fig.height = 4.75}
+ggplot(genes, aes( x = value, color = gene)) + geom_density()
+```
+
+
+## Visualization of 2D data: scatterplots
+
+- Scatterplots are useful for visualizing associations between variables.
+- Let us take a look at differential expression between a wildtype and an FGF4-KO sample.
+
+```{r twodsp1, fig.width = 3.75, fig.height = 3.75, dev = "png"}
+dfx = as.data.frame(exprs(x))
+scp = ggplot(dfx, aes(x = `59 E4.5 (PE)` ,
+                      y = `92 E4.5 (FGF4-KO)`))
+scp + geom_point()
+```
+
+
+## Visualization of 2D data: scatterplots
+
+- Adjust the transparency
+
+```{r twodsp2, fig.width = 3.75, fig.height = 3.75, dev = "png"}
+scp  + geom_point(alpha = 0.1)
+```
+
+- 2D density estimate
+
+```{r twodsp3, fig.width = 3.75, fig.height = 3.75}
+scp + geom_density2d()
+```
+What's wrong with this 2D density graph?
+
+## Visualization of 2D data: 2D density estimate
+
+- tweak the bandwidth and binning parameters
+
+```{r twodsp4, fig.width = 3.75, fig.height = 3.75}
+scp + geom_density2d(h = 0.5, bins = 60)
+```
+
+- with color filling
+
+```{r twodsp5, fig.width = 5.25, fig.height = 3.75, message = FALSE}
+library("RColorBrewer")
+colorscale = scale_fill_gradientn(
+    colors = rev(brewer.pal(9, "YlGnBu")),
+    values = c(0, exp(seq(-5, 0, length.out = 100))))
+
+scp + stat_density2d(h = 0.5, bins = 60,
+          aes( fill = ..level..), geom = "polygon") +
+  colorscale + coord_fixed()
+```
+
+## 3-5D data: five aesthetics provided by ggplot
+
+- fill
+- color
+- shape
+- size
+- alpha
+
+## 3-5D data: Faceting
+We can show multiple plots that result from repeatedly subsetting (or ``slicing'') our data based on one (or more) of the variables, so that we can visualize each part separately. 
+
+```{r facet1, fig.width = 8, fig.height = 2}
+library("magrittr")
+dftx$lineage %<>% sub("^$", "no", .)
+dftx$lineage %<>% factor(levels = c("no", "EPI", "PE", "FGF4-KO"))
+
+ggplot(dftx, aes( x = X1426642_at, y = X1418765_at)) +
+  geom_point() + facet_grid( . ~ lineage )
+```
+
+## 3-5D data: Faceting
+
+We can specify two faceting variables as well
+
+```{r facet2, fig.width = 8, fig.height = 6}
+ggplot( dftx,
+  aes( x = X1426642_at, y = X1418765_at)) + geom_point() +
+   facet_grid( Embryonic.day ~ lineage )
+```
+

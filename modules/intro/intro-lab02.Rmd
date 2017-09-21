@@ -1,0 +1,309 @@
+---
+title: "A First Experience with R and Rstudio"
+author: "Data Science Team"
+output:
+  html_document:
+    keep_md: yes
+
+---
+
+### R and R studio
+
+- R is a language for data analysis and computing
+
+- R studio is an "enviroment" that makes the use of R easier
+
+- It can be confusing at first because you need to get familiar both with R and the new environment, but overall it actually should make your life easier 
+
+### Prompt line execution vs Rmd files
+
+- R is an **interactive** language: you do not need to run a script, submit it and wait for answer
+
+- The best way to familiarize oneself with this is to use the **Console** in Rstudio
+
+- Let's start creating a variable
+
+```{r}
+myvariable<-c(1:10)
+```
+
+- And plot it
+```{r}
+plot (myvariable)
+```
+
+- Note that it is useful to use the **zoom** button 
+
+- To understand which commands to use, and to develop an analysis approach it is often most useful to work on the console.
+
+- On the other hand, it is useful to be able to keep track of commands, so that we could re-run them another time
+
+- And to annotate what one is trying to do, so that the receord is meaningful for everyone.
+
+- This is where the Rmd files come in 
+
+- You can find documentation on Rmd [here](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+
+- Let's also open the file MyRMarkDown.Rmd
+
+- This file is written in .Rmd
+
+- We will provide .Rmd files for all labs
+
+- In class, however, we will often use Console, to do interactive work.
+
+- Our lectures are also written in .Rmd. When lectures contain significant ammounts of R commands that are not echoed, we will also make available those markdown files
+
+### Outbreak data
+
+We are using these to compare the native R commands and the commands that are redefined in a number of packages developed by the same group that developed Rstudio.
+
+- The native R commands have more intuitive names
+
+- Their syntax is simpler
+
+- The "Rstudio" commands make it easier to carry out a number of tasks that one encounter in data analysis, so that they are often preferred in "data science" environments
+
+- Navigating between the two type of commands can be confusing, but at least at the beginning it is important to orient oneself.
+
+#### We start with the native R commands.
+
+```{r}
+snow1<-read.csv("./data/snow.csv")
+snow1$Date<-as.Date(snow1$Date)
+plot(snow1$Date,snow1$Case,ylab="Number of fatal attacks",xlab="Date")
+abline(v=as.Date("1854-09-07"))
+```
+
+#### "Rstudio commands"
+
+The "Rstudio commands" are what you can get from the functionality of Rstudio. For example, using the "Import Dataset" button, you can see the following commands.
+
+```{r}
+library(readr)
+library(ggplot2)
+snow1<-read_csv("./data/snow.csv",col_types = cols(Date = col_date(format = "%Y-%m-%d")))
+qplot(x=snow1$Date,y=snow1$Case,ylab="Number of fatal attacks",xlab="Date") 
+```
+
+
+
+### Cell Phone Data
+
+Here we will read in the data from the cell phone/car collision study of
+Redelmeier and Tibshirani (1997) , and do some simple analyses in R.
+For confidentiality,  some of the data have been randomly perturbed.
+However the first 4 variables are untouched.
+
+
+#### Let's read in the data.
+First we see what happens with the "native" R functions
+
+```{r}
+celldata = read.csv("./data/celldataNew.csv")
+names(celldata)
+summary(celldata)
+```
+
+We can see that 
+
+- the names get modified slighlty, to avoid using a reserved character "-", 
+
+- different variables are interpreted as numerical or factors
+
+
+Now let's try with the "Rstudio-type" commands
+
+```{r}
+celldata = read_csv("./data/celldataNew.csv")
+names(celldata)
+summary(celldata)
+```
+We can see that
+
+- Names are left as such
+
+- There is an explicit declaration of what type each of the variables are
+
+- The default interpretation has much more character than factors, so that we would do better modifying it.
+
+
+We can compute the dimensions of data table
+
+```{r}
+dim(celldata)
+```
+Note that when the data is read in, it is converted to a type of object called a dataframe.
+This is a convenient block form for data, that allows us to index the rows and columns
+easily
+```{r}
+is.data.frame(celldata)
+```
+Other important kinds of objects include vectors, matrices and lists.
+In "Rstudio commands", we actually have created a "tibble," which is just mostly just like a data frame. Here are some other useful things to do when you load a new dataset, to understand what type of data you have.
+
+Print out first few lines of data
+
+```{r}
+celldata[1:2, ]
+
+```
+
+Look at the first variable
+```{r}
+table(celldata$"dayof-on")
+```
+#### Compute histogram of number of years of driving
+```{r}
+qplot(celldata$"num-yrs-driving", geom = "histogram", color = I("red"), bins = 15)
+```
+_Note_: The color `I("red")` specification shows the bar boundaries,
+using mere `color = "red"` will also work, but provide a legend that
+we don't need. This is a detail relating to how `ggplot2` works.
+
+#### Make boxplots for  number of years of driving by gender
+Note that celldata[,"num-yrs-driving"] and celldata$"num-yrs-driving" are almost equivalent. The first will return a data frame with one variable, while the second a vector of values.
+
+```{r}
+qplot(x = celldata$gender, y = celldata$"num-yrs-driving", geom = "boxplot",xlab="Gender",ylab="Years of driving")
+```
+
+
+
+
+
+#### Main result, without accounting for "intermittent driving"
+
+
+
+  Results| Day before/On Phone | Day before/Not on phone
+--- | --- | ---
+Day of collision: On phone   | 13 | 157
+Day of collision: not on phone  | 24 | 505
+
+
+
+```{r}
+table(celldata$"daybef-on", celldata$"dayof-on")
+```
+
+Now let's define a function to compute the relative risk
+```{r}
+relRisk = function(celldata) {
+    n1 = sum(celldata[, "dayof-on"] == 0  & celldata[,"daybef-on"] == 1)
+    n2 = sum(celldata[, "dayof-on"] == 1  & celldata[,"daybef-on"] == 0)
+    out = n2 / n1
+    return(out)
+}
+```
+And let's try it out on different portions of the dataset. We start with the entire data:
+
+```{r}
+relRisk(celldata)
+```
+
+Then restrict to different speeds
+```{r}
+hi = celldata[, "Location"] == "highspeed"
+relRisk(celldata[hi, ])
+```
+```{r}
+low = celldata[, "Location"] == "lowspeed"
+relRisk(celldata[low, ])
+```
+
+
+
+
+### 100m Sprint Data
+
+Here we will analyze data on men's and women's world records for the 100m sprint.
+
+
+#### Let's read in the data on men
+
+```{r}
+library(readr)
+data.men = read_delim("./data/100men", 
+    "\t", escape_double = FALSE, col_types = cols(Date = col_date(format = "%Y-%m-%d")), 
+    trim_ws = TRUE)
+data.men
+```
+#### Let's read in the data on women
+
+```{r}
+
+data.women<- read_delim("./data/100women", 
+    "\t", escape_double = FALSE, col_types = cols(Date = col_date(format = "%B %d, %Y")), 
+    trim_ws = TRUE)
+```
+
+#### Extract numerical times and years
+
+```{r}
+time.men = data.men$Time
+date.men = data.men$Date
+time.men
+year.men =as.numeric(format(date.men,'%Y'))
+
+time.women = data.women$Time
+date.women = data.women$Date
+year.women = as.numeric(format(date.women,'%Y'))
+time.women
+year.women
+
+```
+
+Reverse order of men's data, to be most recent last (as in women)
+```{r}
+year.men = rev(year.men)
+time.men = rev(time.men)
+```
+
+#### Plot data
+```{r}
+library(ggplot2)
+qplot(x = year.men, y = time.men,
+      geom = c("point", "line"),
+      xlab = "Year", ylab = "Time",
+      main = "100m times for men")
+
+```
+
+```{r}
+qplot(x = year.women, y = time.women,
+      geom = c("point", "line"),
+      xlab = "Year", ylab = "Time",
+      main = "100m times for women")
+
+```
+
+
+#### Compute and plot  proportional decreases in time for each record
+```{r}
+prop.dec.men = diff(time.men) / time.men[-length(time.men)]
+
+qplot(x = year.men[-length(year.men)], y = prop.dec.men,
+      xlab = "Year", ylab = "Proportional decrease",
+      main = "100m times for men")
+```
+
+```{r}
+prop.dec.women = diff(time.women) / time.women[-length(time.women)]
+qplot(x = year.women[-length(year.women)], y = prop.dec.women,
+      xlab = "Year", ylab = "Proportional decrease",
+      main = "100m times for women")
+```
+
+ Let's plot the men with the same vertical range as women, to make comparison easier
+
+```{r}
+qplot(x = year.men[-length(year.men)], y = prop.dec.men,
+      xlab = "Year", ylab = "Proportional decrease",
+      ylim = range(prop.dec.women),
+      main = "100m times for men")
+```
+
+
+
+

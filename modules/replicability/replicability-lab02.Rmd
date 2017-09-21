@@ -1,0 +1,194 @@
+---
+title: "Replicability Lab 2"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+BH<-function(p,alpha)
+  {
+    pw<-na.omit(p)
+    n<-length(pw)
+    pw<-sort(pw)
+    comp<-(pw<(1:n)*alpha/n)
+    outcome<-sum(comp==TRUE)    
+    if(outcome>0){
+      last<-max((1:n)[comp==TRUE])
+      pcut<-pw[last]
+      shr<-p*0
+      shr[p<=pcut]<-1
+      out<-list(shr,sum(shr>0,na.rm=T),pcut)
+      names(out)<-c("Reject","Total.Rej","Pcut")
+    }
+    else
+      {
+        shr<-p*0
+        out<-list(shr,outcome,0)
+        names(out)<-c("Reject","Total.Rej","Pcut")
+      }
+    return(out)
+    
+  }
+
+
+# Now we should look at confidence intervals for the mean and talk about Winner's curse
+
+# Winner's curse 0: regression towards the mean/shrinkage
+
+M<-1000
+Tmean<-rnorm(M)
+y<-rnorm(M,Tmean,1)
+
+par(mfcol=c(2,3))
+plot(Tmean,y,xlab="True Means",ylab="Observations",main="Scatterplot")
+points(Tmean,Tmean,col="blue",pch=19)
+
+
+plot(y, Tmean,ylab="True Means",xlab="Observations",main="Other direction, 45d line")
+abline(0,1,col=2,lwd=2)
+
+
+plot(Tmean,y-Tmean,xlab="True Means",ylab="Observed-true",main="Sorting by true means")
+abline(0,0,col="red",lwd=2)
+
+#points(Tmean,rep(0,1000),col="blue",pch=19)
+
+plot(y,y-Tmean,xlab="Observed",ylab="Observed-true",main="Sorting by observations")
+abline(0,0,col="red",lwd=2)
+
+dt<-rep("2-9decile",M)
+dt[order(Tmean)>(9*M/10)]<-"last"
+dt[order(Tmean)<M/10]<-"1st"
+
+boxplot(y-Tmean~dt,ylab="Error",xlab="True Means")
+
+dy<-rep("2-9decile",M)
+dy[order(y)>(9*M/10)]<-"last"
+dy[order(y)<M/10]<-"1st"
+
+boxplot(y-Tmean~dy,ylab="Error",xlab="Observations")
+
+dev.print(file="Winner1.pdf",dev=pdf)
+
+
+# Winner's curse 1: the effect of selective reporting, requiring p < threshold 
+
+par(mfrow=c(1,3))
+Tmean<-rep(0,1000) # the majority of means is equal to 0
+N<-1000 # number of non zero means
+mu<-0.3 # signal strength
+Tmean[1:N]<-mu # first N means are equal to mu 
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+discoveries<-pvalue<0.05
+lower<-y-1.96
+upper<-y+1.96
+
+plot(y,pch=20,main="All variables",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+
+mtext(paste("true signal =",as.character(mu)),side=3,line=0)
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Average signal =",as.character(round(mean(y[1:N]),3))),side=1,line=2.5)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=4)
+
+plot(y,pch=20,main="Report if p-value<0.05",ylim=c(min(lower),max(upper)),xlab="")
+lower<-y-1.96
+upper<-y+1.96
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. correct sign  =",as.character(round(mean(y[discoveries==1]>=0),3))),side=1,line=2.5)
+
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=4)
+
+
+dy<-y[discoveries==1]
+dlower<-lower[discoveries==1]
+dupper<-upper[discoveries==1]
+plot(dy,pch=20,main="Zooming on reports",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Average positive reports=",as.character(round(mean(dy[dy>0]),3))),side=1,line=2.5)
+mtext(paste("Average negative reports ",as.character(round(mean(dy[dy<0]),3))),side=1,line=4)
+
+
+dev.print(file="Winner2.pdf",dev=pdf)
+
+
+# Winner's course 2: bias and confidence interval coverage after appropriate corrections for multiplicity
+
+Tmean<-rep(0,1000) # the majority is equal to 0
+N<-100 # number of non zero means
+mu<-3 # signal strenght
+Tmean[1:N]<-mu
+y<-rnorm(1000,Tmean,1)
+pvalue<-2*pnorm(-abs(y))
+discoveries<-BH(pvalue,0.05)[[1]]
+
+lower<-y-1.96
+upper<-y+1.96
+par(mfrow=c(1,3))
+plot(y,pch=20,main="All",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean>=lower)*(Tmean<=upper))/1000,3))),side=1,line=3)
+
+plot(y,pch=20,main="Selected",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(discoveries))
+{
+	if(discoveries[i]==1)
+	{lines(c(i,i),c(lower[i],upper[i]),col=2)}
+}
+points(1:1000,y,pch=20)
+points(1:1000,Tmean,col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+
+
+dy<-y[discoveries==1]
+dlower<-lower[discoveries==1]
+dupper<-upper[discoveries==1]
+plot(dy,pch=20,main="Zooming on selected",ylim=c(min(lower),max(upper)),xlab="")
+for(i in 1:length(dy))
+{
+	
+	lines(c(i,i),c(dlower[i],dupper[i]),col=2)
+}
+points(1:length(dy),dy,pch=20)
+points(1:length(dy),Tmean[discoveries==1],col="blue",pch=19)
+mtext(paste("Percent. of means covered =",as.character(round(sum((Tmean[discoveries==1]>=lower[discoveries==1])*(Tmean[discoveries==1]<=upper[discoveries==1]))/sum(discoveries==1),3))),side=1,line=3)
+
+dev.print(file="CoverageSelected.pdf",dev=pdf)
+
+
+# Real data analysis
+#====================
+load("prostz.RData") # these are the z-statistics for tests if there is a different in the expression of each of 6033 genes between prostate cancer tissue and normal tissue. 
+hist(prostz)
+pvalue<-2*pnorm(-abs(prostz))
+hist(pvalue)
+
+# Your goal is now to identify which genes have differential expression between prostate cancer tissue and normal one.
+
+
+
+

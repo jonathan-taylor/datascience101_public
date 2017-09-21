@@ -1,0 +1,74 @@
+---
+title: "Homework for PCA module"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+### Due Friday, June 2
+
+Note that this is the last HW for the class. We will be handing out exam practice questions next week.
+
+
+#### 1. Personality
+
+The  Week08.zip directory in CANVAS (please re-download it if you got it on thursday at lab times) contains the file `PersonalityALL`, with
+ the responses to a 100 items questionnaire that is expected to quantify different domains of your personality. 
+
+The exact list of tabulated questions  (with information on the trait they probe) is available at [myPersonalityQuestions](http://mypersonality.org/wiki/doku.php?id=ipip_questions)
+
+You can take the test at [discovermyprofile.com](http://discovermyprofile.com/personality.html).
+
+In class we only analyzed the answers to the first 20 questions: how do the results change when you look at the entire dataset? 
+Note that to really understand the difference between the results with 20 and with 100  questions you will need to re-do the analysis with 20 questions as well.
+Then you might address questions like: how many principal components do you need to explain 50% of the total variance? can you find a correspondence between some of the principal components and the OCEAN traits? Do the same individuals end up in similar portions of the principal component space in the two analysis?
+
+Conclude with a discussion of what you think you can learn from the dataset.
+
+```{r, include=F}
+library(readr)
+perso <- read_delim("./data/PersonalityALL", " ",escape_double = FALSE, col_types = cols(date = col_date(format = "%Y-%m-%d")),  trim_ws = TRUE)
+perso.pc<-prcomp(perso[,3:102],center=TRUE,scale=FALSE)
+summary(perso.pc)
+```
+
+#### 2. Congressional votes
+
+From the website [www.govtrack.us](https://www.govtrack.us/congress/votes), 
+you can gather much more data on votes of members of congress than the snapshop we analyzed during the lab. Use the options under "Filter Votes" to select Chamber and Cathegory. Unfortunately, you will need to download every vote as an individual file, but you know how to use R to merge them to obtain a file like the one we used in Lab.  Construct one dataset (choosing one chamber, one year, one type of votes...) and use principal component analysis to highlight some of its features
+
+
+#### 3. Italian wines
+
+The file `winedata.csv` in Week08.zip directory in CANVAS contains  data on amounts of 13 different chemicals in wines grown in the same region in Italy that are derived from three different cultivars (the cultivars are indicated in the first column, as "1","2", or "3"). 
+Look at how each of the chemicals vary across the three cultivars.
+Then do scatterplots of all the chemicals vs each other using different colors for each cultivar. And finally, do a principal component analysis of the chemicals and see if it helps you distinguish the wines from each of the cultivars. 
+
+
+```{r, include=F,fig.width=9,fig.height=6}
+library(readr)
+wine <- read.csv("./data/winedata.csv")
+summary(wine)
+dim(wine)
+par(mfrow=c(3,5))
+for(i in 2:14)
+  {plot(factor(wine[,1]),wine[,i])
+}
+```
+
+```{r, include=F,fig.width=9,fig.height=9}
+
+pairs(wine[,-1],col=wine[,1])
+```
+
+```{r, include=F,fig.height=5,fig.width=5}
+wine.pc<-prcomp(wine[,-1],center=TRUE,scale=TRUE)
+plot(wine.pc$x[,1],wine.pc$x[,2],col=wine[,1])
+
+```
+#### 4.  IQ debate
+
+Read the chapter from S.J. Gould "The mismeasure of man," and research the debate on how to measure intelligence. Summarize your understanding of the controversy and take a stand.
+
+

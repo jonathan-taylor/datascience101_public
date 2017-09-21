@@ -1,0 +1,110 @@
+SHELL = /bin/bash
+MODULE_DIR = modules
+BUILD_DIR = build
+
+LECTURES = $(wildcard $(MODULE_DIR)/*/*-lecture*.Rmd)
+LABS = $(wildcard $(MODULE_DIR)/*/*-lab*.Rmd)
+HWS = $(wildcard $(MODULE_DIR)/*/*-HW*.Rmd)
+
+SLIDES1 = $(patsubst $(MODULE_DIR)/%-lecture01.Rmd, $(MODULE_DIR)/%-lecture01.html, $(wildcard $(MODULE_DIR)/*/*-lecture01.Rmd))
+SLIDES2 = $(patsubst $(MODULE_DIR)/%-lecture02.Rmd, $(MODULE_DIR)/%-lecture02.html, $(wildcard $(MODULE_DIR)/*/*-lecture02.Rmd))
+SLIDES3 = $(patsubst $(MODULE_DIR)/%-lecture03.Rmd, $(MODULE_DIR)/%-lecture03.html, $(wildcard $(MODULE_DIR)/*/*-lecture03.Rmd))
+LAB1_OUTS = $(patsubst $(MODULE_DIR)/%-lab01.Rmd, $(MODULE_DIR)/%-lab01.html, $(LABS))
+LAB2_OUTS = $(patsubst $(MODULE_DIR)/%-lab02.Rmd, $(MODULE_DIR)/%-lab02.html, $(LABS))
+NB1_OUTS = $(patsubst $(MODULE_DIR)/%-lab01.Rmd, $(MODULE_DIR)/%-lab01.ipynb, $(LABS))
+NB2_OUTS = $(patsubst $(MODULE_DIR)/%-lab02.Rmd, $(MODULE_DIR)/%-lab02.ipynb, $(LABS))
+HW_OUTS = $(patsubst $(MODULE_DIR)/%-HW.Rmd, $(MODULE_DIR)/%-HW.html, $(HWS))
+BUILD_OUTS = $(patsubst $(MODULE_DIR)/%, $(BUILD_DIR)/%, $(wildcard $(MODULE_DIR)/*))
+
+Rdeps: pydeps
+	python tools/installRdeps.py modules/*/R-requirements.txt R-requirements.txt
+	python tools/installRgithub.py modules/*/R-github.txt R-github.txt
+
+pydeps:
+	-pip install notedown nbconvert sphinx nbformat pandoc-attributes;
+
+$(MODULE_DIR)/%.html: $(MODULE_DIR)/%.Rmd
+	python tools/build_slides.py $<;
+
+$(MODULE_DIR)/%lab01.ipynb: $(MODULE_DIR)/%lab01.Rmd
+	-python tools/export_jupyter.py $<;
+
+$(MODULE_DIR)/%lab02.ipynb: $(MODULE_DIR)/%lab02.Rmd
+	-python tools/export_jupyter.py $<;
+
+zipfiles/%.zip : Rdeps pydeps
+	python tools/make_zip.py $(patsubst zipfiles/%.zip, modules/%, $@)
+	-mkdir -p build/zipfiles
+	cp zipfiles/* build/zipfiles
+
+build/% : Rdeps ${LECTURES}
+	python tools/build_slides.py $(patsubst build/%, modules/%/*.Rmd, $@)
+	python tools/make_zip.py $(patsubst build/%, modules/%, $@)
+	-mkdir -p build/zipfiles
+	cp zipfiles/* build/zipfiles
+
+build_all: $(BUILD_OUTS)
+
+slides: Rdeps $(SLIDES1) $(SLIDES2) $(SLIDES3)
+
+labs: Rdeps $(LAB1_OUTS) $(LAB2_OUTS) $(NB1_OUTS) $(NB2_OUTS)
+	$(warning $(NB_OUTS))
+
+homework : $(HW_OUTS)
+
+$(BUILD_DIR)/index.html : index.md
+	notedown index.md > index.ipynb;
+	jupyter nbconvert --to=rst index.ipynb --output=index;
+	rm index.ipynb;
+	mv index.rst sphinx;
+	sphinx-build -v -E -b html sphinx _build/html ;
+	tools/fixup_html_links.R _build/html/index.html ;
+	-mkdir build;
+	cp -r _build/html/* build;
+
+all: slides labs homework $(BUILD_DIR)/index.html
+	cp -r modules/* build
+	rm -fr build/*/*cache
+	rm -fr build/*/*files
+	rm -fr build/*/*~
+	cp profile.R build;
+
+# force rebuild of slides and zipfiles
+all_force: build_all $(BUILD_DIR)/index.html
+	cp -r modules/* build
+	rm -fr build/*/*cache
+	rm -fr build/*/*files
+	rm -fr build/*/*~
+	cp profile.R build;
+
+clean:
+	rm -fr $(BUILD_DIR);
+	rm -fr _build;
+	rm -fr $(MODULE_DIR)/*/*lecture*html
+	rm -fr $(MODULE_DIR)/*/*lab*html
+	rm -fr $(MODULE_DIR)/*/*lab*ipynb
+	rm -fr $(MODULE_DIR)/*/*.md
+	rm -fr zipfiles
+
+
+upload:
+	rsync -avz build/* $(SUNET)@corn.stanford.edu:/afs/ir/class/stats101/WWW
+
+#
+# BN Addition for R package
+#
+
+stats101_pkg: $(RPKG_FILES)
+	tools/make_pkg_list.R . ./stats101
+	R CMD build stats101
+	R CMD INSTALL stats101_1.0.tar.gz
+	Rscript --default-packages=stats101 -e 'stats101_setup()'
+
+# take current state of git repo and build all
+# note: if changes aren't committed they won't be seen in this
+# test
+test_build:
+	mkdir _build_tmp
+	git archive HEAD |  gzip > _build_tmp/datascience101.tar.gz
+	cd _build_tmp; tar -xvzf datascience101.tar.gz;	make all
+	rm -fr _build_tmp

@@ -1,0 +1,148 @@
+---
+title: "Git Intro"
+output:
+     html_document
+---
+
+1. Go in the git directory. You can go down as much as you want. Any
+   git command will recognize what you have done
+
+2. At the beginning of a session to make sure you have all the changes
+that have been applied so far. Note that you will only do this once if
+you have not already cloned the repo.
+
+
+```{bash, eval = FALSE}
+git fetch
+git pull —rebase
+```
+
+## Checking the current status.
+
+The following command will alert you at what changes have happened so far
+
+```{bash, eval = FALSE}
+git status
+```
+This will also tell you on which branch of the repository you are on,
+etc.
+
+## Updating, adding files
+
+You have to tell `git` about any files you have added or modified by
+means of the `git add` command. The format is:
+
+```{bash, eval = FALSE}
+git add <stuff>
+```
+You can use the traditional unix shortcuts to name them all. Note that
+directories can also be added.
+
+This step merely stages the files; that is, it tells git that these
+are files you want committed. But you have to actually commit them,
+per the next section.
+
+Some useful commands in (what I think) typical frequency of use. On
+the command line, I recommend using the full word versions below as
+they aid memory.
+
+- To stage all modified, newly added (untracked) files, but ignoring
+deleted files, use:
+```{bash, eval = FALSE}
+git add .
+```
+
+- To stage all modified and removed files, ignoring newly added files,
+use:
+```{bash, eval = FALSE}
+git add --update
+```
+or equivalently
+
+```{bash, eval = FALSE}
+git add -u
+```
+
+- To stage _all_ files, including modified, newly added, and deleted
+files, use:
+```{bash, eval = FALSE}
+git add --all
+```
+or equivalently
+```{bash, eval = FALSE}
+git add -A
+```
+
+
+If you are unsure, note that you can always add `-n` to all these
+options so that you can get a _dry run_ without anything actually
+happening. Once you have checked things are ok, you can then remove
+the `-n` option.
+
+## Committing
+
+The commit command is below. What follows `-m` is a comment indicating
+what the commit was about.
+
+```{bash, eval = FALSE}
+git commit -m "last version of PCA3"
+git push
+```
+
+The last `push` command ensures that the changes were actually pushed
+to the remote directory since our repository is remote, not local. At
+this point, if the commit you made is to the master branch, you should
+see it in a browser at the
+[Data Science 101 Repo](https://bitbucket.org/jetaylor74/datascience_101).
+
+## Create a new branch
+
+This section is how I (Naras) usually operate within the Emacs'
+_Magit_ mode, but I don't think it necessary that others do so and so
+you may choose to ignore everything below.
+
+I create a branch whenever I want to make some feature changes.
+Making changes in my branch is a good way to create my edits away
+from the `master` branch.
+
+If you don't use branches, you are working directly with the `master`
+branch.
+
+To create a new branch, I execute
+
+```{bash, eval = FALSE}
+git branch mybranch
+```
+which creates a local branch named `mybranch`.
+
+Now I have to inform the remote repo that I have a new branch as shown
+below.
+
+```{bash, eval = FALSE}
+git push --set-upstream origin mybranch
+```
+
+Now I can do all my work with my branch as follows, first by checking
+it out.
+
+```{bash, eval = FALSE}
+git checkout mybranch
+```
+
+I then make my changes as usual and do commits and push changes
+upstream as outlined earlier.  When I push my branch to the remote
+repo, I am provided with a button to create a `pull` request on the
+website.  This pull request (different from `git pull`) is a request
+to merge the branch into the master. I have to approve it and in the
+process resolve any conflicts that may arise. Once it is approved,
+stuff from my branch, gets merged into the master branch.
+
+Once done with a branch, I can delete it.
+
+```{bash, eval = FALSE}
+git branch -d mybranch
+```
+This does not affect the changes that have already been merged into
+the master via my pull request.
+
+

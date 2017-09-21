@@ -1,0 +1,11 @@
+Racial/Ethnic category	Degree-Seeking First-Time First Year 	Degree-Seeking Undergraduates 	Total Undergraduates (both degree- and non-degree- seeking)
+Nonresident aliens 	172	640	642
+Hispanic/Latino 	287	1117	1117
+"Black or African American, non-Hispanic "	130	449	449
+"White, non-Hispanic "	601	2545	2545
+"American Indian or Alaska Native, non-Hispanic "	19	75	75
+"Asian, non-Hispanic "	374	1454	1454
+"Native Hawaiian or other Pacific Islander, non- Hispanic "	7	24	24
+"Two or more races, non-Hispanic "	137	700	700
+Race and/or ethnicity unknown 	11	28	28
+Total 	1738	7032	7034

@@ -1,0 +1,21 @@
+
+1 / Rob: 9/26 Intro   *  
+2 / Jon: 10/3 Data munging and wrangling    Naras
+3 / Lucy: 10/10 Summary statistics  *
+4 / Lucy: 10/17 Visualization tools (histograms, scatterplots, etc.)    Guenther/Jon
+5 / Lucy: 10/24 Sampling variability and uncertainty of statistical estimates  Lester/Jon
+6 / Jon: 10/31 Resampling and testing of statistical hypotheses  *
+7 /  Rob  : 11/7  Linear regression and prediction  
+
+
+8 /  Split (?) : 11/14 principal component analysis, 
+9 /  Rob 11/28 Nonparametric statistics (transformations of the data, ranking, etc.)   Susan/Lucy
+10 / Jon: 12/5 The problem of multiple comparisons and data snooping   Emmanuel
+
+*=ready
+Design of experiments (observational vs. experimental studies,
+confounding factors) will be sprinkled in various places
+
+
+
+

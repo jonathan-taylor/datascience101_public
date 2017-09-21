@@ -1,0 +1,99 @@
+ Syllabus
+
+Data Science 101 :
+Offered Autumn and Spring 2017-2018.
+
+(5 units)
+
+This course will provide a hands-on introduction to statistics and data science. Students will engage with the fundamental ideas in inferential and computational thinking. Each week, we will explore a core topic comprising three
+lectures and two labs (per module), in which students will manipulate
+real-world data and learn about statistical and computational
+tools. Students will engage in statistical computing using the R language.
+
+The objectives of this course are to enable students to:
+
+(1) connect data to underlying phenomena and to think critically about conclusions drawn from data analysis, and
+(2) be knowledgeable about programming abstractions for data analysis so that they can later design their own computational inferential procedures.
+  
+Instructors
+
+Jonathan Taylor
+
+    Office: Sequoia Hall #137
+    Phone: 723-9230
+    Email jonathan.taylor@stanford.edu
+  
+
+Lucy Xia
+
+    Office: Sequoia Hall #244
+    Phone: 497-8146
+    Email lucyxia@stanford.edu
+
+
+Pete Mohanty
+
+     Office: Sequoia Hall #202
+     Phone:
+     Email pmohanty@stanford.edu
+
+Weekly topics:
+
+        Week 1: Introduction to Data Science- real world examples of
+          past and present applications of data science
+        Week 2: Data munging and wrangling   -the  R language, R markdown, R studio
+        Week 3: Summarizing Data- mean, median, quantiles, missing
+          data, outliers
+        Week 4: Visualizing Data- informative graphics, histograms,
+          boxplots, graphical perception
+        Week 5: Sampling variability- the data as a sample,
+          resampling, bootstrapping
+        Week 6: Some inference: hypothesis tests and resampling-
+          permutation and bootstrap hypothesis testing
+        Week 7: Regression models and prediction- defining and fitting
+          models, regression to the mean; residuals
+        Week 8: Principal components analysis- linear combinations
+          with  highest variation;  proportion variance explained
+        Week 9: Nonparametric inference- model-free approaches to the
+          analysis of data
+        Week 10: Data snooping and multiple comparisons:  type I
+          errors; multiple testing; False discovery rates
+
+
+
+
+Schedule & Location MTWRF 9:30-10:20,  Building 200, room 205
+
+
+Course Level: Undergraduate. Freshmen and sophomores especially
+encouraged to attend.  No prerequisites. Enrollment cap in Fall 2016: 80, in Spring 2017: 150.
+
+
+Prerequisites
+
+Some familiarity with elementary algebraic notation at the high school level is assumed, but there is no calculus prerequisite.
+
+
+Course organization
+
+There will be three lectures per week  and two labs.
+  
+
+
+
+Evaluation
+
+   There will be weekly homework assignments.
+A typical assignment may take the following form: a question,
+(e.g. a social or scientific question), and a data set which
+students can analyze to provide possible answers to the question.
+
+The final exam will be a take-home analyses of real data.
+
+The course grade will be determined on the basis of:
+
+* weekly homework assignments (60%) (worst grade will be dropped).
+* final in class exam (40%).
+
+
+

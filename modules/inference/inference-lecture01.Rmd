@@ -1,0 +1,643 @@
+---
+title: "Assessing evidence: hypothesis tests"
+author: "Data Science Team"
+output:
+    slidy_presentation:
+        css: styles.css
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE, fig.height=4, fig.width=4)
+library(pacman)
+pacman::p_load(iterpc,tidyverse,foreach)
+
+```
+
+## Testing hypotheses
+
+- This module investigates the use of data science and statistics
+to answer questions about the process that generated data we observe.
+
+- Key concepts in this module:
+    + Formulation of a question: a **hypothesis**
+    + Evaluating the evidence for or against the question: a **hypothesis test** based on a **test statistic**
+    + What are the chances: **reference distribution**
+    
+- We start by introducing some new concepts:
+    + contingency tables
+    + independence of discrete random variables
+    
+- We will then introduce the idea of testing hypotheses
+
+## Contingency tables
+
+- An example data set from [Practical Data Science with R](https://github.com/WinVector/zmPDSwR) by Nina Zumel and John Mount
+- This is a synthetic dataset based on [PUMS](https://www.census.gov/programs-surveys/acs/data/pums.html) that contains information on individuals including income, sex, housing type, vehible ownership, age, marital status, and whether the subject has health insurance
+- Let's make a table of sex by marital status
+
+```{R}
+custdata = read.table('./data/custdata.tsv',header=T,sep='\t')
+cross = table(custdata$sex, custdata$marital.stat)
+cross
+```
+
+- This is a cross-tabulation or **contingency table**, which shows the counts of the number of observations/subjects having each of the possible combinations of values of these two **categorical variables**
+- Adding up all of the numbers in the table gives us the total number of observations
+
+```{r}
+cat('total count in table:',sum(cross),'total number of observations:',nrow(custdata))
+```
+
+- The sums by row and column give the **marginal counts** or a **simple tabulation**. For example:
+
+```{r}
+apply(cross,2,sum)
+table(custdata$marital.stat)
+```
+
+## Discrete random variables
+
+- We will now introduce an abstract concept and then relate it back to the contingency table
+- A **discrete random variable** X is a quantity that 
+    1. is random -- we cannot know with certainty the result of measuring it beforehand
+    2. Takes on a set of values that can be associated with the positive integers 1,2,3,...etc. For our purposes, we can think of it as taking on **finitely many** values
+    3. we can associate to each unique value a **probability** that X takes that value, so that if we repeat the experiment many times, we can predict the long-run relative frequency that it takes each value
+    
+- Example: the outcome of the spin of a Roulette wheel is a discrete random variable because
+    1. It takes finitely many distinct values (1-36, 0, and 00 in American roulette)
+    2. We don't know with certainty which pocket the ball will fall into before we play
+    3. We do know the **probability** that it falls into each pocket (they all have equal probability on a fair roulette wheel), so that if we play **many games** of roulette, we can predict the relative frequency with which the ball will land in each pocket: $\frac{1}{38}$
+    
+- So if X is a discrete random variable, we can write down (1) its set of possible values and (2) the probablity that it takes each value. This is called its **probability mass function** or **pmf**
+
+- For roulette, we can write the pmf succinctly as $$P[X=x] = \frac{1}{38}$$ for $$x = 1,2,3,...,36,0,00$$ and $P[X=x] = 0$ otherwise (assuming the ball doesn't fly off the wheel or get stuck...but we ignore these rare complications).
+
+## Independence
+
+- Now think about **two** random variables $X$ and $Y$. Suppose they take $K_x,K_y$ possible values. Then we can write their distributions as
+$$P[X = j] = p_j, \quad j=1,2,...,K_x$$
+$$P[Y = j] = q_j, \quad j=1,2,...,K_y$$
+for two sets of nonnegative numbers $p_1,p_2,...,p_{K_x}$ and $q_1,q_2,...,q_{K_y}$ for which
+$$\sum_{j=1}^{K_x} p_j = \sum_{j=1}^{K_y} q_j = 1$$
+
+- We say that $X$ and $Y$ are **independent** if
+$$\pi_{jk} = P[X=j,Y=k] = P[X=j]P[Y=k] = p_j q_k$$
+where $P[X=j,Y=k]$ is the probability that $X=j$ **and** $Y=k$. 
+
+- For example, suppose we have two roulette wheels sitting across the room from each other, and $X$ represents the outcome when we spin the first wheel, while $Y$ represents the outcome when we spin the second wheel
+
+- Unless something "funny" is going on, the two outcomes are **independent** -- that is, which pocket the ball lands in on the first wheel is completely unaffected by which pocket the ball lands in on the second wheel. 
+
+- So consider the event of rolling a 1 on the first wheel and a 2 on the second wheel, which we can represent as $X=1,Y=2$. By independence, we have
+$$P[X=1,Y=2] = P[X=1]P[Y=2] = \frac{1}{38} \frac{1}{38} = \frac{1}{1444}$$
+
+## Back to contingency tables
+
+- Let's now come back to our contingency table example
+
+```{r}
+cross
+```
+
+- This table represents the outcome of measuring `sex` and `marital.stat` for 1000 subjects
+
+- We can think of each subject as a single experiment with a random outcome -- in other words `sex` is our first roulette wheel (which only has two pockets, which may or may not be equally likely) and `marital.stat` is our second roulette wheel (which has four pockets, which also may or may not be equally likely)
+
+- So the data can be thought of as recording the outcome of simultaneously spinning two very odd roulette wheels (different numbers of probably not equally sized pockets). Are the two wheels **independent**? 
+
+- We can look for evidence for or against the idea that sex and marital status are **independent** in the data on the 1000 subjects
+
+- We'll now see one way to do this
+
+## Marital status & sex
+
+- From our contingency table, we can compute the **empirical probabilities**; the relative frequency of each possible outcome
+```{r}
+n.obs <- nrow(custdata)
+pi.hat <- cross/sum(cross)
+```
+
+- You can think of these as **estimates** $\hat{\pi}_{jk}$ of the probabilities $\pi_{jk} = P[X=j,Y=k]$ based on the data, where $X$ represents sex and $Y$ represents marital status
+
+- We can also compute the empirical probabilities for the **marginal tables**
+
+```{r}
+sex.tab <- table(custdata$sex)
+p.hat <- sex.tab/sum(sex.tab)
+p.hat
+mar.tab <- table(custdata$marital.stat)
+q.hat <- mar.tab/sum(mar.tab)
+q.hat
+```
+
+- You can think of these as **estimates** $\hat{p}_j$, $\hat{q}_k$ of the **marginal probabilities** $p_j = P[X=j]$ and $q_k = P[Y=k]$
+
+- These are just estimates because we only have a **sample** of all people, we don't have data on the entire human population
+
+- If sex and marital status **were independent** then we would expect:
+$$\hat{\pi}_{jk} \approx \hat{p}_j \hat{q}_k$$
+
+- We can also compute the **expected counts** -- the contingency table for sex and marital status that we would expect to observe under independence, assuming $\hat{p} = p$ and $\hat{q} = q$
+
+- We do this in a loop to make it clear what's going on
+
+```{R}
+independence_prob = matrix(0, nrow=2, ncol=4)
+for (j in 1:2) {
+    for (k in 1:4) {
+        independence_prob[j,k] = p.hat[j] * q.hat[k]
+    }
+}
+expected_counts = n.obs * independence_prob
+```
+
+- Is this:
+```{r}
+round(expected_counts)
+```
+which is (approximately) what we would get under independence, close enough to this:
+```{r}
+cross
+```
+that it is plausible that sex and marital status are independent?
+
+
+## Marital status & sex
+
+- How can we assess this *rigorously*?
+
+- Consider the following measure of **how far apart** two contingency tables are:
+$$d(O,E) = \max_j \max_k |O_{jk}-E_{jk}|$$
+where $O,E$ are two contingency tables
+
+- This is the **maximum absolute difference** between any two cells
+
+- We now need three things
+    1. A **hypothesis**
+    2. A **test statistic** that should quantify information in the data pertaining to the hypothesis
+    3. A **reference distribution** for this test statistic when the hypothesis is true
+    
+- In our case
+    1. The **hypothesis** is that marital status and sex are **independent**
+    2. Our test statistic is $d(O,E)$ as defined above, where $O$ is the observed contingency table counts and $E$ the **expected counts** under independence
+    3. Our **reference distribution** is the distribution of the $d(O,E)$ **when the hypothesis is true** -- i.e., the distribution of $d(O,E)$ when in fact sex and marital status are **independent**
+    
+- We already have 1 and 2. We can get 3 by simulation.
+
+- Assuming our marginal frequencies of `marital.stat` and
+`sex` are good estimates, we can then generate
+many tables $O^*_1,O^*_2,\ldots,O^*_M$ each with total cell count `r I(n.obs)` in which the two variables
+were independent with pmfs $\hat{p}$ and $\hat{q}$
+
+- Each time we compute $d(O^*_m,E)$ for $m=1,2,\ldots,M$
+
+- We then look at where $d(O,E)$ falls in this distribution. If sex and marital status are actually independent, then our observed $d(O,E)$ will probably be in the "middle" of the distribution. If not, it will likely fall somewhere in the tails.
+
+
+## Reference distribution
+
+- We now create our reference distribution by generating $O^*_1,O^*_2,\ldots,O^*_M$ for "large" $M$ and computing $d(O^*_m,E)$ for each one
+
+- Here is some code to do this
+
+```{R}
+sample_table = function(expected_counts) {
+   expected_freq = expected_counts / sum(expected_counts)
+   return(as.table(matrix(rmultinom(1, as.integer(sum(expected_counts)), expected_freq),
+                                    nrow=nrow(expected_counts),
+                                    ncol=ncol(expected_counts))))
+}
+
+reference_distribution = function(nsample,expected_counts,deviation_function) {
+    expected_freq = expected_counts / sum(expected_counts)
+    reference_sample = numeric(nsample)
+    for (i in 1:nsample) {
+        reference_sample[i] = deviation_function(sample_table(expected_counts), expected_counts)
+    }
+    return(data.frame(reference_sample))
+}
+```
+
+## Reference distribution
+
+- The function `how_far` computes $d(O^*_m,E)$
+
+- We use $M=2000$ to get a reference distribution
+
+```{R}
+how_far = how_far = function(sample_table, expected_counts) {
+    return(max(abs(sample_table - expected_counts)))
+}
+
+how_far_sample = reference_distribution(2000, expected_counts, how_far)
+```
+
+- Here is what we get with our actual data $d(O,E)$
+```{r}
+d.obs <- how_far(cross, expected_counts)
+d.obs
+```
+
+
+## Reference distribution
+
+- Now let's plot our reference distribution, adding a vertical line for our observed value of the test statistic
+
+```{R, warning=FALSE, message=FALSE}
+ggplot(how_far_sample, aes(x=reference_sample)) +
+        geom_histogram(aes(y=..density..)) + geom_vline(xintercept = d.obs,col=2)
+```
+
+- Looks like our observed value of the test statistic lies in the tail of the reference distribution
+
+- In other words, it would be unlikely to observe the value of $d(O,E)$ that we see in the data if in fact sex and marital status were independent
+
+## Different measure of deviation
+
+- We might have used some other measure of how far apart two contingency tables are, such as
+$$d(O,E) = \sum_j \sum_k |E_{jk}-O_{jk}|$$
+which we compute in the function `total_dist`
+
+```{R}
+total_dist = function(sample_table, expected_counts) {
+    return(sum(abs(sample_table - expected_counts)))
+}
+total_dist_sample = reference_distribution(2000, expected_counts, total_dist)
+```
+
+- The value we observe in the actual data is
+```{r}
+td.obs <- total_dist(cross, expected_counts)
+td.obs
+```
+
+
+```{R}
+ggplot(total_dist_sample, aes(x=reference_sample)) +
+        geom_histogram(aes(y=..density..)) + geom_vline(xintercept = td.obs,col=2)
+```
+
+- Again, it looks like it would be very unusual to see a value of the distance this large if in fact sex and marital status were independent
+
+## Evidence against independence
+
+- Using both measures, our observed table `cross`
+seems to behave differently than tables in which
+`marital_status` is independent from `sex`.
+
+   * Caveat: we have assumed that our marginal frequencies
+   are good estimates.
+
+- This evidence against independence leads us to conclude that  **`marital_status` and `sex` are not independent**
+
+- In other words, we **reject the hypothesis** that sex and marital status are independent
+
+- Commonly, the hypothesis being tested is referred to as a "null hypothesis," to somehoe connote that it is the "default" state of nature  
+
+- Often, the null is in some sense a "simpler" state of nature. The **complement** of the null -- i.e. the state of nature that would prevail if the null hypothesis were false -- is usually referred to as the **alternative** (though in some cases we specify a more restrictive set of alternatives) 
+
+- So concluding that our test statistic is very unlikely to be observed under the null is often called **rejecting the null**
+
+
+## Evidence against independence
+
+- The evidence against independence can be summarized by seeing how many of our reference tables were more extreme than our observed one.
+
+- This is an estimate of the **probability** of observing a statistic as extreme or more extreme as the one we actually observed **given that the null was true**
+
+- This is what we call a [**p-value**](https://en.wikipedia.org/wiki/P-value).
+
+```{R}
+c(mean(how_far_sample > how_far(cross, expected_counts)),
+  mean(total_dist_sample > total_dist(cross, expected_counts)))
+```
+
+- Since we took $M=2000$ samples, we estimate that the p-value is less than $0.0005 = 1/2000$ (ignoring sampling variability -- will discuss this in a moment)
+
+- It seems that our observed table `cross` is quite extreme.
+
+## Monte Carlo approximation
+
+- Our *p-value* is based only on 2000 tables we generated (and
+depends on these particular 2000).
+
+- It is an approximation of the true proportion
+of tables (with those marginal frequencies) that are
+more extreme than our observed table using the scores
+`how_far` and `total_dist`.
+
+- Such an approximation is called [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) approximation.
+
+
+## Evidence against independence
+
+- Statisticians have developed many measures like `how_far` or
+`total_dist`. Some work better than others.
+
+- Here is one that only looks at the difference in one of the cells:
+$$d(O,E) = O_{11}-E_{11}$$
+
+```{R}
+single_entry = function(sample_table, expected_counts) {
+    return((sample_table[1,1] - expected_counts[1,1]))
+}
+single_entry_sample = reference_distribution(2000, expected_counts, single_entry)
+```
+
+## Evidence against independence
+
+- Our table is not quite as extreme with this measure
+
+```{R, warning=FALSE}
+d.se <- single_entry(cross, expected_counts)
+ggplot(single_entry_sample, aes(x=reference_sample)) +
+        geom_histogram(aes(y=..density..)) + geom_vline(xintercept = d.se,col=2)
+```
+
+## Evidence against independence
+
+- In `R`, one of these common measures can be easily computed
+
+- This function generates many tables *almost* the same way we did.
+
+```{R}
+chisq.test(cross, simulate.p.value=TRUE)
+```
+
+- Uses [Pearson's $X^2$](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test) as a measure of discrepency
+rather than `how_far` or `total_dist`.
+
+## Evidence against independence
+
+- This function does not simulate at all, but computes a similar p-value.
+
+```{R}
+chisq.test(cross, simulate.p.value=FALSE)
+```
+
+## What is a *p-value*?
+
+- Suppose `marital_status` and `sex` really were independent
+and our marginal frequencies were good estimates.
+
+- How would our p-values behave?
+
+```{R}
+pvalue_sample = numeric(10000)
+for (i in 1:10000) {
+    pvalue_sample[i] = mean(how_far_sample > how_far(sample_table(expected_counts), expected_counts))
+}
+```
+
+## What is a *p-value*?
+
+```{R, warning=FALSE}
+(ggplot(data.frame(pvalue_sample), aes(x=pvalue_sample)) +
+        geom_histogram(aes(y=..density..),bins=10)) + xlim(0,1)
+```
+
+- We call this density *uniform* on the interval [0,1]
+
+- A random variable has a **uniform distribution** on the unit interval if
+$$P[X \in [a,b]] = |b-a|$$
+for any $0 \le a \le b \le 1$.
+
+- We say that p-values have a **uniform distribution under the null**
+
+- This is an example of the general result referred to as the [probability integral transform](https://en.wikipedia.org/wiki/Probability_integral_transform) (you don't need to know this, just putting it here in case of interest)
+
+## What is a *p-value*?
+
+- When `marital_status` and `sex` really are independent,
+then the sampling distribution of our `pvalue` is known.
+
+- Here is a visualization of its cumulative distribution function (or **CDF**), the function given by $f(x) = P[X \le x]$
+
+```{R}
+ECDF = ecdf(pvalue_sample)
+grid = seq(0, 1, length=101)
+qplot(grid, ECDF(grid))
+```
+
+## What can we do with a *p-value*?
+
+- Suppose we decide that a *p-value* less than 0.05 is strong
+evidence against independence.
+
+- What do we know?
+
+- Well, 5% of the time, even when `marital_status` and `sex`
+are independent, we will say that there is strong evidence
+they are not independent.
+
+- This type of error is called a [**Type I error**](https://en.wikipedia.org/wiki/Type_I_and_type_II_errors).
+
+- In words: a **Type I error** is **rejecting the null when the null is true**
+
+- Thresholding the *p-value* at 5% controls the **Type I error rate** at 5%
+
+- In other words, suppose we test **many** hypotheses by thresholding the p-value at 5%, and in **every case**, the null was actually true  
+
+- Then in about 5 percent of those cases, we will **incorrectly reject the null**
+
+## Lady Tasting Tea
+
+- This is a famous example of R. A. Fisher illustrating the idea of a **hypothesis test**.
+
+- A lady declares that by tasting a cup of tea made with milk she can determine whether or not the tea was added before the milk.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Nice_Cup_of_Tea.jpg/440px-Nice_Cup_of_Tea.jpg">
+
+### Experiment
+
+- She is asked to taste eight cups, four of each type.
+
+- Cups are presented in a random order.
+
+- She correctly identifies the type of 6 out of 8 cups.
+
+- Do you think she can really tell the difference?
+
+## A representation of the experiment
+
+- Let her choices either `T` or `M`. She must make 8 choices, 4 of which will be `T` and
+4 of which will be `M`.
+
+- The true types of the tea are also `T` or `M`.
+
+- Here is an example of how we might describe the experiment
+
+
+```{r}
+lady = c('M', 'T', 'M', 'T', 'T', 'T', 'M', 'M')
+truth = c('M', 'M', 'M', 'T', 'T', 'T', 'T', 'M')
+number_correct = sum(lady == truth)
+number_correct
+```
+
+## A mental model
+
+- The variables `lady` and `truth` are just two outcomes for the experiment
+in which the lady correctly identifies exactly 6 of the cups of tea.
+
+- Is this unusual? How many other outcomes for her choices are there?
+
+- How many other outcomes for her choices are there where she correctly identifies 6 or more?
+
+## Permutations
+
+- A *permutation* of a list is a reordering of the list.
+
+- The set of all possible outcomes for `lady` is the set of all
+reorderings of the list `lady`.
+
+
+```{r}
+library(iterpc)
+original_list = c(1:3)
+original_list
+```
+
+
+```{R}
+I = iterpc(3, labels=original_list, ordered=TRUE)
+getall(I)
+```
+
+## Let us count the ways...
+
+
+```{R}
+number_outcomes = 0
+exactly_six = 0
+six_or_more = 0
+
+library(foreach)
+I = iterpc(8, labels=lady, ordered=TRUE)
+permutations_lady = iter_wrapper(I)
+results = (foreach(lady_permuted=permutations_lady, .combine=rbind)
+              %do% { c(1, sum(lady_permuted == truth) == 6, sum(lady_permuted == truth) >= 6)})
+
+totals = apply(results, 2, sum)
+```
+
+
+```{R}
+number_outcomes = totals[1]
+exactly_six = totals[2]
+six_or_more = totals[3]
+data.frame(number_outcomes, exactly_six, six_or_more)
+```
+
+## What if there was no difference between the cups of tea?
+
+- If the lady could really tell no difference between the two,
+then any one of 40320 possible outcomes for her choices should
+reasonably be considered equally likely.
+
+- There were 9792 such outcomes in which she would have
+correctly identified 6 or more.
+
+- As the choices are equally likely, the chances that she would
+correctly identify 6 or more are
+$$
+\frac{9792}{40320} \approx 24\%.
+$$
+
+- Not that rare an occurence. The chances she would correctly identify exactly 6 is about 23%!
+
+<!-- #### Food for thought: why didn't we also permute the `truth`? -->
+
+
+```{r}
+c(six_or_more / number_outcomes, exactly_six / number_outcomes)
+```
+
+## More data?
+
+- The percentage of 75% seemed pretty impressive until we computed the chances
+we would see such an impressive rate.
+
+- What if she had correctly identified 60 out of 80 cups of tea?
+
+- In this case, the number of reorderings is huge, about $10^{118}$!
+
+- Our mental model is still valid: if the lady actually has no ability
+to tell the difference between the two types of teas, then any of these
+orderings is equally likely, whatever `truth` is.
+
+- We can get a sense of how impressive this is by choosing several reorderings
+at random and computing the number of matches.
+
+## More data?
+
+```{r}
+lady = c(rep('T', 40), rep('M', 40))
+truth = c(rep('T', 40), rep('M', 40))
+lady[1:10]
+```
+
+
+```{r}
+more_than_60 = function(number_permutations) {
+    exactly_sixty = 0
+    sixty_or_more = 0
+    matches = numeric(number_permutations)
+    for (i in 1:number_permutations) {
+        lady_reordering = sample(lady, length(lady), replace=FALSE)
+        number_match = sum(lady_reordering == truth)
+        exactly_sixty = exactly_sixty + (number_match == 60)
+        sixty_or_more = sixty_or_more + (number_match >= 60)
+        matches[i] = number_match
+    }
+    return(list(matches=matches, exactly_sixty=exactly_sixty, sixty_or_more=sixty_or_more))
+}
+
+results = more_than_60(50000)
+c(results$exactly_sixty, results$sixty_or_more)
+```
+
+## Maybe she does know what she's doing...
+
+- We would really have been impressed by a 75% rate if she had tasted 80 cups of tea!
+
+- We sometimes (though not always) saw 1 reorderings out of 50000 with a success rate of 75%.
+
+- The probability 1/50000 might not be a great estimate of how likely she
+would be to achieve a success rate of 75% or higher if she really could not
+distinguish between the cups of tea.
+
+- BUT, it certainly gives strong evidence that our mental model may be wrong...
+
+## Sampling distribution
+
+- Instead of just computing the chances above, we could record the number
+of matches for each reordering of `lady` and produce a histogram.
+
+
+```{R, warning=FALSE}
+(ggplot(data.frame(results), aes(x=matches)) +
+        geom_histogram(aes(y=..density..), bins=20))
+```
+
+## The null hypothesis
+
+- Our mental model above represents how we might model the experiment
+under the assumption that the lady really cannot distinguish
+between different the different types.
+
+- This is the *null hypothesis*.
+
+- The permutations above represented different outcomes for our experiment.
+
+- Under our null hypothesis, each of these outcomes was equally likely. This allowed us to compute the chances that the lady would have a success rate of 75% or higher if she really could not tell the difference (i.e. *assuming the null hypothesis was correct.*)
+
+- For 6/8, the chances were about 25%, we were not very impressed. If she had achieved 60/80, we really would have been impressed.
+
+- **Observing something that is rare under the null hypothesis is evidence against the null hypothesis.**
+
+- How rare? This is measured by the **p-value**.
+
+

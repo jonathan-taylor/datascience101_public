@@ -1,0 +1,333 @@
+---
+title: "More Inference: Power and Confidence intervals"
+author: "Data Science 101 Team"
+output: 
+    slidy_presentation:
+        css: styles.css
+        keep_md: true
+
+---
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+library(pacman)
+pacman::p_load(ggplot2)
+```
+
+## Recap of p-values and hypothesis testing
+
+- So far this week, we have discussed doing inference in the following way:
+    1. State a hypothesis
+    2. Define a test statistic and compute it on the data
+    3. Quantify evidence about the hypothesis by comparing to a reference distribution (the distribution of the test statistic given that the hypothesis is true). We often do this by computing a p-value
+    
+- We talked about **Type I errors**: rejecting the null hypothesis when the null hypothesis is true, and said that if we reject the null when the p-value $p < \alpha$, then we will have a type I error rate of $\alpha$
+
+- But what happens when the null **isn't true**?
+
+## The alternative hypothesis
+
+- In addition to the null hypothesis, we generally have an **alternative** hypothesis
+
+- Often, this is just the complement (or negation) of the null
+
+- For example, when we were testing for independence of $X$ and $Y$, the alternative was just that $X$ and $Y$ were **dependent**
+
+- We don't want to reject the null when the null is true...but ideally we would like to reject the null when the alternative is true as often as possible
+
+- Failing to reject the null when the alternative is true is called a **Type II error**
+
+## Simple example
+
+- Suppose we have $n$ observations of a continuous random variable $X$ and we want to test whether $X$ has expectation zero
+
+- Formally, this means that if $f(x)$ is the probability density function for the random variable $X$, then 
+$$\int_{-\infty}^{\infty} x f(x) dx =0$$
+
+- Or, in words, the mean of the "abstract population" is zero...let's call the mean of the abstract population $\mu$. So we want to test the hypothesis $H_0: \mu = 0$. 
+
+- But we only get to observe a **sample** from the population
+
+- **Idea**: let's use the sample mean 
+$$\frac{1}{n} \sum_{i=1}^n x_i$$ 
+as the test statistic. How can we construct our reference distribution?
+
+## Bootstrap p values
+
+- One way might be to use the bootstrap. Suppose we have 20 observations. For now let's generate them with the hypothesis being true
+
+```{r}
+n <- 20
+x <- runif(n,-2,2)
+xbar <- mean(x)
+xbar
+```
+
+- Now, let's create our reference distribution using the bootstrap. Remember, the reference distribution should be an estimate of the distribution of our test statistic when the null is true. So we subtract the sample mean from our data to make sure that they have mean zero, then bootstrap.
+
+```{r}
+boot.mn <- function(B,x) {
+  cent.x = x-mean(x)
+  mn.boot = numeric(B)
+  samp = matrix(sample(cent.x,n*B,replace=TRUE),B,n)
+  mn.boot = apply(samp,1,mean)
+  return(mn.boot)
+} 
+
+mn.boot <- boot.mn(2000,x)
+  
+df.boot <- data.frame(mn.boot=mn.boot)
+ggplot(df.boot,aes(x=mn.boot)) + geom_histogram() + geom_vline(xintercept = xbar, col=2)
+```
+
+- Now let's compute a p-value
+```{r}
+mean(abs(mn.boot)>abs(xbar))
+```
+
+## Aside: central limit theorem
+
+- We're doing everything by simulation here, but...we are bootstrapping a sample mean
+
+- So the central limit theorem should apply...meaning we should get a very similar p-value from this calculation:
+
+```{r}
+2*min(pnorm(xbar,0,sd(mn.boot)),1-pnorm(xbar,0,sd(mn.boot)))
+```
+
+- Magic? No, just math...
+
+## Back to bootstrapping
+
+- Ok, great, we know how to compute p-values using the bootstrap
+
+- But what about when the null is false? What happens with our p-value?
+
+```{r}
+x <- runif(n,-1.9,2.1)
+xbar <- mean(x)
+mn.boot <- boot.mn(2000,x)
+mean(abs(mn.boot)>abs(xbar))
+```
+
+- The null was false, but we still got a p-value that indicated the null is quite plausible. Why?
+
+## What matters? Sample size and "separation"
+
+- In that example, the null was false, but the true mean was only 0.1, which isn't that different from the null
+
+- Let's make the truth "more separated" from the null
+
+```{r}
+x <- runif(n,-1,3)
+xbar <- mean(x)
+mn.boot <- boot.mn(2000,x)
+df <- data.frame(mn.boot=mn.boot)
+ggplot(df,aes(x=mn.boot)) + geom_histogram() + geom_vline(xintercept = xbar,col=2)
+
+mean(abs(mn.boot)>abs(xbar))
+```
+
+- Now the null looks really implausible
+- What changed? The **true** mean is now 1, which is a lot farther from 0 than is 0.1
+
+## Effect of sample size
+
+- If the sample size were larger, that would also help us to identify a true alternative
+
+- The reason is that our estimate of the mean in the original data becomes a lot more precise, and this is reflected in the variance of the bootstrap distribution
+
+```{r}
+n <- 1000
+x <- runif(n,-1.9,2.1)
+xbar <- mean(x)
+
+mn.boot <- boot.mn(2000,x)
+df <- data.frame(mn.boot=mn.boot)
+ggplot(df,aes(x=mn.boot)) + geom_histogram() + geom_vline(xintercept = xbar,col=2)
+
+mean(abs(mn.boot)>abs(xbar))
+```
+
+## Power
+
+- One way to summarize our ability to correctly identify a true alternative is via the **power** of the test, the probability of **rejecting the null hypothesis $H_0$ when the alternative $H_1$ is true.** Notice this is one minus the probability of a Type II error. 
+
+- The notation $H_0$ for the null and $H_1$ for the alternative is standard in statistics
+
+- Often, we are interested in **sharp nulls** like "$X$ has expectation zero" or "$X$ and $Y$ are independent"
+
+- In contrast, the alternative is often just "not the null"
+
+- In our mean testing example, the null corresponds to a single point (0), but there are uncountably many possible alternatives (the whole real line except zero)
+
+- Thus, we often think of power as a **function** of the truth. Let $\mu_0$ be the **true** mean. Then the power can be expressed as
+$$\text{power}(\mu_0) = P[\text{reject } H_0 \mid \text{mean is } \mu_0]$$
+
+- This is a **function** of the true mean. Intuitively, the closer the true mean is to zero, the lower the power (for any fixed sample size)
+
+- Power will also depend on the test statistic we choose -- some are better than others!
+
+## The power function for a simple test
+
+- Suppose we wanted to approximate the power of our test of $H_0: \mu_0 = 0$
+
+- We decide to reject the null when the p-value satisfies $p < .05$. 
+
+- One "quick" way to do this is to construct a bootstrap reference distribution, then take many samples of data with varying values of $\mu_0$, and see how often we reject the null
+
+```{r}
+mns <- seq(from=.05,to=1,by=.05)
+nmn <- length(mns)
+n <- 20
+pow.all <- numeric(nmn)
+
+for (j in 1:nmn) {
+  x <- runif(n,-2+mns[j],2+mns[j])
+  mn.boot <- boot.mn(10000,x)
+    
+  x.all <- matrix(runif(n*1000,-2+mns[j],2+mns[j]),n,1000)
+  xbar.all <- apply(x.all,2,mean)
+  pvals <- apply(matrix(xbar.all,1,1000),2,function(x){mean(abs(mn.boot)>abs(x))})
+  pow.all[j] <- mean(pvals<.05)
+}
+
+df <- data.frame(power=pow.all,mu0=mns)
+```
+
+- When we plot the power function, it's clear that power is very low when $\mu_0$ is near zero, and increases as $\mu_0$ gets farther from zero
+
+```{r}
+ggplot(df,aes(x=mu0,y=power)) + geom_point()
+```
+
+- This makes sense -- we have trouble distinguishing the null from the alternative when they correspond to very similar values of $\mu$. When the values they correspond to are very different, it is easier to distinguish the null and the alternative, because **the data we see tend to look very different from what we would expect under one or the other hypothesis**
+
+## Interval estimates
+
+- Everything we have done so far was about testing a hypothesis
+
+- A distinct -- though not entirely unrelated -- topic is that of **interval estimation**
+
+- In hypothesis testing, we compare a statistic to a reference distribution, and interpret that as evidence for or against the hypothesis
+
+- Often, the hypothesis is stated in terms of some **parameter** of the abstract population (e.g. $H_0: \mu = 0$)
+
+- In interval estimation, we seek a **range of plausible values of a parameter**
+
+- Often this is expressed as a **confidence interval**
+
+## Confidence intervals
+
+- Consider a parameter $\mu$ of the abstract population -- the mean of a random variable $X$. 
+
+- Upon observing a sample $x = (x_1,\ldots,x_n)$ of size $n$, assumed to be independent and identically distributed (iid) realizations of $X$, we construct an **interval** $[a(x),b(x)]$, which is a function of the data
+
+- This is a **random interval** in the sense that, if we repeated the experiment by gathering another $n$ iid realizations of $X$, we would not get exactl the same interval (sampling variability again)
+
+- A $1-\beta$ confidence interval has the property that, in repeat sampling, the proportion of the time that the **true value of the parameter will lie inside the interval is $1-\beta$**
+
+## Confidence interval for the mean
+
+- Let's take an example. Suppose we want to estimate the mean $\mu$ of a random variable $X$
+
+- As an estimator, we use the sample mean, $\bar{x}$
+
+- Can we construct a 95 percent confidence interval for $\bar{x}$? 
+
+- In general, we can do this using the bootstrap. Take $X$ to be uniform on $[-1,1]$, so the mean is zero. 
+
+```{r}
+n <- 30
+x <- runif(n,-1,1)
+```
+
+- Now bootstrap, and estimate the 2.5th and 97.5th percentile of the bootstrap distribution
+
+```{r}
+B <- 1000
+
+boot.sample <- matrix(sample(x,n*B,replace=T),n,B)
+mns <- apply(boot.sample,2,mean)
+int95 <- quantile(mns,probs=c(0.025,0.975))
+```
+
+- Our **candidate** 95 percent confidence interval is
+
+```{r}
+int95
+```
+
+## Checking the coverage
+
+- Another way of saying that the random interval $[a(x),b(x)]$ is a $1-\beta$ confidence interval is to say that it has **coverage** $1-\beta$
+
+- Let's now check by simulation if the interval we constructed using the bootstrap actually has the 95 percent coverage we claim it has
+
+- To do this, we need to repeat the process of sampling data many times, and each time check whether the interval **covers the truth** (i.e. the true value of the parameter is in the interval)
+
+- This should be true about 95 percent of the time
+
+```{r}
+
+boot.interval <- function(x,B) {
+  boot.sample = matrix(sample(x,n*B,replace=T),n,B)
+  mns = apply(boot.sample,2,mean)
+  int95 = quantile(mns,probs=c(0.025,0.975)) 
+  sdb = sd(mns)
+  return(c(int95,sdb))
+}
+
+x.samples <- matrix(runif(n*1000,-1,1),n,1000)
+boot.ints <- apply(x.samples,2,boot.interval,B=1000)
+ints <- boot.ints[1:2,]
+sdb <- boot.ints[3,]
+is.in <- (ints[1,]<0) & (ints[2,]>0)
+mean(is.in)
+```
+
+- Not bad, a bit lower than what we expected. Note we could also have used the bootstrap just to get the standard error, then made a normal approximation. The result here is similar
+
+
+```{r}
+# normal approximation
+norm.int <- rbind(apply(x.samples,2,mean)+qnorm(0.025,0,sdb),apply(x.samples,2,mean)+qnorm(0.975,0,sdb))
+is.in <- (norm.int[1,]<0) & (norm.int[2,]>0)
+mean(is.in)
+```
+
+## More complicated parameters/statistics
+
+- Sometimes we want to estimate more complicated parameters
+
+- For example, there are situations in which we want to estimate the mean of the **exponential** of a random variable, i.e. the mean of $Y = e^X$
+
+- We might estimate this by taking the sample mean of $y=e^x$, i.e.
+$$\bar{y} = \frac{1}{n} \sum_{i=1}^n e^{x_i}$$
+
+- Note this is not the same as $e^{\bar{x}}$!!!
+
+- A major advantage of the bootstrap is that we can easily compute standard errors and confidence intervals for more complicated statistics like these
+
+- This gives an estimated 95 percent interval for $\bar{y}$. Here, $x_1,\ldots,x_n$ were generated from a normal distribution, so we are getting an interval for the mean of a **lognormal** distribution
+
+```{r}
+y <- exp(rnorm(100,0,1))
+ybar <- mean(y)
+int <- boot.interval(y,1000)
+int <- int[1:2]
+int
+ybar
+```
+
+
+```{r}
+samp <- matrix(sample(y,n*1000,replace=T),n,1000)
+ybar.boot <- apply(samp,2,mean)
+df <- data.frame(ybar=ybar.boot)
+ggplot(df,aes(x=ybar)) + geom_histogram()
+```
+
+
+
+

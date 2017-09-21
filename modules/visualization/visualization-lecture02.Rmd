@@ -1,0 +1,313 @@
+---
+title: "Visualizing Data"
+author: "Data Science 101 Team"
+output:
+  slidy_presentation:
+    css: styles.css
+    keep_md: yes
+  ioslides_presentation: default
+---
+
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE,cache = TRUE)
+library(pacman)
+pacman::p_load(tidyverse,HistData,datasets,weatherData,lubridate,nycflights13,GGally,Hiiragi2013,magrittr)
+```
+
+## Agenda
+
+- Today we'll consider some additional plot types, including dot plots and 2d density plots
+- We'll also describe plotting up to five variables on a single graphic, and say more about how to select appropriate visualizations
+
+<p></br></p>
+<p></br></p>
+<p></br></p>
+
+---------------------------------
+The materials of this lecture are taken from the book 'Modern statistics for modern biology' by Susan Holmes and Wolfgang Huber.
+---------------------------------
+
+## Base R plotting
+
+- Data from an enzyme-linked immunosorbent assay (ELISA) assay
+- The data were generated in the process of developing an assay for DNase
+- Roughly speaking, the assay works by allowing a sample containing the protein of interest to adhere to a plate
+- Then, a solution containing antibody to the target protein is added. The antibody binds the target.
+- The antibody is linked to an enzyme that interacts with another solution, resulting in color change
+- The extent of color change is proportional to the concentration of the target in the original sample
+- To calibrate the assay, known concentrations of the target are used, and the extent of color change measured
+
+```{r}
+head(DNase)
+ggplot(DNase,aes(x=conc,y=density)) + geom_point()
+```
+
+- From this it is clear that the color change is increasing in concentration, but nonlinear
+
+- Also, the amount of variation is proportional to concentration
+
+## Customizing aspects of the plot
+
+- Another example of customizing labels, coloring
+
+```{r}
+ggplot(DNase,aes(x=conc,y=density)) + geom_point(col='blue') +
+  labs(x="concentration (known)",y="extent of color change") +
+  theme(text=element_text(size=24))
+```
+
+<!-- ## Base R plotting: histogram and boxplot -->
+
+<!-- ```{r basicplotting3, fig.width=5.6, fig.height=3.5} -->
+<!-- hist(DNase$density, breaks=25, main = "") -->
+<!-- ``` -->
+
+<!-- ```{r basicplotting4, fig.width=5.6, fig.height=3.5} -->
+<!-- boxplot(density ~ Run, data = DNase) -->
+<!-- ``` -->
+
+## More visualization workflow
+
+- Layering out the graphics
+- Plot 1D, 2D, 3-5D data
+- More faceting examples
+
+## An example dataset
+
+- A dataset on gene expression in murine embryonic cells
+
+```{r loadHiiragi, warning = FALSE,message = FALSE,}
+data("x")
+dim(exprs(x))
+head(pData(x),n=2)
+```
+
+## An example dataset - continued
+
+```{r groupSize, warning = FALSE,message = FALSE,}
+groups <- pData(x) %>% group_by(sampleGroup) %>%
+  summarise(n = n() , color = unique(sampleColour))
+groups
+```
+
+```{r}
+ggplot(data = groups, aes(x = sampleGroup, y = n)) +
+  geom_bar(stat = "identity") + 
+  theme(text=element_text(size=24),axis.text.x = element_text(angle=90))
+```
+
+## Layers
+
+- Expression of two genes compared using a scatter plot
+- 101 observations in the data
+- To more easily visualize trends, we can add a nonlinear smoother (loess)
+- This is basically a curve drawn through the "middle" of the data
+- The curve is effectively a weighted average of the data points, weighting the nearby data points more heavily
+
+```{r}
+dftx = data.frame(t(exprs(x)), pData(x))
+ggplot( dftx, aes( x = X1426642_at, y = X1418765_at)) +
+  geom_point( shape = 1 ) +
+  geom_smooth( method = "loess" )
+```
+
+- Color data points according to which sample they came from (corresponding to different stages of embryonic development and wild type vs mutant)
+- "#FDBF6F" "#FF7F00" "#E31A1C" are mutants (for Fibroblast Growth Factor (FGF) 4), the rest are wild type
+
+```{r}
+ggplot( dftx, aes( x = X1426642_at, y = X1418765_at ))  +
+  geom_point( aes( color = sampleColour), shape = 19 ) +
+  geom_smooth( method = "loess" ) +
+  scale_color_discrete( )
+```
+
+## More plot types for univariate/bivariate data
+
+- Barplots
+- Boxplots
+- Violin plots
+- Dot plots and beeswarm plots
+- Density plots
+
+## Visualization of 1D Data
+
+- A common task in biological data analysis is the comparison between several samples of univariate measurements. 
+
+- As an example to visulize and compare such samples, we'll use the expression levels of a set of four genes Fgf4, Gata4, Gata6 and Sox2. 
+
+- On the array, they are represented by
+
+```{r genes2ps1}
+selectedProbes = c( Fgf4 = "1420085_at", Gata4 = "1418863_at",
+                   Gata6 = "1425463_at",  Sox2 = "1416967_at")
+```
+
+Convert them into a dataframe:
+
+```{r melt}
+dfE <- data.frame(exprs(x)[selectedProbes, ])
+dfE$probe <- rownames(dfE)
+genes = dfE %>% gather(sample,expression,-probe)
+head(genes)
+genes2 = genes
+```
+
+For good measure, we also add a column that provides the gene symbol along with the probe identifiers.
+
+```{r symbol}
+genes2$gene = names(selectedProbes)[ match(genes$probe, selectedProbes) ]
+```
+
+## Barplots and Boxplots
+
+- What information do we get from the graphs?
+- Mean expression level of each gene across all samples
+
+```{r onedbp1}
+ggplot(genes2, aes( x = gene, y = expression)) +
+  stat_summary(fun.y = mean, geom = "bar")
+```
+
+- Visualize the distribution of expression levels across samples for each of the four genes
+
+```{r onedboxpl}
+p = ggplot(genes2, aes( x = gene, y = expression))
+p + geom_boxplot() + 
+  theme(text=element_text(size=24))
+```
+
+## Violin plots
+
+- Recall that a violin plot is effectively a density plot turned on its side
+- Put another way, a "smoothed" version of the histogram
+- Gives different information about the shape of the distribution
+
+```{r onedviolin}
+p + geom_violin()
+```
+
+## Dot plots
+
+When the number of data points is not too large, it is possible to show the data points directly.
+
+```{r oneddot}
+p + geom_dotplot(binaxis = "y", binwidth = 1/6,
+       stackdir = "center", stackratio = 0.75) +
+   theme(text=element_text(size=24))
+```
+
+## Density plots
+
+- Recall the density plot is like a "smoothed" histogram
+- Choice of size of smoothing window
+- small: capture peaks in the dense regions, but may lead to instable (``wiggly'') estimates elsewhere
+- big:  sharp peaks, may be smoothed out.
+
+```{r oneddens}
+ggplot(genes2, aes( x = expression, color = gene)) + geom_density()
+```
+
+
+## Visualization of 2D data: scatterplots
+
+- Scatterplots are useful for visualizing associations between variables.
+
+- Let us take a look at differential expression between a wildtype and an FGF4-KO sample.
+
+- Here we are visualizing the expression of all the genes on the chip, just for these two samples
+
+- Remember the usefulness of `alpha` and `size` when there are many data points
+
+```{r twodsp1, dev = "png"}
+dfx = as.data.frame(exprs(x))
+scp = ggplot(dfx, aes(x = `59 E4.5 (PE)` ,
+                      y = `92 E4.5 (FGF4-KO)`))
+scp + geom_point(size=.4,alpha=.2) +
+  theme(text=element_text(size=24))
+```
+
+
+## Visualization of 2D data: scatterplots
+
+- 2D density plots are like 1D density plots, except now we are visualizing the **joint distribution** of the two variables
+
+```{r twodsp3}
+scp + geom_density2d()
+```
+
+- What's wrong with this 2D density graph?
+- It seems not to show that group of differentially expressed genes that we saw in the scatterplot
+
+## Visualization of 2D data: 2D density estimate
+
+- tweak the bandwidth and binning parameters to reveal that structure
+
+```{r twodsp4}
+scp + geom_density2d(h = 0.5, bins = 60)
+```
+
+- with color filling
+
+```{r twodsp5, message = FALSE}
+#library("RColorBrewer")
+colorscale = scale_fill_gradientn(
+    colors = rev(brewer.pal(9, "YlGnBu")),
+    values = c(0, exp(seq(-5, 0, length.out = 100))))
+
+scp + stat_density2d(h = 0.5, bins = 60,
+          aes( fill = ..level..), geom = "polygon") +
+  colorscale + coord_fixed()
+```
+
+- It's not clear we learned anything new from this plot relative to the scatterplot, but it is perhaps more visually compelling
+
+## 3-5D data: five aesthetics provided by ggplot
+
+- fill
+- color
+- shape
+- size
+- alpha
+
+## 3-5D data: Faceting
+
+- Recall faceting
+- Can show multiple plots that result from repeatedly subsetting (or ``slicing'') our data based on one (or more) of the variables
+- For instance, show expression of two genes by cell lineage
+
+```{r facet1}
+dftx$lineage %<>% sub("^$", "no", .)
+dftx$lineage %<>% factor(levels = c("no", "EPI", "PE", "FGF4-KO"))
+```
+
+
+```{r}
+ggplot(dftx, aes( x = X1426642_at, y = X1418765_at)) +
+  geom_point() + facet_grid( . ~ lineage )
+```
+
+## 3-5D data: Faceting
+
+- We can specify two faceting variables as well
+- In this case, cell lineage and embryonic day
+
+```{r facet2}
+ggplot( dftx,
+  aes( x = X1426642_at, y = X1418765_at)) + geom_point() +
+   facet_grid( Embryonic.day ~ lineage )
+```
+
+
+
+<!-- ## An example dataset - a better picture -->
+
+<!-- ```{r} -->
+<!-- groupColor = setNames(groups$color, groups$sampleGroup) -->
+<!-- ggplot(groups, aes(x = sampleGroup, y = n, fill = sampleGroup)) + -->
+<!--   geom_bar(stat = "identity") + -->
+<!--   scale_fill_manual(values = groupColor, name = "Groups") + -->
+<!--   theme(axis.text.x = element_text(angle = 90, hjust = 1)) -->
+<!-- ``` -->
+

@@ -1,0 +1,157 @@
+---
+title: "Principal Components Lab 2"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(dev="png",dpi=300, out.width=500,  fig.align="center",fig.width=5,fig.height=4)
+library(readr,ggplot2)
+```
+
+
+
+
+## The decathlon dataset
+
+The first set of commands reproduces the analysis we did in class for the performances of 33 men's decathlon at the 1988 Olympic Games, as reported in the R package `ade4`. We start by loading the data, understanding what the variables are and looking at basic summaries.
+
+```{r}
+deca<-read.csv(file="data/Decathlon.csv")
+summary(deca)
+```
+
+So, we have the results for 10 events and the final score obtained by combining these and that determined the ranking of the athletes.
+Rather then numerical summaries, we might want to look at boxplots, making it is easier to get a global picture of what is going on.
+
+```{r,fig.height=4,fig.width=8.5,out.width=900}
+par(mfrow=c(2,5),bty="n")
+for(i in 1:10) {
+    boxplot(deca[,i],main=names(deca)[i])
+}
+```
+
+
+The scatter plots of the results on the various events  tell us how they are correlated
+
+```{r,fig.height=8,fig.width=8,out.width=900}
+pairs(deca[,1:10])
+```
+
+And the plots of the results of each event vs the final score tell us how important they are to determine who wins.
+
+```{r,fig.height=4,fig.width=8.5,out.width=900}
+par(mfrow=c(2,5),bty="n")
+for(i in 1:10) {
+  plot(deca$Score,deca[,i],main=names(deca)[i],xlab="Final Score")
+}
+```
+
+To calculate the principal components, we use `prcomp` with the options `center=TRUE` which subtracts the mean from each variable, and `scale=TRUE`, which standardizes each variable to have variance 1. Then we look at the objects created by prcomp.
+
+```{r}
+deca.pc<-prcomp(deca[,1:10],center=TRUE,scale=TRUE)
+summary(deca.pc)
+```
+
+The eigenvalues (their square root) are stored in `$sdev$
+
+```{r}
+deca.pc$sdev
+```
+
+The eigenvectors (coefficients of all the variables in the linear combinations that define the principal components) are stored in `$rotation$
+
+```{r}
+deca.pc$rotation
+```
+
+And the actual principal components are in the matrix `$x`.
+
+```{r}
+dim(deca.pc$x)
+head(deca.pc$x)
+```
+
+To understand how well we did, we are going to look closely at what are the coefficients of all the events in the first principal component.
+
+```{r}
+par(mfrow=c(1,1),las=3)
+barplot(deca.pc$rotation[,1],main=paste(" PCA ", as.character(1)),xlab="",ylab="Coefficients",names.arg=names(deca)[1:10])
+```
+
+And compare what this first principal component tells us with the score that determines the olimpic ranking.
+
+```{r}
+par(mfrow=c(1,1),las=1)
+plot(deca.pc$x[,1],deca$Score,main="Decathlon 1988",xlab="First Principal Component", ylab="Olympic score")
+```
+
+### *Exercise 1:  changing the scale option in the decathlon dataset* 
+
+Rerun the analysis of the decathlon dataset with `prcomp(,scale=FALSE)`. What happens? Why?
+
+###  The vote dataset
+
+The file `Senate.csv` contains votes for the 2016 (114th) congress, senate, as of September 1 (18 items). The information was 
+downloaded from [https://www.govtrack.us/congress/votes](https://www.govtrack.us/congress/votes). Again, we start by loading the data and understanding which type of information it contains.
+
+```{r}
+vote<-read.csv(file="data/Senate.csv",header=T)
+summary(vote)
+```
+
+
+It is interesting to see how votes change with party affiliation. To do this graphically, we can look at the following plots
+
+```{r,fig.height=5,fig.width=8.5,out.width=900}
+par(mfrow=c(3,6),mar=c(2, 2, 1, 1))
+for(i in 5:22)
+  {
+plot(vote$party,vote[,i], bty="n",main=names(vote)[i],axes=F)
+mtext("D",side=1,line=0.5,at=.25)
+mtext("R",side=1,line=0.5,at=.75)
+}
+```
+
+Since we want to do an analysis with PCA, tet's code the votes as numeric.
+
+```{r}
+par(mfrow=c(1,1), mar=c(5, 4, 4, 2) + 0.1)
+for(i in 5:22)
+  {
+    vote[,i]<-as.character(vote[,i])
+    vote[vote[,i]=="Yea",i]<-2
+    vote[vote[,i]=="Nay",i]<-0
+    vote[vote[,i]=="Not Voting",i]<-1
+    vote[,i]<-as.numeric(vote[,i])
+  }
+summary(vote)
+```
+
+### *Exercise 2. Principal components of votes*
+
+Do a principal component analysis of the votes. Start with `prcomp(,center=TRUE, scale=FALSE)`. What do you learn? Try also with `prcomp(,center=TRUE, scale=TRUE)`
+
+
+### Some artificial data
+
+So far, we have concentrated only on the first principal component, because that is what we have learned how to interpret. But we have also said that the principal components can be thought as a new coordinate system. Each of the components is orthogonal to each other (if you think of them coming from eigenvalues and eigenvectors this would make sense). And all of the components have something to tell us. To start exploring this, we play with a simulated dataset, which contains 3 variables (x,y and z), but is not really three dimensional, as one variable  is exactly a linear combination of the other two. Note that a scatter plot of all the variable pairs reveals no surprises.
+
+
+```{r}
+x<-rnorm(100)
+y<-rnorm(100)
+z<-x*3+y*3
+dataset<-cbind(x,y,z)
+pairs(dataset)
+```
+
+### *Exercise 3*
+
+Do a principal component analysis of this dataset. What do you learn?
+
+

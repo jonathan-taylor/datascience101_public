@@ -1,0 +1,68 @@
+---
+title: "Homework for Nonparametrics module"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+# Due Dec. 9
+
+## 1. Cloud seeding example continued
+
+- Use the difference in medians between the groups as your test statistic. Conduct the permutation test and then state your p-value and a conclusion.
+
+- Use the sum of the observations in the seeded group as your test statistic. Conduct the permutation test and then state your p-value and a conclusion.
+
+
+## 2. Wilcoxon Rank-Sum Test: two-sample test
+
+The Wilcoxon rank-sum test is a permutation test that uses the sum of the ranks as a test statistic. Let us first review the definition of rank. Let $X_1, \cdots, X_n$ the dataset of $n$ observations. The rank of $X_i$ among the $n$ observations is given by 
+
+rank ($X_i$) = the number of $X_j$'s $\leq$ $X_i$.
+
+The test statistic for the Wilcoxon rank-sum test is calculated as the following: we will rank all values with the two groups combined, then calculate $W$, our test statistic, as the sum of the ranks in group 1. 
+
+- Is it the same if we decide to use the sum of the ranks in group 2 as our test statistic?
+
+We will look at a dataset about sleep deprivation:
+
+“Researchers have established that sleep deprivation has a harmful effect on visual learning. In a recent study, Stickgold, James, and Hobson (2000) investigated whether subjects could ”make up” for sleep deprivation by getting a full night’s sleep in subsequent nights. This study involved randomly assigning 21 subjects (volunteers between the ages of 18 and 25) to one of two groups: One group was deprived of sleep on the night following training with a visual discrimination task, and the other group was permitted unrestricted sleep on the first night. Both groups were allowed unrestricted sleep on the following two nights and then were retested on the third day. Subjects’ performance on the test was recorded as the minimum time (in milliseconds) between stimuli appearing on a computer screen for which they could accurately report what they had seen on the screen. Previous studies had shown that subjects deprived of sleep had performed significantly worse the following day, but it was not clear how long these negative effects would last.” (Rossman and Chance, 2001)
+
+The dataset is stored in ``sleepdep.txt``
+
+- Calculate the observed test statistics $W_{obs}$. Remember you should rank the two groups together first.
+
+- Use permutation test to calculate p-value and state your conclusion. In other words, find all the permutations and calculate $W$ for each assignment.
+
+## 3. Nonparametric measure of association
+
+We are going to look at a study conducted to explore whether a medication can be effective at reducing allergic symptoms. The data is stored in ``allergy.RData``. Here is a brief description of the variables:
+
+
+obs: patient ID 
+
+itchy: symptoms (1=none, 2=mild, 3=moderate, 4=severe) 
+
+sneezy: symptoms (1=none, 2=mild, 3=moderate, 4=severe) 
+
+runny: symptoms (1=none, 2=mild, 3=moderate, 4=severe) 
+
+stuffy: symptoms (1=none, 2=mild, 3=moderate, 4=severe) 
+
+treat: treatment (1 = placebo, 2 = 15 mg, 3 = 30 mg, 4 = 60 mg ) 
+
+day: study day 
+
+pollen: pollen count (particles per cubic meter) 
+
+age: age in years 
+
+bmi: body mass index (BMI) 
+
+female: gender (0=male, 1=female) 
+
+logpollen: log10(pollen+1) 
+
+- Is there any association between age and bmi? Please report your result with one nonparametric measure of association. Please also include any descriptive statistics and plots that you think can help answer this question.
+- Ask a question that you find interesting about this dataset and use the tools you learned (not necessarily this week) to answer it.

@@ -1,0 +1,142 @@
+---
+title: "Visualizing your data lab"
+author: "Data Science 101 Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+
+```{r setup, include=FALSE}
+source('https://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The goal of this lab is to help you get familiar with the grammar of graphics philosophy implemented in the ``R`` package ``ggplot2``. The documentation for this package is available at http://docs.ggplot2.org/. You should work through this lab by running all the R code on your computer and making sure that you understand the input and the output.
+
+First, you need to make sure the packages ``nutshell`` and ``ggplot2`` are installed on your computer, and load it into ``R`` as follows:
+
+```{r libload, message=FALSE}
+# If these packages are not installed yet, you should install them first.
+# install.packages("ggplot2")
+# install.packages("nutshell")
+library(pacman)
+pacman::p_load(ggplot2,nutshell)
+#library("ggplot2")
+#library("nutshell")
+```
+
+
+We will be going through some of the topics here:
+http://docs.ggplot2.org/
+You may keep that website open as a reference throughout this tutorial.
+
+To learn about the graphics of grammar, we will use a data set about births in the USA in 2006.  First, load this data (make sure you already did ``library(nutshell)``).
+```{r dataload, tidy=FALSE}
+data(births2006.smpl)
+# look at this data set by uncommenting the line below
+# help(births2006.smpl)
+births.big <- births2006.smpl
+```
+Q: How many observations are there in this dataset?
+
+```{r}
+# add a new variable to include whether it is a weekend or not
+births.big$WEEKEND <- c("Weekday","Weekend")[(
+  births2006.smpl$DOB_WK %in% c(1, 7)) + 1]
+```
+
+Q: What does the above line of code realize?
+
+```{r}
+# courser health score based on APGAR 5 score
+births.big$HEALTH <- c("CritLow","Low","Normal")[(
+  findInterval(births2006.smpl$APGAR5, c(3.5, 6.5))) + 1]
+```
+Q: What does function 'findInterval' do? What happen to the NAs in vector APGAR5?
+
+```{r}
+# Sometimes, we want to work with a smaller sample (just first 10000 instead of 427323)
+births.big$ESTGEST <- replace(births.big$ESTGEST, births.big$ESTGEST==99, NA)
+births.small <- births.big[1:10000, ]
+```
+
+Plot Creation & Geoms in the Grammar of Graphics
+------------------------------------------------
+
+The function ``ggplot()`` is used to construct a plot incrementally, using the ``+`` operator to add layers to the existing ggplot object. This is advantageous in that the code is explicit about which layers are added and the order in which they are added. The layers that we add are geometric objects, or "geoms". You can think of the call ``ggplot`` as taking out a piece of paper and the call ``geom_something`` draws something on the piece of paper. For example, ``geom_bar`` draws a bar plot. The first argument in ``ggplot`` is the data that is going to be drawn. We also need to describe the aesthetics of the plot and we do this with the function ``aes()``. The aesthetics of a plot are the specifics about what is going to be drawn and how. This can be included in the initialization ``ggplot(data=..., aes(...))`` or in the geometric object ``geom(aes(...))``.
+
+For example, let's look at the number of births on each day of the week in our sample data. First set up our plot with the data ``births``.
+```{r birth_init_ggplot}
+ppp <- ggplot(births.small) # plot with a subset of the data (faster)
+```
+Note that this doesn't actually plot anything (just like if you wrote ``junk <- 7`` doesn't output anything until you write ``junk``. 
+
+Q: What happens here when you type ``ppp``?
+
+The number of births per day of the week can be shown easily in a barplot, so let's use that. To create a geometric object layer for a barplot we use the function ``geom_bar()``. In order for it to know what part of the data we want to actually plot, we need to give an aesthetic. We can do this by declaring the aesthetic for the x-axis is the day of the week of the birth. The column ``DOB_WK`` gives the day of the week that each birth happened as a numeric value 1 (Sunday) through 7 (Saturday). We can tell ``R`` that this is actually a factor variable by putting the variable name in the function ``factor()``. Putting this all together, we get ``geom_bar(aes(x=factor(DOB_WK))``. Finally, to draw this layer on top of the initialized graph, we will add the geometric object layer with the ``+`` operator. 
+```{r birth_wk_hist}
+ppp + geom_bar(aes(x=factor(DOB_WK)))
+```
+
+Doctors are able to delay birth with anti-contraction medications or labor represents called tocolytics. That might be one reason we see fewer births on day 1 of the week (Sunday) and day 7 (Saturday).
+
+We can get further information from this geom if we add more aesthetics. For example, maybe we can fill each bar with different colors corresponding to what type of birth it was ("C-section", "Vaginal", or "Unknown"). We can do this by just including another ``aes`` in the geometric object. Start with the same initialization, but add a geometric object with the x-axis and also fill color defined.
+```{r birth_wk_hist_color}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC))
+```
+
+When we made that plot, we used a default value for the ``position`` argument of the barplot geometric object. We could have rewritten the above command as follows.
+
+```{r birth_wk_hist_stack, eval=FALSE}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC), position="stack")
+```
+
+Another option is to use the ``position="dodge"``. Note that this is an argument to ``geom_bar`` and not to ``aes``.
+
+```{r birth_wk_hist_dodge}
+ppp + geom_bar(aes(x=factor(DOB_WK), fill=DMETH_REC), position="dodge")
+```
+
+Now it's a bit clearer to see that about 1/2 as many C-sections on an average weekend as there are on an average weekday, whereas there are about 3/4 as many vaginal births on an average weekend as there are on an average weekday.
+
+
+Facets in the Grammar of Graphics
+---------------------------------
+
+Let's continue looking at the birth data on a day to day basis.  We might conjecture that older women are less likely to take a tocolytic since they are more likely to have had other complications already. One way we can do this is to "facet" the graph and display day of the week versus women's age.
+
+First, let's make a histogram of all women's ages to get an idea of what this overall distribution looks like.
+
+```{r birth_age_hist}
+ppp + geom_histogram(aes(x=MAGER), binwidth=1)
+```
+
+We use the argument ``binwidth=1`` to say the width of the bins in this histogram.
+
+Using the grammar of graphics, it is easy to facet this single graph to make multiple graphs along a dimension. In this case, we're interested in breaking this up along the dimension of day of birth ``DOB_WK``. We will add this facet with the command  ``facet_grid`` or ``facet_wrap``. In ``facet_grid``, the argument we use is a formula with the rows (of the tabular display) on the LHS and the columns (of the tabular display) on the RHS. A formula is separated in ``R`` with the tilde character ``~``.  A dot in the formula is used to indicate there should be no faceting on this dimension (either row or column). The formula can also be provided as a string instead of a classical formula object. In ``facet_wrap``, we have the same sort of argument, but we only include a RHS of the formula. We'll use both of them in an example so you can see the difference.
+
+Now let's look at this faceting on that variable. Again, we will use the ``+`` operator. Here, we also see that we can save the geometric objects in the plot and just add facets at the end.
+
+```{r birth_age_facet}
+ppp1 <- ppp + geom_histogram(aes(x=MAGER, fill=DMETH_REC), binwidth=1)
+ppp1 + facet_wrap( ~ DOB_WK)
+ppp1 + facet_grid(DOB_WK ~ SEX)
+```
+
+What is the differences between ``facet_wrap`` and ``facet_grid``?
+
+Here is an interesting perspective of the data.
+
+```{r birth_age_facet_color, tidy=FALSE}
+# exclude the Unknown delivery method data
+ppp.big <- ggplot(subset(births.big, DMETH_REC %in% c("C-section","Vaginal"))) 
+ppp.big + 
+  geom_histogram(aes(x=MAGER, fill=factor(TBO_REC)), binwidth=1) +
+  facet_grid(WEEKEND ~ DMETH_REC, scale="free_y", drop=TRUE) +
+  geom_vline(xintercept=seq(15,45,by=5), alpha=0.2, color="white") +
+  labs(title="Births in USA 2006", fill="Birth\nOrder")
+```
+
+
+

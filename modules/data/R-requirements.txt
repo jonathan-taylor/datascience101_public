@@ -1,0 +1,14 @@
+readr
+tidyr
+dplyr
+xml2
+magrittr
+tibble
+tm
+wordcloud
+RColorBrewer
+ggplot2
+rvest
+nycflights13
+tidyverse
+ggmap

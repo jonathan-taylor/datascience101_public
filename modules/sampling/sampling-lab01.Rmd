@@ -1,0 +1,344 @@
+---
+title:  "Sampling Variability Lab 1"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(dev="png",dpi=300, out.width=500,  fig.align="center",fig.width=5,fig.height=4)
+
+```
+
+## Examples of sample summaries variability
+
+We start by recalling the analysis done in lecture. By having the code available you can try changing the parameters and see how this affects the results.
+
+### Stanford Data
+
+The data is obtained from the [Stanford Common Data Set](https://ucomm.stanford.edu/cds/pdf/stanford_cds_2016.pdf) and it reports information as of October 15, 2016.
+
+```{r}
+library(readr)
+Stanford <- read_delim("data/Stanford.txt", 
+    "\t", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+Let's focus on the degree seeking undergraduate population, extracting the relevant columns and renaming them.
+
+```{r}
+Stanford<-Stanford[,c(1,3)]
+names(Stanford)<-c("Race/Ethnicity","Number")
+Stanford<-Stanford[-10,]
+UGRace<-rep(Stanford$"Race/Ethnicity",Stanford$Number)
+```
+
+```{r,fig.height=4,fig.width=8,out.width=700}
+#to produce html you want fig.height=4,fig.width=9
+par(mar=c(5,20,4,2))
+barplot(sort(summary(as.factor(UGRace)))/length(UGRace),horiz = T,las=1)
+```
+
+We now explore how different random  samples of size 100 from this population would lead to different estimates  of  the proportion of "Black or African American" and "Hispanic/Latino"
+
+
+```{r}
+ssize<-100
+B<-1000
+SamplePropB<-NULL
+SamplePropH<-NULL
+for(i in 1:B)
+{
+observation<-sample(UGRace,ssize,replace=FALSE)
+SamplePropB<-c(SamplePropB,
+  sum(observation==
+"Black or African American, non-Hispanic")/ssize)
+SamplePropH<-c(SamplePropH,
+  sum(observation=="Hispanic/Latino")/ssize)
+}
+```
+
+```{r,fig.height=4.5,fig.width=7.5,out.width=700}
+par(mfrow=c(1,2))
+hist(SamplePropB,main="Black or African American",xlab="Sample Proportion",xlim=c(0,.3))
+abline(v=0.064,col=2,lwd=2)
+hist(SamplePropH,main="Hispanic/Latino",xlab="Sample Proportion",xlim=c(0,.4))
+abline(v=0.16,col=2,lwd=2)
+```
+
+
+### Roulette
+
+Let's make R play roulette
+
+```{r}
+values = c("00", 0:36)
+play<-sample(values,1)
+play
+```
+
+Suppose we want to bet on red. Let's make a function
+that takes a possible value from `values` and tells us whether  our bet on red wins or not.
+
+```{r}
+red_values = c( 1,  3,  5,  7,  9,  12, 14, 16, 18,
+               21, 23,  25, 27, 28, 30, 32, 34,  36)
+red_bet = function(spin_value) {
+    return(spin_value %in% red_values)
+}
+red_bet(play)
+```
+
+Let's evaluate the sampling variability of the proportion of red wins.
+
+We plot the histograms of 1000 experiments each of 100 or 1000 spins
+```{r}
+ssize1<-100
+ssize2<-1000
+B<-1000
+x<-NULL
+y<-NULL
+for(i in 1:B)
+{
+x<-c(x,mean(red_bet(sample(values, ssize1, replace=TRUE))))
+y<-c(y,mean(red_bet(sample(values, ssize2, replace=TRUE))))
+}
+```
+
+```{r,fig.height=4.5,fig.width=7.5,out.width=700}
+par(mfrow=c(1,2))
+hist(x,main="100 spins",xlab="Proportion of red",xlim=c(0.28,0.62))
+abline(v=18/38,col=2,lwd=2)
+hist(y,main="1000 spins",xlab="Proportion of red",xlim=c(0.28,0.62))
+abline(v=18/38,col=2,lwd=2)
+```
+
+## Learning about densities and abstract population models
+
+### How to interpret a density
+
+
+First, let's notice that we can define a density histogram, where the height of colums is normalized differently. The height of a column is chosen so that the **area** of the column is equal to the   proportion of elements in a sample that take on values between the two extremes of the base of a column.
+
+```{r,fig.width=6,fig.height=4,echo=F}
+X<-rnorm(10000,mean=70,sd=4)
+try<-hist(X,plot=FALSE)
+hist(X,probability = TRUE)
+polygon(c(try$breaks[7], try$breaks[8], try$breaks[8], try$breaks[7]),c(0, 0, try$density[7], try$density[7]),col='red')
+mtext(paste(paste(paste("Proportion of values between",as.character(try$breaks[7])),"and"),as.character(try$breaks[8])),side=1,line=2,at=try$breaks[7],col=2)
+```
+
+The density function is a continuous version  of this histogram. In the case of the normal distribution we can see it by superposing the two.
+
+
+```{r,fig.width=6,fig.height=4}
+t<-seq(min(X),max(X),length.out=1000)
+hist(X,probability=TRUE,ylim=c(0,0.1))
+lines(t,dnorm(t,mean=70,sd=4),col=2,lwd=2)
+```
+
+The area under the density function in an interval represents the proportion of values in  the interval.
+
+```{r,fig.height=4,fig.width=5,echo=FALSE}
+library(ggplot2)
+ggplot()+geom_line(aes(x=t,y=dnorm(t,mean=70,sd=4)))+ geom_area(aes(x=t[300:400],y=dnorm(t,mean=70,sd=4)[300:400]),fill="red",alpha=0.5)+ggtitle("Normal distribution")+ylab("Density")+annotate("text",label=paste(paste(paste("Proportion of values between",as.character(round(t[300])),"and"),as.character(round(t[400])))), x = t[300], y =dnorm(t[400],mean=70,sd=4),color="red",size=3)
+```
+
+
+### Different abstract population models
+
+There are many abstract population models. The technical name for these is **distributions** and one learns about them in classes that teach about probability. You can think of probability as population proportion in these abstract population models (the probability of winning when betting on red in a roulette is the proportion of all wheel spins that result in the ball landing on red). Now, probability is one really beautiful subject, so we warmly encourage you  to learn about it, but we cannot cover it in this class. 
+
+Nevertheless, we are going to mention a few distributions in this lab, because they are useful to provide examples of abstract populations and you might find it handy to have a few options to generate random numbers.
+
+In base R there are built in functions to work with some of these distributions, and more similar functions for more models are available in the package `stats`.
+For each distribution `xxx` there are four functions: `dxxx()`, `pxxx()`,`qxxx()`, `rxxx()`
+
+- **d**`xxx(t)` gives you the density function at point `t` for the distribution
+- **p**`xxx(t)` gives you the probability that a variable with that distribution has values smaller or equal to `t`
+- **q**`xxx(p)` gives you the p-quantile of the distribution (which value `t` is such that the probability of the variable being smaller than `t` is equal to `p`)
+- **r**`xxx(n)` generates `n` random samples from the distribution.
+
+Depending on the distributions, there are different parameters you will specify. A good place to start to understand how this is done in R is using `help(Distributions)`.
+
+#### Normal distribution
+
+Let's look once again at the commands we have used to introduce the [Normal](https://en.wikipedia.org/wiki/Normal_distribution) distribution. This is also known as Gaussian and has two parameters: mean and standard deviation. We will learn more about this distribution later in the week.
+
+```{r,fig.width=9,fig.height=4,out.width=800}
+par(mfrow=c(1,2))
+x<-seq(-1,30,length.out = 1000)
+plot(x,dnorm(x,mean=15,sd=4),main="Density of a normal, mean=15 and sd=4",ylab="Density",pty="l")
+X<-rnorm(1000,mean=15,sd=4)
+hist(X,main="Histogram of 1000 samples from N(15,4)",freq = FALSE)
+```
+
+#### Another simple distribution: Uniform on an interval
+
+The [uniform](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) describes a variable that can take any value between a min and a max and such that any interval of equal lenght in the range [min, max] has the same probability. Again, to have a quick sense of what it represents, we look at the density function and at the histogram of random samples.
+
+```{r,fig.width=9,fig.height=4,out.width=800}
+par(mfrow=c(1,2))
+x<-seq(-1,30,length.out = 1000)
+plot(x,dunif(x,min=10,max=20),main="Density of a uniform between 10 and 20",ylab="Density",pty="l")
+X<-runif(1000,min=10,max=20)
+hist(X,main="Histogram of 1000 samples from U[10,20]")
+```
+
+#### Another  distribution: Chi-square with degrees of freedom df
+
+You might have studied the  $\chi^2$-test in your high school biology class. The [chi-square](https://en.wikipedia.org/wiki/Chi-squared_distribution) distribution describe a population that can take on only positive numbers. There are two parameters that can vary: they are called degrees of freedom and non-centrality.
+
+```{r,fig.width=9,fig.height=4,out.width=800}
+par(mfrow=c(1,2))
+x<-seq(0,30,length.out = 1000)
+plot(x,dchisq(x,df=10),main="Density of a chi-square with 10 df",ylab="Density",pty="l")
+X<-rchisq(1000,df=10)
+hist(X,main="Histogram of 1000 samples from Chi^2(10)")
+```
+
+
+### Empirical density plots (continuous histograms)
+
+The densities we have plotted are all theoretical values; they are models for the "abstract populations" we are often interested in. 
+
+We can estimate a density by smoothing the values of an histogram. We can do this using the function 'density()' which takes as input the same object as histogram. Note that this estimated density will varies with each sample, quite differently from the theoretical density.
+
+```{r}
+ssize<-50
+X<-rnorm(ssize,mean=5,sd=2)
+hist(X, freq=FALSE)
+lines(density(X), col='blue', lwd=2)
+lines(sort(X),dnorm(sort(X),mean=5,sd=2), col='red', lwd=2)
+
+```
+
+```{r}
+ssize<-1000
+X<-rnorm(ssize,mean=5,sd=2)
+hist(X, freq=FALSE)
+lines(density(X), col='blue', lwd=2)
+lines(sort(X),dnorm(sort(X),mean=5,sd=2), col='red', lwd=2)
+
+```
+
+```{r}
+ssize<-10000
+X<-rnorm(ssize,mean=5,sd=2)
+hist(X, freq=FALSE)
+lines(density(X), col='blue', lwd=2)
+lines(sort(X),dnorm(sort(X),mean=5,sd=2), col='red', lwd=2)
+
+```
+
+### The density as an histogram with small bins
+
+Finally, note that we can interpret a density function just as the limit of a density histogram when the bins are made very small.
+
+```{r}
+ssize<-100000
+X<-rnorm(ssize,mean=5,sd=2)
+par(mfrow=c(1,2))
+hist(X, freq=FALSE)
+lines(sort(X),dnorm(sort(X),mean=5,sd=2), col='red', lwd=2)
+hist(X, freq=FALSE,breaks=70)
+lines(sort(X),dnorm(sort(X),mean=5,sd=2), col='red', lwd=2)
+
+```
+
+## Learning the mean of a population
+
+We are now going to run an experiment similar to what we have done in class, when we have tried to learn proportions.
+
+We imagine that we would like to learn the mean of one population and see how the sample mean works for us.
+
+#### Uniform distribution U[50,100]
+
+Let's start thinking about what the mean of this distribution is. I claim it is 75. Why?
+To have a sense we can take a very large sample from U[50,100], show its histogram and calculate its sample mean.
+```{r}
+X<-runif(10000,min=50,max=100)
+hist(X,freq=FALSE)
+abline(v=mean(X),col=2,lwd=2)
+lines(sort(X),dunif(sort(X),min=50,max=100),col="blue")
+```
+
+Now let's try to estimate this means from samples.
+We do the same conceptual experiments we have done for the stanford students and for the roulette. We are going to try four sample sizes and see how the sample variability changes.
+
+```{r,fig.width=8,fig.height=8,out.width=800}
+ssize<-c(10,100,1000,5000)
+B<-1000
+smean<-matrix(NA,nrow=B,ncol=length(ssize))
+for(i in 1:B)
+{
+  for(j in 1:length(ssize))
+      {
+      X<-runif(ssize[j],min=50,max=100)
+      smean[i,j]<-mean(X)
+  }
+}
+par(mfrow=c(2,2))
+for(i in 1:4)
+hist(smean[,i],freq = FALSE,main="Histogram of 1000 sample means",xlab=paste("Mean of a sample of size",as.character(ssize[i])),xlim=c(60,90))
+```
+
+So, we see again that the sample mean does provide an estimate of the population mean. The estimate has some variability and the variability is smaller the larger the sample size.
+
+#### Poisson distribution with parameter lambda
+
+This is another model for an abstract population. The values of [Poisson](https://en.wikipedia.org/wiki/Poisson_distribution) are positive natural numbers and the mean of the distribution is specified by the parameter lambda.
+
+To have a sense of what it looks like we take a large sample
+
+```{r}
+library(stats)
+X<-rpois(10000,lambda=15)
+summary(X)
+par(mfrow=c(1,1))
+hist(X,freq=FALSE)
+abline(v=mean(X),col=2,lwd=2)
+points(sort(X),dpois(sort(X),lambda=15),col="blue",pch=20)
+```
+
+Let's redo the experiment
+
+```{r,fig.width=8,fig.height=8,out.width=800}
+ssize<-c(10,100,1000,5000)
+B<-1000
+smean<-matrix(NA,nrow=B,ncol=length(ssize))
+for(i in 1:B)
+{
+  for(j in 1:length(ssize))
+      {
+      X<-rpois(ssize[j],lambda=15)
+      smean[i,j]<-mean(X)
+  }
+}
+par(mfrow=c(2,2))
+for(i in 1:4)
+hist(smean[,i],freq = FALSE,main="Histogram of 1000 sample means",xlab=paste("Mean of a sample of size",as.character(ssize[i])),xlim=c(11,19))
+```
+
+#### Other cases to try
+
+1. *Re-run the experiments describing sampling estimates and variability for different sample sizes for one of the following cases:*
+
+  + Take as a population a [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) (`library(stats),dgamma() rgamma()`) with parameters `shape=10,rate=1`: try to estimate its mean
+  
+  + Take as a population a Normal with parameters `mean=0, sd=10`: try to estimate its variance
+  
+  + Take as a population a [Binomial](https://en.wikipedia.org/wiki/Binomial_distribution) (`dbinom(),rbinom()`) with parameters `size=20, prob=.25`: try to estimate its mean
+
+2. *For any of the experiments above, evaluate the mean and the variance of the estimate across the repeated samples*
+
+3. *For any of the experiments above, evaluate the average distance of the estimate from its target value as a function of sample size. *
+For each sample, you want to calculate the distance of the sample summary from the population summary and average this across samples. You want to then plot this against the sample size you have used.
+
+4. *Now consider  X with normal distribution with mean 0 and a set of values for the standard deviation sd=c(1,10,20,40).
+Try to estimate the mean of X with a sample of size 20 for each of the values of sd (obtain 1000 such samples for each distribution and plot their histogram). How do the results differ?*
+
+

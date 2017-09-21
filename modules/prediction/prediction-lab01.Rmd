@@ -1,0 +1,164 @@
+---
+title: "Prediction Lab 1"
+date: "May 16, 2017"
+output:
+    html_document:
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+pacman::p_load(ggplot2,ggfortify)
+```
+
+The MASS library contains the Boston housing  data set, which records ${\rm medv}$ (median house value) for $506$ neighborhoods around Boston. We will seek to predict ${\rm medv}$ using $13$ predictors such as ${\rm rm}$ (average number of  rooms per house), ${\rm age}$ (average age of houses), and ${\rm lstat}$ (percent of households with low socioeconomic status).
+
+```{r}
+library(MASS)
+attach(Boston)
+names(Boston)
+```
+
+By using `attach` here, we won't need to use the `$` symbol to extract variables from the dataset. R will just assume that we are refering to variables from that dataset. In general you should only do this if you are **sure** that your analysis will only use variables from this data frame.
+
+Because this dataset is part of the `MASS` package, there is a built-in help file that gives you a description of each variable. Take a minute to look at this now by searching `Boston` in the help window.
+
+Start by using the lm function to fit a simple  linear regression model, with ${\rm medv}$ as the response and ${\rm lstat}$  as the predictor. Store the returned object as `lm.fit`
+
+```{r}
+lm.fit=lm(medv~lstat,data=Boston)
+```
+
+If we type lm.fit, some basic information about the model is output. For more detailed information, we use summary(lm.fit). This gives us p-values and standard errors for the coefficients, as well as the $R^2$ statistic and F-statistic for the model. Try both
+
+```{r}
+lm.fit
+```
+
+```{r}
+summary(lm.fit)
+```
+
+We can use the names() function in order to find out what other pieces of information  are stored in lm.fit.
+
+```{r}
+names(lm.fit)
+```
+ 
+Although we can extract these quantities by name --- e.g. lm.fit$coefficients --- it is safer to use the extractor functions like {\defineR{coef()}} to access them. Try using `coef()` to get the coefficient estimates from the `lm.fit` object. 
+ 
+```{r}
+coef(lm.fit)
+```
+
+In order to obtain a confidence interval for the coefficient estimates, we can use the confint() command. Try it. Which coefficients have confidence intervals that include zero?
+
+```{r}
+confint(lm.fit)
+```
+
+The predict() function can be used to produce confidence intervals and prediction intervals for the prediction of ${\rm medv}$ for a given value of ${\rm lstat}$. You can obtain each type of interval using the argument `interval` to the `predict` function.
+
+```{r}
+predict(lm.fit,data.frame(lstat=(c(5,10,15))),
+       interval="confidence")
+ 
+predict(lm.fit,data.frame(lstat=(c(5,10,15))),
+       interval="prediction")
+```
+  
+For instance, the $95\%$ confidence interval associated with a ${\rm lstat}$ value of 10 is $(24.47, 25.63)$, and the 95\% prediction interval is $(12.828, 37.28)$.
+
+Why are these intervals different? The confidence interval is a 95\% confidence interval for $\hat{y}$ for a particular value of the $x$, while the **prediction** interval is a 95\% interval for a **new y** having that value of $x$. In other words, the confidence interval gives us a range of plausible values for the **mean** of $y$, while the **prediction** interval gives us a range of possible values for a single **new** value of $y$.
+
+As expected, the confidence and prediction intervals are centered around the same point (a predicted value of $25.05$ for ${\rm medv}$ when ${\rm lstat}$ equals 10), but the latter are substantially wider. 
+
+Now plot medv and lstat along with the least squares regression line. You can do the latter easily in base R graphics using the `abline` function.
+
+```{r}
+plot(lstat,medv)
+abline(lm.fit)
+```
+
+There is some evidence for non-linearity in the relationship between lstat and medv. 
+
+The abline function can be used to draw any line, not just the least squares regression line.
+To draw a line with intercept and slope, we type `abline(a,b)`. In this case, the `abline` function has a special method for the object that is returned by `lm` and "knows" what we want it to do. 
+
+Next we examine some diagnostic plots. Four diagnostic plots are automatically
+produced by applying the plot() function directly to the output
+from lm(). In general, this command will produce one plot at a
+time, and hitting Enter will generate the next plot. However,
+it is often convenient to view all four plots together. You can do this by first issuing the
+`par` command, then plotting the object.
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fit)
+```
+
+In addition to one plot you have already seen -- the normal QQ -- this makes several other plots. What are these?
+
+1. "residuals vs fitted" is a plot of the residual vs $\hat{y}$. A smoothed curve is drawn through the plot to help visualize any patterns present in this bivariate relationship. In general, this curve should be approximately a horizontal line. This is because if the "usual" assumptions of the model are satisfied -- in particular, linearity, independence of the error terms $\epsilon$, and constant variance of $\epsilon$ as a function of $x$ -- then the residuals should be unrelated to the fitted values. If they aren't, it suggests violation of one or more assumptions.
+
+2. "Scale-location" is a plot of the fitted values ($\hat{y}$) vs the square root of the absolute standardized residuals. The standardized residuals are the residuals divided by their estimated standard deviations. In a linear model, the estimated standard deviation of the residuals depends on the value of x. The interpretation of this plot is similar to that of the "residuals vs fitted plot"
+
+3. "Residuals vs. leverage". This plots the value of the residuals vs a quantity called "leverage" which measures the "influence" of each observation on the fit. Points that have high leverage "pull" the regression line toward them more than do the other points. This is particularly troublesome when the residual value for that point is high, since it suggestst that the point is both pulling the line toward it **and** the model is still not fitting well. These points might be considered "outliers" -- i.e. they coule be  points for which the model is not appropriate, or points with data quality issues (measurement/recording errors, etc). The numbers shown on the plot indicate the index (in the data frame) of points with particularly high values of leverage and large residual values, so you can easily look at them. In a scatter plot of `medv` vs `lstat`, highlight these three points. Does it make sense that these points were flagged as possibly outliers?
+
+```{r}
+df.fit <- data.frame(medv=medv,lstat=lstat,yhat=lm.fit$fitted.values)
+df.fit$outlier <- 1
+df.fit$outlier[c(215,413,375)] <- 2
+ggplot(df.fit,aes(x=lstat,y=medv,col=factor(outlier))) + geom_point()
+```
+
+You can also make this same suite of diagnostic plots in ggplot using the `ggfortify` package, which I automatically loaded at the top of this file. Try using the `autoplot` command on `lm.fit`
+
+```{r}
+autoplot(lm.fit)
+```
+
+Alternatively, we can compute the residuals from a linear regression
+fit using the residuals() function. The function
+rstudent() will return the studentized residuals, and we
+can use this function to plot the residuals against the fitted values.
+
+In a linear regression, our estimates of the standard deviation of the residuals depends on the values of the predictors $x$. "Studentized" residuals standardize the residuals by dividing by this estimated standard deviation. This can sometimes be more interpretable. 
+
+```{r}
+qplot(predict(lm.fit), residuals(lm.fit))
+qplot(predict(lm.fit), rstudent(lm.fit))
+```
+
+## Multiple Linear Regression
+
+First just two variables:
+
+```{r}
+lm.fit=lm(medv~lstat+age,data=Boston)
+summary(lm.fit)
+```
+
+The Boston data set contains thirteen variables, and so it would be cumbersome to have to type all of these in order to perform a regression using all of the predictors.
+Instead, we can use the following short-hand:
+
+```{r}
+lm.fit=lm(medv~.,data=Boston)
+summary(lm.fit)
+```
+
+Which predictors have the largest estimated coefficients? Is the relative magnitude interpretable here?
+
+We can access the individual components of a summary object by name
+(type ?summary.lm to see what is available). Hence
+summary(lm.fit)\$r.sq gives us the $R^2$, and
+summary(lm.fit)\$sigma gives us the RSE. 
+
+What if we would like to perform a regression using all of the variables but one?  For example, in the above regression output,  age has a high p-value. So we may wish to run a regression excluding this predictor.
+ The following syntax results in a regression using all predictors except age
+```{r}
+ lm.fit1=lm(medv~.-age,data=Boston)
+summary(lm.fit1)
+```

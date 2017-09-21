@@ -1,0 +1,9 @@
+slidy_presentation:
+  css: styles.css
+  keep_md: true
+  incremental: true
+  highlight: pygments
+  mathjax: default
+  fig_width: 7
+  fig_height: 6
+  fig_caption: true

@@ -1,0 +1,665 @@
+---
+title: "Nonparametric Statistics: a real example about rankings"
+author: "Data Science Team"
+output: 
+       slidy_presentation:
+        css: styles.css
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction: World University Rankings
+This is a great dataset available through [Kaggle.com](https://www.kaggle.com/mylesoneill/world-university-rankings#).
+
+* 3 sources of rankings are included: Times rankings, center for world university rankings, and Shanghai rankings.
+
+* We will spend sometime on data cleaning and visualization.
+
+* Use PCA to see which covariates drive the rankings the most. Indeed, we could use principal component regression, using the PCA scores as covariates in the model.
+
+* Barro-Lee Dataset on Educational Attainment.
+
+
+## Setup
+``` {r libraries, warning = FALSE, message = FALSE}
+library(maps)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+```
+
+## Let us look at each of the dataset 
+
+- Times Higher Education World University Ranking [(source)](https://www.timeshighereducation.com/world-university-rankings)
+
+- timesData.csv
+      + world_rank - world rank for the university. Contains rank ranges and equal ranks (eg. =94 and 201-250).
+      + university_name - name of university.
+      + country - country of each university.
+      + teaching - university score for teaching (the learning environment).
+      + international - university score international outlook (staff, students, research).
+      + research - university score for research (volume, income and reputation).
+      + citations - university score for citations (research influence).
+      + income - university score for industry income (knowledge transfer).
+      + total_score - total score for university, used to determine rank.
+      + num_students - number of students at the university.
+      + student_staff_ratio - Number of students divided by number of staff.
+      + international_students - Percentage of students who are international.
+      + female_male_ratio - Female student to Male student ratio.
+      + year - year of the ranking (2011 to 2016 included).
+      
+## Load the data and rename some categories      
+```{r loadTimes, warning = FALSE}
+timesdf <- read.csv("./data/timesData.csv", na.strings = '-', stringsAsFactors = FALSE )
+timesdf %<>% 
+  tbl_df %>%
+  rename( institution = university_name ) %>% 
+  mutate(
+    institution = gsub(" *(-|â€“) *","-",institution),
+    institution = gsub("Leibniz University of Hanover","Leibniz University of Hannover",institution),
+    institution = gsub("William & Mary","College of William and Mary",institution),
+    institution = gsub("SÃ£o Paulo State University (UNESP)","UNESP, SÃ£o Paulo State University",institution),
+    institution = gsub("University of Paris North-Paris 13","University of Paris Nord (Paris 13)",institution),
+    institution = gsub("Louisiana State University","Louisiana State University-Baton Rouge",institution),
+    female_male_ratio = as.numeric((gsub('^([0-9]+).+','\\1',female_male_ratio)))/100,
+    international_students = as.numeric(gsub('%','',international_students))/100,
+    num_students = as.numeric(gsub(',','',num_students)),
+    country = gsub('Republic of Ireland','Ireland',country),
+    country = gsub('Russian Federation','Russia',country),
+    country = gsub("Unisted States of America",'United States of America',country),
+    country = gsub("Unted Kingdom","United Kingdom",country)
+  ) %>%
+  rename(femaleProp = female_male_ratio)
+```
+
+## Brief summary
+```{r}
+summary(timesdf)
+```
+
+## Center for World University Rankings [(source)](http://cwur.org/)
+
+*  cwurData.csv
+      + world_rank - world rank for university.
+      + university_name - name of university.
+      + country - country of each university.
+      + national_rank - rank of university within its country.
+      + quality_of_education - rank for quality of education.
+      + alumni_employment - rank for alumni employment.
+      + quality_of_faculty - rank for quality of faculty.
+      + publications - rank for publications.
+      + influence - rank for influence.
+      + citations - rank for citations.
+      + broad_impact - rank for broad impact (only available for 2014 and 2015)
+      + patents - rank for patents.
+      + score - total score, used for determining world rank.
+      + year - year of ranking (2012 to 2015).
+   
+##   Load the data and rename some categories  
+
+```{r loadCWUR, warning = FALSE}
+cwurdf <- read.csv("./data/cwurData.csv", stringsAsFactors = FALSE )
+cwurdf %<>%
+  tbl_df %>%
+  mutate(
+    institution = gsub(" *(-|â€“) *","-",institution),
+    institution = gsub(" catholique"," Catholique",institution),
+    institution = gsub("University of Hanover","Leibniz University of Hannover",institution),
+    institution = gsub("Western University (The University of Western Ontario)","Western University of Ontario",institution),
+    institution = gsub("^Purdue University.+","Purdue University",institution),
+    institution = gsub("Royal Veterinary College, University of London","Royal Veterinary College",institution),
+    institution = gsub("University of Pittsburgh-Pittsburgh Campus","University of Pittsburgh",institution),
+    institution = gsub("Texas A&M University, College Station","Texas A&M University",institution),
+    institution = gsub("University of Paris-Sud","University of Paris Sud (Paris 11)",institution),
+    institution = gsub("University of Paris 13","University of Paris Nord (Paris 13)",institution),
+    institution = gsub("London School of Economics","London School of Economics and Political Science",institution),
+    country = gsub('Slovak Republic','Slovakia',country),
+    country = gsub('^USA$','United States of America',country),
+    country = gsub('^UK$','United Kingdom',country)
+  )
+```
+
+## Brief summary
+```{r}
+summary(cwurdf)
+```
+
+## Academic Ranking of World Universities 
+[(source)](http://www.shanghairanking.com/) (aka the Shanghai Rankings)  
+
+*  shanghaiData.csv
+      + world_rank - world rank for university. Contains rank ranges and equal ranks (eg. 101-152).
+      + university_name - name of university.
+      + national_rank - rank of university within its country.
+      + total_score - total score, used to determine rank.
+      + alumni - Alumni Score, based on the number of alumni of an institution winning nobel prizes and fields medals.
+      + award - Award Score, based on the number of staff of an institution winning Nobel Prizes in Physics, Chemistry, Medicine, and Economics and Fields Medals in Mathematics.
+      + hici - HiCi Score, based on the number of Highly Cited Researchers selected by Thomson Reuters.
+      + ns - N&S Score, based on the number of papers published in Nature and Science.
+      + pub - PUB Score, based on total number of papers indexed in the Science Citation Index-Expanded and Social Science Citation Index.
+      + pcp - PCP Score, the weighted scores of the above five indicators divided by the number of full time academic staff.
+      + year - year of ranking (2005 to 2015).
+
+##  Load the data and clean.        
+```{r loadShanghai, warning = FALSE}
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+# Determine the country associated with each university in the Shanghai dataset.
+schoolCountry <- read.csv("./data/school_and_country_table.csv", stringsAsFactors = FALSE) %>% tbl_df
+schoolCountry %<>% 
+  mutate(
+    school_name = gsub(" *(-|â€“) *","-",school_name),
+    school_name = gsub("Leibniz University of Hanover","Leibniz University of Hannover",school_name),
+    country = gsub('Republic of Ireland','Ireland',country),
+    country = gsub('Russian Federation','Russia',country),
+    country = gsub('Slovak Republic','Slovakia',country)
+  ) %>%
+  bind_rows(timesdf %>% dplyr::select(institution,country) %>% rename(school_name = institution)) %>%
+  bind_rows(cwurdf  %>% dplyr::select(institution,country) %>% rename(school_name = institution)) %>%
+  distinct
+
+shanghaidf <- read.csv("./data/shanghaiData.csv", stringsAsFactors = FALSE ) %>% tbl_df
+shanghaidf %<>% filter(university_name != "")
+```
+
+## Reconcile university names with those of timesdf and cwurdf
+
+```{r}
+substPatterns <- matrix(
+  c(
+    "Aix Marseille","Aix-Marseille",
+    "Hygiene Tropical","Hygiene & Tropical",
+    "A *& *M","A&M",
+    "^The ","",
+    '^University of Queensland','The University of Queensland',
+    '^Open University','The Open University',
+    "Vrije (University|Universiteit) Brussel.*","Vrije Universiteit Brussel",
+    "(University Libre Bruxelles)|(UniversitÃ© libre de Bruxelles.*)","UniversitÃ© Libre de Bruxelles",
+    "Queen Mary, (U\\.|University) of London","Queen Mary University of London",
+    " *- *","-",
+    "Curtin University of Technology","Curtin University",
+    "University of Hannover","Leibniz University of Hannover",
+    "College of +William","College of William",
+    "Erasmus University","Erasmus University Rotterdam",
+    "Western University (The University of Western Ontario)","University of Western Ontario",
+    "^Western University$","University of Western Ontario",
+    "Imperial College of Science, Technology and Medicine","Imperial College London",
+    "Purdue University-West Lafayette","Purdue University",
+    "^UNESP$","UNESP, SÃ£o Paulo State University",
+    "MINES P","Mines P",
+    "(Korea Advanced Institute of Science and Technology)","\\1 (KAIST)",
+    "Ecole Polytechnique","Ã‰cole Polytechnique",
+    "University of New England","University of New England (Australia)",
+    "University of California-Berkeley","University of California, Berkeley",
+    "University of Pittsburgh.*","University of Pittsburgh",
+    "Texas A&M University-College Station","Texas A&M University",
+    "University of Paris-Sud (Paris 11)","University of Paris Sud (Paris 11)",
+    "University of Roma-La Sapienza","Sapienza University of Rome",
+    "University of Santiago Compostela","University of Santiago de Compostela",
+    "Massachusetts Institute of Technology.+","Massachusetts Institute of Technology",
+    "London School of Hygiene and Tropical Medicine","London School of Hygiene & Tropical Medicine"
+  )
+  ,ncol=2,
+  byrow=TRUE,
+  dimnames = list(NULL,c('from','to'))
+)
+
+schools <- shanghaidf$university_name
+for(i in seq_len(nrow(substPatterns))){
+  schools <- gsub(substPatterns[i,1],substPatterns[i,2],schools)
+}
+shanghaidf$university_name <- schools
+
+```
+## Fix school and country names
+
+Load the `world.cities` dataset from package `maps`.
+
+```{r loadcities}
+data("world.cities")
+wc <- world.cities %>% 
+  tbl_df %>% 
+  arrange(desc(pop)) %>%
+  filter( !duplicated(name) ) %>%
+  dplyr::select(name,country.etc) %>% 
+  mutate(country.etc = gsub('^UK$','United Kingdom',gsub('^USA$','United States of America',country.etc)) ) %>%
+  rename(
+    city    = name,
+    country = country.etc
+  ) %>%
+  filter( !(city == 'Roma' & country == 'Australia')) %>%
+  filter( !(city == 'Santiago' & country == 'Philippines')) %>%
+  filter( !(city == 'Halle' & country == 'Germany')) %>%
+  bind_rows(
+    data_frame(
+      city = c("Goettingen","Muenster","Duesseldorf","Roma","Yang Ming","Mount Sinai","Norwegian","King Fahd","ParisTech"),
+      country = c("Germany","Germany","Germany","Italy","China","United States of America","Norway","Saudi Arabia","France")
+    )
+  )
+countries <- wc$country %>% unique %>% sort
+```
+
+## Then assign countries to Shanghai dataset.
+```{r asgncntry}
+# First find the exact matches for university name in the `schoolCountry` dataset.
+set1 <- shanghaidf$university_name %>% unique %>% sort
+a <- schoolCountry %>% filter( school_name %in% set1 )
+set1 %<>% setdiff(a$school_name)
+# Next, get the schools that are obviously American because they have a US state in their name.
+a %<>% bind_rows(
+  data_frame(
+    school_name = state.name %>% paste(collapse="|") %>% grep(set1) %>% { set1[ . ] },
+    country = 'United States of America' 
+  ) 
+)
+set1 %<>% setdiff(a$school_name)
+# Then, get the schools that have countries in their names
+countries <-
+a %<>% bind_rows(
+  data_frame(
+    school_name = countries %>% sapply(function(cntry) cntry %>% grep(set1)) %>% unlist %>% { set1[ . ] },
+    country    =  countries %>% sapply(function(cntry) cntry %>% grep(set1) %>% { rep( cntry, length( . ) ) } ) %>% unlist
+  ) 
+)
+set1 %<>% setdiff(a$school_name)
+```
+
+## Then, get the schools that have a world city in their names
+```{r}
+ischool    <- wc$city %>% sapply(function(city) city %>% { paste0("(^|[- (])", . ,"($|[- )])") } %>% grep(set1))
+ischool    <- ischool[sapply(ischool,length)>0]
+cntryNames <- setNames(wc$country,wc$city)[names(ischool)]
+a %<>% bind_rows(
+  data_frame(
+    school_name = set1[ ischool %>% unlist ],
+    country     = rep(cntryNames,times=sapply(ischool,length))
+  ) 
+)
+set1 %<>% setdiff(a$school_name)
+# Now strip down the unassigned schools to just the place/name and see if a school with an assigned country
+# also has the same place/name and therefore belongs to the same country.
+
+shanghaidf2 <- shanghaidf %>% 
+  full_join(a, by = c('university_name' = 'school_name')) %>% 
+  dplyr::select(1:2,country,everything()) %>%
+  rename( institution = university_name ) 
+```
+
+
+## Combine Rankings
+
+Combine the rankings into a single data.frame
+
+```{r combine, warning = FALSE, fig.width = 11, fig.height = 9}
+countries <- timesdf$country %>% 
+  union( cwurdf$country ) %>% 
+  union( shanghaidf2$country ) %>% 
+  sort %T>% print
+```
+
+## Combine Rankings
+
+```{r}
+combodf <- timesdf %>% 
+  full_join( shanghaidf2, by = c('institution','country','year') ) %>% 
+  full_join(     cwurdf,  by = c('institution','country','year') ) %>%
+  mutate(
+    institution = factor(institution),
+    country     = factor(country)
+  ) %>%
+  rename(
+      rank_times        = world_rank.x,
+      rank_shanghai     = world_rank.y,
+      rank_cwur         = world_rank,
+      citations_times   = citations.x,
+      citations_cwur    = citations.y,
+      score_times       = total_score.x,
+      score_shanghai    = total_score.y,
+      natlrank_shanghai = national_rank.x,
+      natlrank_cwur     = national_rank.y
+  ) %>%
+  dplyr::select(institution,country,year,starts_with('rank'),matches('rank'),everything()) %T>% { summary(.) %>% print }
+```
+
+## Show the counts of institutions captured in each source-year combo.
+
+```{r cntinst}
+countRanks <- function(df){
+  sapply(
+    2012:2015 %>% 
+      setNames(2012:2015),
+    function(yr) { 
+      df %>% 
+        filter(year==yr) %$% 
+        { 
+          c(
+            times=length(unique(rank_times)),
+            cwur=length(unique(rank_cwur)),
+            shanghai=length(unique(rank_shanghai))
+          ) 
+        }
+    }
+  )
+}
+
+combodf    %>% countRanks %T>% print %>% sum
+```
+## If we only want to see the top-100 rankings:
+```{r}
+combo100df <- combodf %>% filter((rank_times %in% as.character(1:100)) | (rank_cwur < 101) | 
+(rank_shanghai %in% as.character(1:100)))
+```
+
+```{r}
+combo100df %>% countRanks %T>% print %>% sum
+```
+
+## Sort according to rankings
+```{r}
+timesdf2 <- timesdf %>% mutate(world_rank = sprintf('%8s',world_rank))
+tmp.times <- lapply(unique(timesdf2$year) %>% sort, 
+              function(i) {
+                tmp<- timesdf2 %>% filter(year==i); 
+                ry <- rank(tmp$world_rank); 
+                tmp %<>% mutate(
+                  rank.times=ry,
+                  qrank.times=1-ecdf(ry)(ry))
+              }
+) %>% { do.call( rbind, . ) }
+tmp.cwur <- lapply(unique(cwurdf$year) %>% sort, 
+                    function(i) {
+                      tmp<- cwurdf %>% filter(year==i); 
+                      ry <- rank(tmp$world_rank); 
+                      tmp %<>% mutate(
+                        rank.cwur=ry,
+                        qrank.cwur=1-ecdf(ry)(ry))
+                    }
+) %>% { do.call( rbind, . ) }
+shanghaidf2 %<>% mutate(world_rank = sprintf('%8s',world_rank))
+tmp.shanghai <- lapply(unique(shanghaidf2$year) %>% sort, 
+                    function(i) {
+                      tmp<- shanghaidf2 %>% filter(year==i); 
+                      ry <- rank(tmp$world_rank); 
+                      tmp %<>% mutate(
+                        rank.shanghai=ry,
+                        qrank.shanghai=1-ecdf(ry)(ry))
+                    }
+) %>% { do.call( rbind, . ) }
+```
+
+## Visualize Combined Data
+
+Just a quick check on what we've got. Rankings color-coded by country.
+
+```{r pltcombo, fig.width=12, fig.height=8}
+iyr <- 2015
+gplt.times <- tmp.times %>% 
+  dplyr::select(1:3,year,contains('rank')) %>% 
+  filter(year == iyr,qrank.times>0.9) %>% 
+  mutate(institution = factor(institution,levels=unique(institution)[order(qrank.times,decreasing=TRUE)])) %>% 
+  ggplot(aes(x=institution,y=qrank.times,fill=country)) + 
+  geom_bar(stat='identity') + 
+  theme(axis.text.x = element_text(angle = 90,hjust=1.0)) + labs(title = sprintf('Times World Rankings %d',iyr))
+
+gplt.cwur <- tmp.cwur %>% 
+  dplyr::select(1:3,year,contains('rank')) %>% 
+  filter(year == iyr,qrank.cwur>0.9) %>% 
+  mutate(institution = factor(institution,levels=unique(institution)[order(qrank.cwur,decreasing=TRUE)])) %>% 
+  ggplot(aes(x=institution,y=qrank.cwur,fill=country)) + 
+  geom_bar(stat='identity') + 
+  theme(axis.text.x = element_text(angle = 90,hjust=1.0)) + labs(title = sprintf('CWUR World Rankings %d',iyr))
+
+gplt.shanghai <- tmp.shanghai %>% 
+  dplyr::select(1:3,year,contains('rank')) %>% 
+  filter(year == iyr,qrank.shanghai>0.9) %>% 
+  mutate(institution = factor(institution,levels=unique(institution)[order(qrank.shanghai,decreasing=TRUE)])) %>% 
+  ggplot(aes(x=institution,y=qrank.shanghai,fill=country)) + 
+  geom_bar(stat='identity') + 
+  theme(axis.text.x = element_text(angle = 90,hjust=1.0)) + labs(title = sprintf('Shanghai World Rankings %d',iyr))
+
+marrangeGrob(list(times = gplt.times, cwur = gplt.cwur, shanghai = gplt.shanghai), nrow = 1, ncol = 3)
+```
+
+
+## Bayesian Plackett-Luce Modeling to infer institution strengths from rankings
+
+- Starting with the combo top-100 rankings, combo100df, convert into an ordering matrix with the appropriate covariate matrices for X, country, source, year.
+
+- Here, we'll use the inverse-logistic (effectively, log-odds) of the quantiles of each 
+variable from the 3 ranking sources (Times, CWUR, Shanghai). This is convenient since some of the variables are scores and others are rankings.  
+```{r conversion1}
+a <- combo100df %>% 
+  dplyr::select(-contains('score')) %>% 
+  mutate(schoolID  = as.integer(factor(institution)),
+         countryID = as.integer(factor(country)))
+```
+## Getting the covariates, X
+```{r}
+medianMLT <- function(x) median(x,na.rm=TRUE)
+instX <- a %>% 
+  group_by(institution) %>% 
+  summarize_each(funs(medianMLT),teaching:countryID) %>%
+  inner_join(a %>% dplyr::select(country,countryID) %>% distinct,by='countryID')
+```
+Variable `femaleProp` has `NA` for quite a few institutions, so we'll drop it.
+In order to retain institutions like Columbia U. and Purdue U., we'll drop the `income` column.
+
+```{r dropit}
+instX %<>% dplyr::select(-femaleProp,-income)
+
+# *************************************************
+# ***Drop any row with 6 or more missing values.***
+# ***THIS DROPS ANY UNIVERSITY THAT DIDN'T SHOW ***
+# *** UP ON AT LEAST TWO OF THE RANKING LISTS   ***
+# *************************************************
+instX %<>% filter(apply(.,1,function(x) length(which(is.na(x)))<6))
+# We'll drop these schools too.
+instX %>% filter(!complete.cases(.)) %>% print
+instX %<>% filter(complete.cases(.)) %>%
+  mutate(
+    country     = factor(as.character(country)),
+    countryID   = as.integer(country),
+    institution = factor(as.character(institution)),
+    schoolID    = as.integer(institution)
+  )
+a     %<>% filter(institution %in% instX$institution) %>% 
+  mutate(
+    country     = factor(as.character(country)),
+    countryID   = as.integer(country),
+    institution = factor(as.character(institution)),
+    schoolID    = as.integer(institution)
+  )
+```
+
+This leaves `r nrow(instX)` institutions.
+
+
+## Continue with the column conversions...
+```{r conversion2}
+# Convert all columns into log-odds of empirical CDF.
+# The rankings variables are negated so that less negative values are better (or could have reversed the ranking values if 
+# wanted to keep everything positive).
+negate <- function(x) -x
+makeBayesFactors <- function(x) qlogis(rank(x)/(length(x)+1))
+instX %<>% 
+  mutate_each(funs(negate),one_of('quality_of_education','alumni_employment','quality_of_faculty','publications','influence','citations_cwur','patents')) %>%
+  mutate_each(funs(makeBayesFactors),-institution,-country,-schoolID,-countryID) %>% 
+  dplyr::select(institution,country,schoolID,countryID,everything())
+
+# So this is now our design matrix of covariate values. 
+# One row for each of the 113 institutions, and one column for each
+# of the 15 covariates we've decided to keep.
+X <- instX %>% 
+  arrange(schoolID) %>% 
+  dplyr::select(-institution,-schoolID,-country,-countryID) %>% 
+  dplyr::select(-citations_cwur) %>% # Also drop citations_cwur because have citations_times
+  as.matrix
+rownames(X) <- instX %>% arrange(schoolID) %$% { institution %>% as.character }
+```
+
+## Visualization of the Covariates
+
+We use principal components analysis (PCA) to display the level of correlation amongst the covariates and to hint at which might drive the rankings the most.
+
+Considering that Harvard, Stanford and MIT are near the top of all of the rankings, we expect that the biplot indicates `influence`, `research`, `hici`, `quality_of_education`, `quality_of_faculty`, `alumni` and `award` to have high potential as drivers of the rankings.
+
+## Visualization of the Covariates
+
+```{r pcaX, fig.width = 11, fig.height=8}
+xpca <- princomp(X, cor = FALSE)
+plot(xpca)
+```
+
+## Visualization of the Covariates
+```{r}
+biplot(xpca)
+```
+
+## PCA results
+```{r}
+print(xpca)
+```
+
+## PCA results with names
+```{r}
+scl2char <- function(x) {xmax<- x[which.max(abs(x))]; if(xmax<0) fctr<- -1 else fctr <- 1; ifelse(abs(x)>0.25,sprintf("%4.2f",fctr*x),"")}
+xpcachar <- xpca$loadings %>% matrix(nrow=nrow(.),dimnames=dimnames(.)) %>%
+  as.data.frame %>% 
+  tbl_df %>% 
+  mutate_each(funs(scl2char)) %>% 
+  mutate(X=rownames(xpca$loadings)) %>% 
+  dplyr::select(X,everything()) %T>% print(width=Inf)
+
+X <- xpca$scores %>% apply(2,function(x) {xmax<- x[which.max(abs(x))]; if(xmax<0) fctr<- -1 else fctr <- 1; fctr*x })
+
+```
+## Another related interesting dataset about educational attainment
+
+* UNESCO Institute for Statistics and the Barro-Lee Dataset on Educational Attainment
+[(SOURCE)](http://datatopics.worldbank.org/Education/wDataQuery/QProjections.aspx)
+
+*  educational_attainment_supplementary_data.csv
+      + Barro-Lee Dataset (2014) - Average years of schooling; Educational attainment among age groups and genders; Population distributions. 144 countries. 1985-2010 in 5 year intervals.
+      + UNESCO Institute for Statistics (UIS) - Mean years of schooling; Percentage of population (age 25+) by educational attainment. 152 countries. 1985-2015.
+      
+## Here, we will focus on the Barro-Lee Dataset
+      
+```{r loadAttain}
+attaindf <- read.csv("./data/educational_attainment_supplementary_data.csv", stringsAsFactors = FALSE)
+attaindf %<>% 
+  tbl_df %>%
+  filter( series_name != "") %>%
+  mutate(
+    series_name = factor(series_name),
+    country_name = factor(country_name)
+  )
+```
+
+## Stack all the columns across the years into a `Year` and `Value` column (using `tidyr::gather()`).
+
+```{r}
+attaindf %<>%
+  gather( key = Year, value = Value, -country_name, -series_name ) %>%
+  mutate(
+    Year      = as.numeric( gsub('X','',Year))
+  ) %>%
+  filter(!is.na(Value)) %T>% { summary(.) %>% print }
+```
+
+
+
+## Barro-Lee Data
+
+There's quite a bit of information to work through in this dataset.  We began by breaking off chunks and transforming and plotting them to get a feel for what the
+data were saying. Let us first look at the Barro-Lee average years of schooling and population data.
+```{r bldf}
+bldf <- attaindf %>% filter(grepl('^Barro',series_name))
+```
+
+## Average years of schooling
+```{r}
+bldfay <- bldf %>% filter(grepl('Average years',series_name)) %>%
+  mutate(
+    source = 'Barro-Lee',
+    type = "Average years of schooling",
+    schoolLevel = factor(gsub('.+ ([^ ]+) schooling.+','\\1',series_name),levels=c('primary','secondary','tertiary','total')),
+    ageCohort   = factor(gsub('.+, age ([^,]+),.+','\\1',series_name)),
+    gender      = factor(gsub('.+, ([a-zA-Z]+)$','\\1',series_name))
+  ) %>%
+  dplyr::select(-series_name)
+```
+
+## Proportions finished schooling
+```{r}
+bldfpf <- bldf %>% filter(grepl('Percentage of',series_name)) %>%
+  mutate(
+    Value = Value/100,
+    source = 'Barro-Lee',
+    type = "Proportion with schooling",
+    schoolLevel = factor(gsub('.+\\with (.+)$','\\1',series_name),
+                         levels=c(
+                           'no education',
+                           'primary schooling. Completed Primary',
+                           'primary schooling. Total (Incomplete and Completed Primary)',
+                           'secondary schooling. Completed Secondary',
+                           'secondary schooling. Total (Incomplete and Completed Secondary)',
+                           'tertiary schooling. Completed Tertiary',
+                           'tertiary schooling. Total (Incomplete and Completed Tertiary)'
+                         )
+    ),
+    ageCohort   = factor(gsub('.+ age ([^ ]+) .+','\\1',series_name)),
+    gender      = factor(ifelse(gsub('.+Percentage of ([a-zA-Z]+) .+','\\1',series_name)=='population','total','female'))
+  ) %>%
+  dplyr::select(-series_name)
+```
+
+## Population
+```{r}
+bldfpop <- bldf %>% filter(grepl('Population',series_name)) %>%
+  mutate(
+    source = 'Barro-Lee',
+    type = "Population in thousands",
+    ageCohort   = factor(gsub('.+, age ([^,]+),.+','\\1',series_name)),
+    gender      = factor(gsub('.+, ([a-zA-Z]+)$','\\1',series_name)),
+    population  = Value*1000
+  ) %>%
+  dplyr::select(-series_name,-Value)
+
+bldfay %<>% inner_join(bldfpop %>% dplyr::select(-source,-type), by = c("country_name","Year","ageCohort","gender"))
+bldfpf %<>% inner_join(bldfpop %>% dplyr::select(-source,-type), by = c("country_name","Year","ageCohort","gender"))
+```
+
+## Plot out the data to get a feel for its structure and message.
+```{r usplots1, fig.width = 10, fig.height = 8}
+country <- "United States"
+bldfay %>% 
+  filter(
+    country_name == country,
+    !grepl('15\\+|25\\+',ageCohort)
+  ) %>% 
+  ggplot(aes(x = Year, y = Value, color = gender)) + 
+     geom_line() + labs(y = 'Average Years of Schooling', title = country) +
+     theme(axis.text.x = element_text(angle = 90)) +
+     facet_wrap(schoolLevel~ageCohort, nrow = 4)
+```
+
+## Plot out the data to get a feel for its structure and message.
+
+```{r}
+country <- "United States"
+bldfay %>%
+  filter(
+    country_name == country,
+    !grepl('15\\+|25\\+',ageCohort)
+  ) %>%
+  ggplot(aes(x = Year, y = Value, color = ageCohort)) +
+  geom_line() + labs(y = 'Average Years of Schooling', title = country) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(gender ~ schoolLevel, nrow = 2)
+```
+

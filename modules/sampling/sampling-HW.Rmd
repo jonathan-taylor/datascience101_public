@@ -1,0 +1,186 @@
+---
+title: "Homework for Week 5"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+```{r setup,include=F}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(dev="png",dpi=300, out.width=500,  fig.align="center",fig.width=6,fig.height=4)
+
+```
+
+#### Due May 12, 9:30am
+
+### 1. How many clusters of galaxies?
+
+In this exercise, we will work with the data analyzed in 
+Roeder (1990) [Density Estimation With Confidence Sets Exemplified by Superclusters and Voids in the Galaxies](https://www.jstor.org/stable/2289993?seq=1#page_scan_tab_contents). They are the measured velocities in km/second of 82 galaxies from the Corona Borealis region. It is available in R in the package (MASS).
+
+```{r}
+library(MASS)
+gal <- galaxies/1000
+plot(x = c(0, 40), y = c(0, 0.3), type = "n", bty = "l",
+     xlab = "velocity of galaxy (1000km/s)", ylab = "density")
+rug(gal)
+lines(density(gal, width = 4, n = 200), lty = 1)
+lines(density(gal, width = 2, n = 200), lty = 3)
+```
+
+The plot above includes two different density estimates for the data, using two different levels of smoothing, specified by the parameter `width`. Both densities present multiple local modes. The number of modes in this data is of scientific interest. Take a look at the referenced article to understand why, but here is a short summary. A theory of how the universe formed predicts the existence  of clusters of galaxis.
+If the galaxies are clumped, the distribution of velocities would be multimodal, with each mode representing a cluster as it moves away at its own speed. Conversely, if there is no cluster effect, the distribution would be determined by the sampling scheme. 
+
+Our task is to provide an estimate of the number of modes and a sense of the variability of this estimate due to sampling error.
+
+#### 1.a Identifying and counting the modes
+
+Write a function  `mode.finder()` that uses the output of `density()` to identify the local modes in an estimated density. 
+Take this definition of local mode: a point where the estimated density is higher than at its immediate neighbors both at the right and left. 
+
+*Hint 1*: look at what is the object created by `density()`.
+*Hint 2*: Think about how you want to treat the first and last point of your estimated density. 
+
+```{r,include=F}
+# these r commands are just for me checking the feasibility of what I am asking them to do. I am sure you can improve elegance and readability of the solutions.
+mode.finder<-function(x,y)
+{
+  n<-length(y)
+  modefound<-NULL
+  if(y[1]>y[2]){modefound<-c(modefound,1)}
+  for(i in 2:(n-1))
+  { 
+    if((y[i]>=y[i-1])&&(y[i]>=y[i+1])){modefound<-c(modefound,i)}
+  }
+  if(y[n]>y[n-1]){modefound<-c(modefound,n)}
+return(x[modefound])
+}
+```
+
+#### 1.b Modes in the galaxies data
+
+What are the local modes for the `galaxies` data when you use `width = 4`, `width = 3`, `width = 2` as parameters in `density()`?
+
+```{r,include=F}
+density.object<-density(gal, width = 3, n = 200)
+mode.finder(density.object[[1]],density.object[[2]])
+```
+
+#### 1.c Bootstrapping to learn about modes
+
+As you have seen, the number of estimated modes depends on the value of the parameter `width`. In what follows, work with `width=3`, unless specified otherwise.
+
+Construct B=1000 bootstrap samples of the galaxies data, and for each of them estimate the density, and record the corresponding modes.
+
+*Hint:* since the number of modes might be different across bootstrap samples, you might find it useful to store the modes of the bootstrap samples in a `list` object. One way to initialize a list object is `bootstrapmodes <-vector("list",B)`. To get to the i-th element of the list use `bootstrapmodes[[i]]`.
+
+```{r,include=F}
+B<-1000
+modecount<-NULL
+modesite<-vector("list",B)
+for(i in 1:B)
+{
+  bootsample<-sample(gal,82,replace=T)
+  density.boot<-density(bootsample, width = 3, n = 200)
+  modeboot<-mode.finder(density.boot[[1]],density.boot[[2]])
+  modesite[[i]]<-modeboot
+  modecount<-c(modecount,length(modeboot))
+}
+```
+
+
+#### 1.d Display the bootstrap results
+
+Create a graphical display that shows how the number and locations  of modes changes across the bootstrap samples.
+```{r,fig.width=8,fig.height=4,include=F}
+par(mfrow=c(1,2))
+hist(modecount,xlab="Number of local modes",main="Histogram of bootstrap mode count")
+plot(x = c(0, 40), y = c(0, 0.3), type = "n", bty = "l",
+     xlab = "velocity of galaxy (1000km/s)", ylab = "density of original sample",main="Location of bootstrap modes")
+lines(density(gal, width = 3, n = 200), lty = 1)
+for(i in 1:B)
+{rug(modesite[[i]])}
+```
+
+#### 1.e Conclusions
+
+What are your conclusions? How would you communicate them to interested astronomers? What other analysis would you do to strenghten your conclusions?
+
+### 2. Sample averages and the central limit theorem
+
+We want to convince ourselves of the validity of the formulas we have written out in class for the variability of the sample average.
+
+The problem we consider is that of estimating the mean time you need to wait before being served at a popular fast-food restaurant on a saturday between 11:30am and 1:30pm.
+To generate observations from this abstract population, we will use the [gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distribution. Load the package `stats` and look up  `help(rgamma)`. There are two parameters you need to choose: `shape` and `rate`. The mean value of a variable that has a gamma distribution is `shape/rate` and its variance is `shape/rate^2`.
+
+#### 2.a Let's get familiar with the Gamma distribution
+
+For the values of `(shape=5,rate=1)`,`(shape=50,rate=10)`,`(shape=.5,rate=.1)`,
+plot the density, generate a random sample of size 10000, plot the histogram of the sample and calculate sample mean and sample variance.
+
+
+```{r,include=F}
+x<-seq(0,100, length.out = 1000)
+plot(x,dgamma(x,6,.6))
+X<-rgamma(1000,6,.6)
+hist(X)
+mean(X)
+var(X)
+```
+
+#### 2.b The role of the sample size
+
+Consider a population described by a Gamma(shape=6,rate=.6). We will work with samples of size `n=10,20,50,100,200,1000`. For each of these sample sizes, 
+
+- draw 10000 samples, 
+- calculate the sample mean for each of the samples 
+- plot the histograms of the sample means
+- calculate the standard deviation of the sample means (standard error) across the 10000 samples
+
+Now plot the values of standard error against the sample size (or transformations of it). What do you conclude?
+
+#### 2.c The role of the population variance
+
+Now re-do an exercise similar to the one above, but keeping the sample size constant `n=100` and changing the variance of the Gamma.
+Specifically, conside the following values of parameters `(shape=2,rate=0.2)`, `(shape=4,rate=.4)`, `(shape=6,rate=.6)`, `(shape=8,rate=.8)`, `(shape=10,rate=1)`, `(shape=15,rate=1.5)`.
+
+For each of these parameter values, 
+
+- draw 10000 samples of size 100, 
+- calculate the sample mean for each of the samples 
+- plot the histograms of the sample means
+- calculate the standard deviation of the sample means (standard error) across the 10000 samples
+
+Now plot the values of the standard error against the variance of the population generating the data (or transformations of it). What are your conclusions?
+
+*Hint* This exercise is quite similar to some of the examples presented in Sampling-Lab02.Rmd.
+
+### 3. Accuracy of a poll
+
+This was an election year and there has been a lot of interest in polls.
+In this exercise we want to understand how to choose a sample size to guarantee a certain level of accuracy of the poll.
+
+Suppose that there are two possible candidates on the ticket, and that `p` is the true proportion of the entire population that is going to vote for the first candidate. Furthermore---to make our life simpler---let's assume that  everyone votes and chooses one of the candidates: in this scenario the first candidate wins if p>0.5.
+
+The true population is big enough that a sample of size `n` from it is effectively with replacement.
+This means that a sample of votes of size `n` can be represented as the result of flipping `1` coin that has probability of head `p` for `n` times. In R, we can use the function `rbinom(n,size=1,prob=p)` to such sample of `n` votes from the population.
+
+A poll is successful if it predicts the right candidate to win. Determine what is a sample size that will allow "to make reliable predictions"  when `p`, the true population proportion of voters for the first candidate takes on the following different values `p=c(0.1,0.2,0.3,0.4,0.45,0.47,0.51)`.
+
+*Hint 1* Defining specifically what it means "to make reliable predictions"  is part of the exercise. So, start by stating your goal and choose a goal that you can manage.
+
+*Hint 2* Depending on how you choose your goal, you might be able to arrive to an answer analytically. Using simulations is also a good option. 
+
+### 4. Confidence intervals
+
+In class we briefly introduced the notion of *interval estimation*, providing two rules to carry this out. We explore here how one of those rules works across multiple samples.
+
+We want to estimate the average BMI of asian adult females. To generate data from this abstract population we are going to use a normal distribution with mean 20 and standard deviation 3.
+
+1. Generate 1000 random samples of size 100 
+
+2. For each sample $(X_1,\ldots,X_{100})$, calculate the interval defined by $(\bar{X}-2SD(X_1,\ldots,X_{100})/\sqrt{100},\bar{X}+2SD(X_1,\ldots,X_{100})/\sqrt{100})$
+
+3. Which fraction of the intervals contains the true population mean value 20?
+
+4. Provide a graphical display of the intervals that you think help convey the performance of this method of interval estimation.

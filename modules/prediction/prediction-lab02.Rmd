@@ -1,0 +1,15 @@
+---
+title: "Prediction Lab"
+date: "May 16, 2016"
+output:
+    html_document:
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+library(pacman)
+pacman::p_load(ggplot2,ggfortify)
+
+```

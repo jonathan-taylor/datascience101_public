@@ -1,0 +1,487 @@
+<?xml version="1.0"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:nyt="http://www.nytimes.com/namespaces/rss/2.0" version="2.0">
+  <channel>
+    <title>NYT &gt; Home Page</title>
+    <link>http://www.nytimes.com/pages/index.html?partner=rss&amp;emc=rss</link>
+    <atom:link rel="self" type="application/rss+xml" href="http://www.nytimes.com/services/xml/rss/nyt/HomePage.xml"/>
+    <description/>
+    <language>en-us</language>
+    <copyright>Copyright 2016  The New York Times Company</copyright>
+    <lastBuildDate>Tue, 27 Sep 2016 21:07:22 GMT </lastBuildDate>
+    <image>
+      <title>NYT &gt; Home Page</title>
+      <url>https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png</url>
+      <link>http://www.nytimes.com/pages/index.html?partner=rss&amp;emc=rss</link>
+    </image>
+    <item>
+      <title>The Morning After the Debate, Donald Trump Goes on the Attack</title>
+      <link>http://www.nytimes.com/2016/09/28/us/politics/hillary-clinton-donald-trump-debate.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/us/politics/hillary-clinton-donald-trump-debate.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/us/politics/hillary-clinton-donald-trump-debate.html?partner=rss&amp;emc=rss"/>
+      <description>Mr. Trump lashed out at the debate moderator, complained about his microphone and threatened to make Bill Clinton&#x2019;s marital infidelity a campaign issue in a TV appearance Tuesday.</description>
+      <dc:creator>ALEXANDER BURNS</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 13:38:00 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Debates (Political)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Holt, Lester (1959- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Women and Girls</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Beauty Contests</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Miss Universe Organization</category>
+    </item>
+    <item>
+      <title>Shamed and Angry: Alicia Machado, a Miss Universe Mocked by Donald Trump</title>
+      <link>http://www.nytimes.com/2016/09/28/us/politics/alicia-machado-donald-trump.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/us/politics/alicia-machado-donald-trump.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/us/politics/alicia-machado-donald-trump.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/us/28MACHADOweb1/28MACHADOweb1-moth-v2.jpg" medium="image" height="151" width="151"/>
+      <media:description>Alicia Machado, who won the Miss Universe pageant in 1996, was photographed in May of this year in Los Angeles.</media:description>
+      <media:credit>Emily Berl for The New York Times</media:credit>
+      <description>During Monday&#x2019;s debate, Hillary Clinton put a spotlight on Ms. Machado, who was nicknamed &#x201C;Miss Eating Machine&#x201D; by Mr. Trump in 1996 and says she has never fully recovered.</description>
+      <dc:creator>MICHAEL BARBARO and MEGAN TWOHEY</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 14:43:39 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Machado, Alicia (1976- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Beauty Contests</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Women and Girls</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Miss Universe Organization</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Debates (Political)</category>
+    </item>
+    <item>
+      <title>Trump and Clinton Discuss Alicia Machado</title>
+      <link>http://www.nytimes.com/video/us/politics/100000004674290/trump-and-clinton-discuss-alicia-machado.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/video/us/politics/100000004674290/trump-and-clinton-discuss-alicia-machado.html</guid>
+      <description>During Monday&#x2019;s presidential debate, Hillary Clinton quoted insults that Alicia Machado, a Miss Universe pageant winner, attributed to Donald J. Trump, while Mr. Trump showed disbelief at the insinuations.</description>
+      <dc:creator/>
+      <pubDate>Tue, 27 Sep 2016 18:28:19 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/des">Debates (Political)</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_org_all">Miss Universe Organization</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_per">Machado, Alicia (1976- )</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_per">Trump, Donald J</category>
+    </item>
+    <item>
+      <title>Trump and Clinton in First Debate</title>
+      <link>http://www.nytimes.com/video/us/politics/100000004672976/trump-and-clinton-face-off-in-first-debate.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/video/us/politics/100000004672976/trump-and-clinton-face-off-in-first-debate.html</guid>
+      <description>Donald J. Trump and Hillary Clinton clashed on taxes, crime and race during their presidential debate on Monday at Hofstra University in Hempstead, N.Y. The Times reporter Michael D. Shear weighs in on the night of pointed attacks.</description>
+      <dc:creator/>
+      <pubDate>Tue, 27 Sep 2016 02:38:21 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/des">Debates (Political)</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/nyt_per">Trump, Donald J</category>
+    </item>
+    <item>
+      <title>Suburban Women Find Little to Like in Donald Trump&#x2019;s Debate Performance</title>
+      <link>http://www.nytimes.com/2016/09/28/us/politics/women-voters-reaction.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/us/politics/women-voters-reaction.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/us/politics/women-voters-reaction.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/us/28voices3/28voices3-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>A debate watch party Monday night at Gullifty&#x2019;s, a bar in Rosemont, Pa., a Philadelphia suburb.</media:description>
+      <media:credit>Mark Makela for The New York Times</media:credit>
+      <description>Undecided women in Philadelphia&#x2019;s suburbs, a crucial voting bloc, said Mr. Trump had not only failed to win them over but in many cases had repelled them.</description>
+      <dc:creator>TRIP GABRIEL</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 20:51:11 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+    </item>
+    <item>
+      <title>About New York: What Donald Trump Got Wrong on Stop-and-Frisk</title>
+      <link>http://www.nytimes.com/2016/09/28/nyregion/what-donald-trump-got-wrong-on-stop-and-frisk.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/nyregion/what-donald-trump-got-wrong-on-stop-and-frisk.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/nyregion/what-donald-trump-got-wrong-on-stop-and-frisk.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/nyregion/28about1/28about1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Officers in 2014 outside a housing project in Brownsville, Brooklyn, the neighborhood that once had the highest concentration of street stops.</media:description>
+      <media:credit>Victor J. Blue for The New York Times</media:credit>
+      <description>In his debate with Hillary Clinton, Mr. Trump uttered elaborate fiction about a tactic still used by the New York Police Department.</description>
+      <dc:creator>JIM DWYER</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 20:45:05 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Murders, Attempted Murders and Homicides</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Search and Seizure</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Debates (Political)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Bloomberg, Michael R</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">de Blasio, Bill</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">New York City</category>
+    </item>
+    <item>
+      <title>Critic's Notebook: How the Split Screen Framed Trump and Clinton</title>
+      <link>http://www.nytimes.com/2016/09/28/arts/television/presidential-debate-donald-trump-hillary-clinton.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/arts/television/presidential-debate-donald-trump-hillary-clinton.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/arts/television/presidential-debate-donald-trump-hillary-clinton.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/arts/television/28DEBATWATCH-COMBO/28DEBATWATCH-COMBO-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Donald J. Trump and Hillary Clinton at the first presidential debate at Hofstra University in Hempstead, N.Y., on Monday.</media:description>
+      <media:credit>Photographs by Doug Mills/The New York Times</media:credit>
+      <description>In their first debate, the two candidates&#x2019; stage styles served as campaign arguments in themselves.</description>
+      <dc:creator>JAMES PONIEWOZIK</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 13:29:48 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Debates (Political)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Television</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Holt, Lester</category>
+    </item>
+    <item>
+      <title>Notebook: The Reverse-Gaslighting of Donald Trump</title>
+      <link>http://www.nytimes.com/2016/09/27/magazine/the-reverse-gaslighting-of-donald-trump.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/27/magazine/the-reverse-gaslighting-of-donald-trump.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/27/magazine/the-reverse-gaslighting-of-donald-trump.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/27/magazine/27mag-debate/27mag-debate-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Hillary Clinton and Donald Trump at the presidential debate on Monday.</media:description>
+      <media:credit>Joe Raedle/Getty Images</media:credit>
+      <description>On Monday night, Hillary Clinton used the Republican candidate&#x2019;s own tactics against him.</description>
+      <dc:creator>SUSAN DOMINUS</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 17:18:39 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Gaslight (Movie)</category>
+    </item>
+    <item>
+      <title>DealBook: Trump&#x2019;s a Businessman. Where&#x2019;s His Business Backing?</title>
+      <link>http://www.nytimes.com/2016/09/27/business/dealbook/trumps-a-businessman-wheres-his-business-backing.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/27/business/dealbook/trumps-a-businessman-wheres-his-business-backing.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/27/business/dealbook/trumps-a-businessman-wheres-his-business-backing.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/27/business/27DB-SORKINSUB/27DB-SORKINSUB-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Donald J. Trump spoke before the Economic Club of New York earlier this month.</media:description>
+      <media:credit>Damon Winter/The New York Times</media:credit>
+      <description>Despite pushing proposals that sound like a corporate chieftain&#x2019;s dream, the Republican nominee isn&#x2019;t getting much love from his peers.</description>
+      <dc:creator>ANDREW ROSS SORKIN</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 16:40:09 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Campaign Finance</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Regulation and Deregulation of Industry</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Economy</category>
+    </item>
+    <item>
+      <title>Christie Was Told of Bridge Plot During 9/11 Ceremony, Witness Testifies</title>
+      <link>http://www.nytimes.com/2016/09/28/nyregion/bridgegate-trial-chris-christie.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/nyregion/bridgegate-trial-chris-christie.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/nyregion/bridgegate-trial-chris-christie.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/nyregion/28bridgegate1/28bridgegate1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Gov. Chris Christie and his wife, Mary Pat Christie, at the Sept. 11 memorial ceremony in 2013.</media:description>
+      <media:credit>Ozier Muhammad/The New York Times</media:credit>
+      <description>David Wildstein, the mastermind behind the lane closings, said Gov. Chris Christie was informed of the lane closings at a memorial service the week they were happening.</description>
+      <dc:creator>KATE ZERNIKE</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 16:37:47 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">George Washington Bridge Scandal (2013)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Port Authority of New York and New Jersey</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Christie, Christopher J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Wildstein, David</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Baroni, Bill</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Kelly, Bridget Anne</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Fort Lee (NJ)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">George Washington Bridge</category>
+    </item>
+    <item>
+      <title>Prison Sentence Over Smashing of Shrines in Timbuktu: 9 Years</title>
+      <link>http://www.nytimes.com/2016/09/28/world/europe/ahmad-al-faqi-al-mahdi-timbuktu-mali.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/world/europe/ahmad-al-faqi-al-mahdi-timbuktu-mali.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/world/europe/ahmad-al-faqi-al-mahdi-timbuktu-mali.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/world/28Hague-web3/28Hague-web3-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Ahmad al-Faqi al-Mahdi, left, a member of a jihadist group linked to Al Qaeda, was sentenced at the International Criminal Court in The Hague on Tuesday.</media:description>
+      <media:credit>Pool photo by Bas Czerwinski</media:credit>
+      <description>The decision, by judges at the International Criminal Court in The Hague, was the body&#x2019;s first prosecution of the destruction of cultural heritage as a war crime.</description>
+      <dc:creator>MARLISE SIMONS</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 10:26:46 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">War Crimes, Genocide and Crimes Against Humanity</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Monuments and Memorials (Structures)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Muslims and Islam</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Mahdi, Ahmad al-Faqi al-</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Mali</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">International Criminal Court</category>
+    </item>
+    <item>
+      <title>On Washington: Senate&#x2019;s Vote on Simple Bill to Fund the Government Is Anything But</title>
+      <link>http://www.nytimes.com/2016/09/28/us/politics/congress-funding-bill-mcconnell.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/us/politics/congress-funding-bill-mcconnell.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/us/politics/congress-funding-bill-mcconnell.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/us/28HULSE-sub/28PULSE-sub-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Senator Mitch McConnell of Kentucky, the majority leader, on Capitol Hill earlier this month. He has been exasperated by the inability of the Senate to pass the stopgap spending measure.</media:description>
+      <media:credit>Al Drago/The New York Times</media:credit>
+      <description>Republicans wanted money for Louisiana flood relief, Democrats for the water in Flint, Mich. A vote on a stopgap spending bill then got difficult.</description>
+      <dc:creator>CARL HULSE</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 18:56:31 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Democratic Party</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Republican Party</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Federal Budget (US)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Flint (Mich)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Michigan</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Shutdowns (Institutional)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">McConnell, Mitch</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Reid, Harry</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Ryan, Paul D Jr</category>
+    </item>
+    <item>
+      <title>Syrian Ground Troops Clash With Rebels in Aleppo</title>
+      <link>http://www.nytimes.com/2016/09/28/world/middleeast/aleppo-syria-ground-offensive.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/world/middleeast/aleppo-syria-ground-offensive.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/world/middleeast/aleppo-syria-ground-offensive.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/world/28Syria-web2/28Syria-web2-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>A man mourned as his daughter&#x2019;s body was pulled from the rubble of a building after an airstrike in the Sha&#x2019;ar neighborhood of Aleppo, Syria, on Tuesday.</media:description>
+      <media:credit>Karam Al-Masri/Agence France-Presse &#x2014; Getty Images</media:credit>
+      <description>An advance by government forces would be a major development in the battle for the rebel-held city, said to be coping with shortages of food and medical supplies.</description>
+      <dc:creator>HWAIDA SAAD</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 15:31:24 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Civilian Casualties</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Syrian Observatory for Human Rights</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Free Syrian Army</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Assad, Bashar al-</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Aleppo (Syria)</category>
+    </item>
+    <item>
+      <title>Fire Dept. Battalion Chief Killed in Bronx Explosion After Reports of Gas Leak</title>
+      <link>http://www.nytimes.com/2016/09/28/nyregion/bronx-explosion-fire.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/nyregion/bronx-explosion-fire.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/nyregion/bronx-explosion-fire.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/nyregion/28xp-bronx-web1/28xp-bronx-web1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Emergency workers at the scene of an explosion in the Kingsbridge neighborhood of the Bronx on Tuesday morning.</media:description>
+      <media:credit>Amir Levy for The New York Times</media:credit>
+      <description>The chief, Michael J. Fahy, was part of a group responding to a building in the Kingsbridge neighborhood that was being investigated as a place where marijuana was being grown, officials said.</description>
+      <dc:creator>ELI ROSENBERG and EMILY PALMER</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 18:12:17 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Fires and Firefighters</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Explosions (Accidental)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Kingsbridge (Bronx, NY)</category>
+    </item>
+    <item>
+      <title>Women Petition U.N. Leader to Seek Korean Peace Treaty</title>
+      <link>http://www.nytimes.com/2016/09/28/world/asia/korea-armistice-ban-ki-moon-petition.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/world/asia/korea-armistice-ban-ki-moon-petition.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/world/asia/korea-armistice-ban-ki-moon-petition.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/world/28korea/28korea-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Ban Ki-moon, secretary general of the United Nations, has often expressed a wish to reduce tensions on the Korean Peninsula.</media:description>
+      <media:credit>Justin Lane/European Pressphoto Agency</media:credit>
+      <description>More than 130 activists from 38 countries urged Ban Ki-moon to pursue a permanent peace treaty to end the Korean War, replacing the 63-year-old armistice.</description>
+      <dc:creator>RICK GLADSTONE</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 08:49:30 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Korean War</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">International Relations</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Treaties</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Ban Ki-moon</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">North Korea</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">South Korea</category>
+    </item>
+    <item>
+      <title>Kerr Putney, Charlotte Chief, Had Cause in His Life to Distrust Police</title>
+      <link>http://www.nytimes.com/2016/09/27/us/kerr-putney-charlotte-police-chief.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/27/us/kerr-putney-charlotte-police-chief.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/27/us/kerr-putney-charlotte-police-chief.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/27/us/27charlotte-jp/27charlotte-jp-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Kerr Putney, chief of the Charlotte-Mecklenburg police, at a news conference Friday.</media:description>
+      <media:credit>Sean Rayford/Getty Images</media:credit>
+      <description>Caught between defending his officers and regaining the trust of many who claim he has reacted badly to the fatal police shooting of a black man.</description>
+      <dc:creator>RICHARD FAUSSET, ALAN BLINDER and YAMICHE ALCINDOR</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 00:55:54 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Police Brutality, Misconduct and Shootings</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Charlotte (NC)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Demonstrations, Protests and Riots</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Scott, Keith Lamont (1973-2016)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Putney, Kerr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Blacks</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Murders, Attempted Murders and Homicides</category>
+    </item>
+    <item>
+      <title>Your Daily Mini Crossword</title>
+      <link>http://www.nytimes.com/crosswords/game/mini?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/crosswords/game/mini</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/crosswords/game/mini?partner=rss&amp;emc=rss"/>
+      <description>Solve a bite-size crossword in just a few minutes.</description>
+      <dc:creator/>
+      <pubDate>Thu, 25 Feb 2016 07:18:20 GMT</pubDate>
+    </item>
+    <item>
+      <title/>
+      <link>http://www.nytimes.com/newsletters/morning-briefing?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/newsletters/morning-briefing</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/newsletters/morning-briefing?partner=rss&amp;emc=rss"/>
+      <description>&lt;a href="http://www.nytimes.com/newsletters/morning-briefing"&gt;&lt;strong&gt;The Morning Briefing&lt;/strong&gt;&lt;/a&gt; What you need to know to start your day, delivered to your inbox Monday through Friday.</description>
+      <dc:creator/>
+      <pubDate>Mon, 26 Sep 2016 21:17:24 GMT</pubDate>
+    </item>
+    <item>
+      <title>Voter Registration Deadlines, State by State</title>
+      <link>http://www.nytimes.com/2016/09/24/us/politics/voter-registration-deadlines.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/24/us/politics/voter-registration-deadlines.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/24/us/politics/voter-registration-deadlines.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/17/us/17xp-registration_web1/17xp-registration_web1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>A voter registration event in Philadelphia in August.</media:description>
+      <media:credit>Ruth Fremson/The New York Times</media:credit>
+      <description>It&#x2019;s not too late. Here&#x2019;s a handy list, from red to blue and everything in between.</description>
+      <dc:creator>JONAH ENGEL BROMWICH</dc:creator>
+      <pubDate>Fri, 23 Sep 2016 13:24:22 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Voter Registration and Requirements</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2016</category>
+    </item>
+    <item>
+      <title>Well: Does Sparkling Water Have a Downside?</title>
+      <link>http://well.blogs.nytimes.com/2016/09/16/does-sparkling-water-have-a-downside/?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://well.blogs.nytimes.com/2016/09/16/does-sparkling-water-have-a-downside/</guid>
+      <atom:link rel="standout" href="http://well.blogs.nytimes.com/2016/09/16/does-sparkling-water-have-a-downside/?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/01/health/ask-well-sparkling-water/ask-well-sparkling-water-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description/>
+      <media:credit>iStock</media:credit>
+      <description>A reader asks: Are there any health drawbacks to drinking seltzer?</description>
+      <dc:creator>SOPHIE EGAN</dc:creator>
+      <pubDate>Mon, 26 Sep 2016 16:20:06 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/">Citrus Fruits</category>
+      <category domain="http://www.nytimes.com/namespaces/">Fluorides</category>
+      <category domain="http://www.nytimes.com/namespaces/">Salt</category>
+      <category domain="http://www.nytimes.com/namespaces/">Soft Drinks</category>
+      <category domain="http://www.nytimes.com/namespaces/">Teeth and Dentistry</category>
+      <category domain="http://www.nytimes.com/namespaces/">Water</category>
+      <category domain="http://www.nytimes.com/namespaces/">Ask Well</category>
+      <category domain="http://www.nytimes.com/namespaces/">Eat</category>
+      <category domain="http://www.nytimes.com/namespaces/">Featured</category>
+    </item>
+    <item>
+      <title>Sports of The Times: Tax Break for Olympic Heroes? One Man Says No</title>
+      <link>http://www.nytimes.com/2016/09/28/sports/olympics/american-athlete-tax-break-vote.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/sports/olympics/american-athlete-tax-break-vote.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/sports/olympics/american-athlete-tax-break-vote.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/sports/28MACURweb1/28MACURweb1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Representative Jim Himes questioned why Olympians should receive tax breaks on their compensation when other extraordinary Americans did not.</media:description>
+      <media:credit>Tom Williams/CQ Roll Call, via Getty Images</media:credit>
+      <description>Connecticut&#x2019;s Jim Himes, the only United States representative who voted against a bill to grant medalists a break on their bonuses, called it &#x201C;a lonely, lonely moment.&#x201D;</description>
+      <dc:creator>JULIET MACUR</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 15:31:23 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Taxation</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Olympic Games</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Himes, James A (1966- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Law and Legislation</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Income Tax</category>
+    </item>
+    <item>
+      <title>Cuomo&#x2019;s Vision for Revamped Penn Station: New Home for Amtrak and L.I.R.R.</title>
+      <link>http://www.nytimes.com/2016/09/28/nyregion/penn-station-new-york-andrew-cuomo.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/nyregion/penn-station-new-york-andrew-cuomo.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/nyregion/penn-station-new-york-andrew-cuomo.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/nyregion/28STATION1sub/28STATION1sub-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>A rendering of a new station for Amtrak and the Long Island Rail Road in the James A. Farley Building, also known as the General Post Office.</media:description>
+      <media:credit>SOAM / VOLLEY</media:credit>
+      <description>Gov. Andrew M. Cuomo presented a plan that would create a train hall in the James A. Farley Building on the west side of Eighth Avenue by 2020, while renovating the passageways at Penn Station.</description>
+      <dc:creator>CHARLES V. BAGLI</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 16:45:10 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Railroads</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Amtrak</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Farley, James A, General Post Office (Manhattan, NY)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Long Island Rail Road Co</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Cuomo, Andrew M</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">New York State</category>
+    </item>
+    <item>
+      <title>Alton Brown, Showman of Food TV, Pulls Back the Curtain</title>
+      <link>http://www.nytimes.com/2016/09/28/dining/alton-brown-cookbook-everydaycook.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/dining/alton-brown-cookbook-everydaycook.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/dining/alton-brown-cookbook-everydaycook.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/dining/28ALTON1-WEB/28ALTON1-WEB-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Alton Brown&#x2019;s new book, &#x201C;EveryDayCook: This Time It&#x2019;s Personal,&#x201D; is his eighth, but the first in which he offers at least a small peek into the ways he cooks and eats at home.</media:description>
+      <media:credit>Bryan Meltz for The New York Times</media:credit>
+      <description>As he releases a new cookbook, &#x201C;EveryDayCook: This Time It&#x2019;s Personal,&#x201D; the very private host reflects on a difficult time in his life.</description>
+      <dc:creator>KIM SEVERSON</dc:creator>
+      <pubDate>Mon, 26 Sep 2016 20:12:20 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Cooking and Cookbooks</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Television</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Brown, Alton</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Marietta (Ga)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">EveryDayCook: This Time Its Personal (Book)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Food Network</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Good Eats (TV Program)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Iron Chef America (TV Program)</category>
+    </item>
+    <item>
+      <title>Woman Who Took Husband&#x2019;s Intestine on Flight Wanted It Tested, Lawyer Says</title>
+      <link>http://www.nytimes.com/2016/09/28/world/europe/graz-airport-woman-husband-poison.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/world/europe/graz-airport-woman-husband-poison.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/world/europe/graz-airport-woman-husband-poison.html?partner=rss&amp;emc=rss"/>
+      <description>The 35-year-old Moroccan, concerned about foul play by the man&#x2019;s family, hoped to have the sample analyzed by European doctors, according to her representative.</description>
+      <dc:creator>ALISON SMALE</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 11:17:26 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Graz (Austria)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Marrakesh (Morocco)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Poisoning and Poisons</category>
+    </item>
+    <item>
+      <title>White House Letter: Michelle and George: The Embrace Seen Around the World</title>
+      <link>http://www.nytimes.com/2016/09/26/us/politics/for-some-bush-obama-rapport-recalls-a-lost-virtue-political-civility.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/26/us/politics/for-some-bush-obama-rapport-recalls-a-lost-virtue-political-civility.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/26/us/politics/for-some-bush-obama-rapport-recalls-a-lost-virtue-political-civility.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/26/us/26WHLETTER/26WHLETTER-moth-v2.jpg" medium="image" height="151" width="151"/>
+      <media:description>Michelle Obama hugged George W. Bush on Saturday at the National Museum of African American History and Culture.</media:description>
+      <media:credit>Al Drago/The New York Times</media:credit>
+      <description>The Bush and Obama families have a deep bond, thanks to the shared experience of life in the White House and George W. Bush&#x2019;s decorum as an ex-president.</description>
+      <dc:creator>MARK LANDLER</dc:creator>
+      <pubDate>Mon, 26 Sep 2016 00:33:04 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidents and Presidency (US)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">First Ladies (US)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Bush, George W</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Bush, Laura</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Bill</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Clinton, Hillary Rodham</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Obama, Barack</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Obama, Michelle</category>
+    </item>
+    <item>
+      <title>At Paris Fashion Week, Who&#x2019;s Got the Power?</title>
+      <link>http://www.nytimes.com/2016/09/28/fashion/paris-fashion-week-dior-lanvin-ysl-valentino.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/28/fashion/paris-fashion-week-dior-lanvin-ysl-valentino.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/28/fashion/paris-fashion-week-dior-lanvin-ysl-valentino.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/28/fashion/28TIP-WEB-COMBO/28TIP-WEB-COMBO-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Clockwise from top left: Bouchra Jarrar; Pierpaolo Piccioli; Maria Grazia Chiuri; Anthony Vaccarello.</media:description>
+      <media:credit>Dmitry Kostyukov for The New York Times; Nadia Shira Cohen for The New York Times; Antonio de Moraes Barros Filho/WireImage, via Getty Images; Ian Gavan/Getty Images</media:credit>
+      <description>Fashion&#x2019;s cycle has turned again, and the balance of influence has shifted, with new names at Dior, Lanvin, YSL and Valentino reshaping more than silhouettes.</description>
+      <dc:creator>VANESSA FRIEDMAN</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 13:33:59 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Fashion and Apparel</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Paris Fashion Week</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Christian Dior SA</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Lanvin</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Valentino Fashion Group SpA</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org_all">Yves Saint Laurent</category>
+    </item>
+    <item>
+      <title>Spock: Half-Vulcan. Half-Human. All Outsider Role Model.</title>
+      <link>http://www.nytimes.com/2016/10/02/movies/spock-half-vulcan-half-human-all-outsider-role-model.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/10/02/movies/spock-half-vulcan-half-human-all-outsider-role-model.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/10/02/movies/spock-half-vulcan-half-human-all-outsider-role-model.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/10/02/arts/02SPOCK1/02SPOCK1-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Adam Nimoy, left, and Leonard Nimoy in an image from &#x201C;For the Love of Spock,&#x201D; a documentary directed by Adam. The film partly explores how the character of Spock became admired for his multiracial identity.</media:description>
+      <media:credit>via Nimoy Archive/CBS</media:credit>
+      <description>A documentary by Adam Nimoy explores how his father&#x2019;s &#x201C;Star Trek&#x201D; character, Spock, provided inspiration to those who saw themselves as different.</description>
+      <dc:creator>ROBERT ITO</dc:creator>
+      <pubDate>Tue, 27 Sep 2016 17:42:43 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Documentary Films and Programs</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">For the Love of Spock (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Television</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Science Fiction</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Nimoy, Adam (1956- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Nimoy, Leonard</category>
+    </item>
+    <item>
+      <title>A Toilet, but No Proper Plumbing: A Reality in 500,000 U.S. Homes</title>
+      <link>http://www.nytimes.com/2016/09/27/health/plumbing-united-states-poverty.html?partner=rss&amp;emc=rss</link>
+      <guid isPermaLink="true">http://www.nytimes.com/2016/09/27/health/plumbing-united-states-poverty.html</guid>
+      <atom:link rel="standout" href="http://www.nytimes.com/2016/09/27/health/plumbing-united-states-poverty.html?partner=rss&amp;emc=rss"/>
+      <media:content url="https://static01.nyt.com/images/2016/09/27/science/27ALABAMA/27ALABAMA-moth.jpg" medium="image" height="151" width="151"/>
+      <media:description>Dorothy Rudolph in front of her home in Tyler, Ala., which does not have a septic tank.</media:description>
+      <media:credit>Bryan Meltz for The New York Times</media:credit>
+      <description>The inability of many to afford a working septic tank in areas like rural Alabama where running water is not a given could create a health crisis.</description>
+      <dc:creator>SABRINA TAVERNISE</dc:creator>
+      <pubDate>Mon, 26 Sep 2016 09:00:21 GMT</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Bathrooms and Toilets</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Sewers and Sewage</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Rural Areas</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/mdes">Poverty</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Alabama</category>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,282 @@
+---
+title: "Homework for Inference module"
+author: "Data Science Team"
+output: pdf_document
+---
+
+```{r}
+library(pacman)
+pacman::p_load(ggplot2)
+```
+
+# Due Friday May 19 9:30am via canvas
+
+## Lady tasting tea revisited
+
+In our "Lady Tasting Tea" example, the experiment was setup so that there were 4 cups with milk first
+and 4 cups with tea first. Here, we consider a different setup, though our goal
+is still to understand how well the lady can distinguish between milk first and tea first.
+
+Instead of a fixed number of milk first and tea first, each cup of tea is randomly
+poured milk first with probability $p$ and tea first with probability $1-p$.
+The lady is told these probabilities.
+
+1. Suppose the lady was guessing completely randomly, saying milk with probability $q$ and
+tea with probability $1-q$. In an experiment with $N$ cups of tea, how many
+matches do you expect to see?
+
+A: They're independent, so the probability of the lady guessing milk when it is milk is $p q$ and the probability of guessing tea when it is tea is $(1-p)(1-q)$. So we would expect $N(pq + (1-p)(1-q)) = N(1-p-q+2pq)$ correct. 
+
+2. If she were to guess randomly, and $p=1/4$, what choice of $q$ gives her the highest
+expected number of matches? (You can answer this with a plot after solving part 1.)
+
+A: we want to maximize $1-1/4-q+q/2 = 3/4-q/2$, so she should pick $q=0$. So she should always guess tea, that is, if you don't know, guess the majority class.
+
+3. The outcome of the experiment based on $N$ cups can be described by a 2x2 table
+with columns denoting whether the cup was poured milk or tea first and rows
+denoting the lady's guess.
+Describe a random model for the experiment, assuming that the Lady guesses Milk randomly with probability $q$.
+
+A: The table has entries (rows corresponding to the truth, columns corresponding to lady's guess)
+\begin{tabular}{c|cc}
+& M & T \\
+\hline
+M & $N_{MM}$ & $N_{MT}$ \\
+T & $N_{TM}$ & $N_{TT}$ \\
+\end{tabular}
+with the joint distribution 
+$$(N_{MM},  N_{MT}, N_{TM}, N_{TT}) \sim \text{Multinomial}(N,(pq,p(1-q),(1-p)q,(1-p)(1-q)))$$
+
+
+4. Write a function in `R` that generates samples from your random model. Your function
+should take arguments `(N, p_truth, q_lady)` where `p_truth` is $p$ and
+`q_lady` is $q$. The function should return the 2x2 table.
+
+```{r}
+
+samp_table <-  function(N,p,q) {
+  probs = c(p*q,(1-p)*q,p*(1-q),(1-p)*(1-q))
+  Ns = rmultinom(1,N,probs)
+  Ns = matrix(Ns,2,2)
+}
+
+```
+
+5. Suppose we have set $N=10$ and $p_M=1/4$. The data we observe
+is:
+```{R}
+truth = c('M', 'T', 'T', 'T', 'T', 'M', 'M', 'T', 'T', 'M')
+lady = c('M', 'M', 'T', 'M', 'T', 'M', 'T', 'T', 'T', 'M')
+```
+She has correctly guessed 7 of 10 cups. Is she doing much better than our best guesser from
+2.? Use your function to assess the evidence (you can assume that 2000 Monte Carlo replications are sufficient).
+You will also have to choose a test statistic.
+
+
+```{r}
+p <- 1/4
+N <- 10
+E <- 7.5
+O <- matrix(0,2,2)
+O[1,1] <- sum((truth=='M')*(lady=='M'))
+O[1,2] <- sum((truth=='M')*(lady=='T'))
+O[2,1] <- sum((truth=='T')*(lady=='M'))
+O[2,2] <- sum((truth=='T')*(lady=='T'))
+sum(diag(O))
+E-sum(diag(O))
+
+dist.table <- function(Tab,E) {
+  d <- sum(diag(Tab))-E
+  return(d)
+}
+
+ds <- numeric(2000)
+for (j in 1:2000) {
+  tab <- samp_table(N,p,0)
+  d <- dist.table(tab,E)
+  ds[j] <- d
+}
+
+mean(ds> (sum(diag(O))-E))
+```
+
+6. Consider the null hypothesis $H_0 : \text{Lady is no better than the best random guesser}$. Test this hypothesis by thresholding the p-value from your test at 0.05. Be careful how you define the p-value in this case (Hint: "more extreme" probably shouldn't include cases where the lady did worse than the random guesser).
+
+7. Suppose that the lady actually can do better than the best guesser. Specifically, suppose she correctly identifies the pour order with probability $r>0.5$. Assuming that the probability of pouring milk first is still $p$, write down the probabilities of the four possible outcomes corresponding to the cells of the table in Part 3. 
+
+
+8. For \texttt{r = seq(from=0.55,to=0.95,by=.05)}, assess the power of your test from 6. when $N=20$ and $p=1/4$. You will need to write a new function to simulate under the alternative. Plot the power as a function of $r$.
+
+```{r fig.width=3, fig.height=3}
+samp_table_1 <- function(N,p,r) {
+    probs = c(p*r,(1-p)*(1-r),p*(1-r),(1-p)*r)
+    Ns = rmultinom(1,N,probs)
+    Ns = matrix(Ns,2,2)
+    ncorrect = sum(diag(Ns))
+    return(ncorrect)
+}
+
+N <- 20
+p <- 1/4
+ds <- numeric(10000)
+E <- (1-p)*N
+for (j in 1:10000) {
+  tab <- samp_table(N,p,0)
+  d <- dist.table(tab,E)
+  ds[j] <- d
+}
+
+min.d <- min(ds)
+max.d <- max(ds)
+drng <- min.d:max.d
+p.thresh <- numeric()
+ctr <- 0
+for (j in min.d:max.d) {
+  ctr <- ctr + 1
+  p.thresh[ctr] <- mean(ds>j)
+}
+ 
+p5.thresh <- min(drng[p.thresh<.05]) 
+
+rs <- seq(from=0.55,to=0.95,by=.05)
+power.test <- numeric()
+ctr <- 0
+for (r in rs) {
+  ctr <- ctr + 1
+  samp.all <- apply(matrix(N,1000,1),1,samp_table_1,1/4,r) 
+  delt <- samp.all-E
+  reject <- delt>=p5.thresh
+  power.test[ctr] <- mean(reject) 
+}
+
+df <- data.frame(power=power.test,r=rs)
+ggplot(df,aes(x=r,y=power)) + geom_point()
+
+```
+
+## Assumptions in inference
+
+There are several websites around that find
+interesting [correlations](http://tylervigen.com/spurious-correlations) in
+seemingly unrelated things.
+For example, the site [Spurious Correlations](http://tylervigen.com/view_correlation?id=1703) shows a high correlation
+between the divorce rate in Maine and per capita consumption of Margarine in the U.S.
+
+```{R}
+# from http://tylervigen.com/view_correlation?id=1703
+divorce = c(5, 4.7, 4.6, 4.4, 4.3, 4.1, 4.2, 4.2, 4.2, 4.1)
+margarine = c(8.2, 7, 6.5, 5.3, 5.2, 4, 4.6, 4.5, 4.2, 3.7)
+```
+
+1. Make a scatterplot of `divorce` vs. `margarine`. Do the variables appear related?
+
+```{r fig.width=3,fig.height=3}
+df <- data.frame(divorce=divorce,margarine=margarine)
+ggplot(df,aes(x=margarine,y=divorce)) + geom_point()
+```
+
+2. Compute the correlation between `divorce` and `margarine` and use the bootstrap to 
+estimate the SD of your estimate. Report the usual 2 SE confidence interval.
+Is 0 in this confidence interval?
+
+```{r}
+calc.cor <- function(xy) {
+  x = xy[,1]
+  y = xy[,2]
+  c = cor(x,y)
+  return(c)
+}
+
+cor.obs <- cor(divorce,margarine)
+n <- length(divorce)
+B <- 2000
+X <- cbind(divorce,margarine)
+
+samps <- sample.int(n,n*B,replace=T)
+Xsamp <- X[samps,]
+Bid <- rep(seq(B),each=n)
+
+Xsplit <- split(data.frame(Xsamp),Bid)
+cors <- sapply(Xsplit,calc.cor)
+se <- sd(cors)
+cat("2 se interval:",cor.obs-2*se,cor.obs+2*se)
+```
+
+3. In order to trust the answer in 2., what assumptions are you making when you use the bootstrap
+to estimate the SD? (Be as specific as you can. We recognize that we have not developed 
+the full language in the course to be very specific...)
+Do you think these assumptions hold here?
+
+A: we're basically assuming they are independent observations from the same distribution
+
+4. Can you think of a mechanism by which such spurious correlations might easily arise?
+For example, consider [Bay Area home prices](http://my.paragon-re.com/Docs/General/SixtyFortyImages/Case-Shiller_HT_1996-2011.jpg)
+and [sea surface temperature anomalies](https://climatedataguide.ucar.edu/sites/default/files/styles/node_lightbox_display/public/key_figures_247?itok=WmoTLGBZ).
+Do you think they would show strong correlation from 1996 to present?
+Do you think the data for Bay Area home prices is well modeled by a simple random sample?
+
+A: Certainly both would tend to exhibit serial correlation, so they aren't a simple random sample. They also just happen to both be increasing over the past couple of decades for largely unrelated reasons (though one could argue vaguely that "economic growth" drives both). If one looks at enough pairs of time series, it is not too hard to find such things.
+
+## Bootstrapping in more than one dimension
+
+Most of our tests about parameters were about a 1-dimensional parameter. 
+There are many times where we will want to ask questions about 
+more than one parameter.
+
+The site [Real Clear Politics](http://www.realclearpolitics.com/epolls/2016/president/us/general_election_trump_vs_clinton-5491.html)
+showed several polls taken near the end of October 2016 that suggested the 
+presidential race was tightening. Let's take two of them. 
+First, an NBC News / Survey Monkey poll of 40816 likely voters shows support for Trump at 44% and support for Clinton at 51% (with the rest supporting Other).
+A second poll, the ABC / Washington post poll of 1128 likely voters shows support for Clinton at 48% and support for Trump at 47% (with the rest supporting Other).
+
+1. Given a poll based on a simple random sample
+of size `N` with choices `[Trump, Clinton, Other]`, write a function that uses
+the bootstrap to estimate the SD of the difference in apparent support between
+Trump and Clinton, i.e. $\hat{p}_{C} - \hat{p}_{T}$. 
+Use this function to form a confidence interval for the true difference in support for 
+Trump and Clinton for using the NBC / Survey Monkey poll. 
+Repeat using the ABC / Washington Post poll. (In using this function, we are making
+the assumption that the polls were simple random samples. In practice, this is
+often not the case -- polling firms use complicated weighting schemes to make
+their final estimate. This makes our bootstrap calculations somewhat dubious here, but this is a homework assignment.)
+
+```{r}
+p1 <- c(.44,.51,1-.44-.51)
+n1 <- 40816
+c1 <- p1*n1
+p2 <- c(.47,.48,1-.47-.48)
+n2 <- 1128
+c2 <- p2*n2
+
+boot.delt <- function(N,p) {
+  samp1 = sample(c(1,2,3),N,replace=T,prob = p) # could also do this with multinomial
+  cts = table(samp1)
+  phat = cts/N
+  delt = phat[2]-phat[1]
+}
+
+D.nbc <- apply(matrix(n1,1000,1),1,boot.delt,p=p1) 
+sd.nbc <- sd(D.nbc)
+ci.nbc <- p1[2]-p1[1]+2*c(-sd.nbc,sd.nbc)
+ci.nbc
+
+D.abc <- apply(matrix(n2,1000,1),1,boot.delt,p=p2) 
+sd.abc <- sd(D.abc)
+ci.abc <- p2[2]-p2[1]+2*c(-sd.abc,sd.abc)
+ci.abc
+```
+
+2. Use the bootstrap to test the hypothesis $H_0: p_C=p_T$ using each of the two polls. (Hint: you'll want to bootstrap under the null hypothesis. What is our best estimate of the common value of $p$ if $p_C=p_T$? Note this will be different for the two different polls.)
+
+3. Combine your bootstrap samples of $\hat{p}_{C}-\hat{p}_{T}$ from the two polls from part 1 into a single data frame. Make a 2D density plot using geom_density2d in ggplot. Where is the density plot centered?
+
+```{r fig.width=3,fig.height=3}
+df <- data.frame(nbc=D.nbc,abc=D.abc)
+ggplot(df,aes(x=nbc,y=abc)) + geom_density2d()
+```
+
+4. (BONUS) Find some test statistic and, using the bootstrap, construct  
+an "improved" test of $H_0:p_T=p_C$. This test
+is "improved" in the sense that it uses more information than either test that uses
+just one of the polls. 
+

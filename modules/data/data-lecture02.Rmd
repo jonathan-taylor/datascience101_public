@@ -1,0 +1,470 @@
+---
+title: "Messier Data"
+author: "Data Science Team"
+output:
+  slidy_presentation:
+    css: styles.css
+    keep_md: yes
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## More on reading data 
+
+Continuing from the first lab, we'll consider some more
+issues with data import.
+
+We assume some familiarity with a text editor and
+computer directory structure on your system.
+
+## Back to `mpg` data, in a file
+
+Suppose we have a file of pure numbers (univariate data) that we want
+to read into R. 
+
+For example, assume that the `mpg` data is stored in
+file called [mpg.txt](./data/mpg.txt) literally as shown.
+
+```
+21.0 21.0 22.8 21.4 18.7
+18.1 14.3 24.4 22.8 19.2
+17.8 16.4 17.3 15.2 10.4
+10.4 14.7 32.4 30.4 33.9
+21.5 15.5 15.2 13.3 19.2
+27.3 26.0 30.4 15.8 19.7
+15.0 21.4
+```
+
+## The `scan` function
+
+Such data can be read into R using `scan`:
+
+
+```{r}
+mpg <- scan(file = "./data/mpg.txt")
+```
+
+R functions (like `mean`, `sd`) take inputs and these can be
+named. The above construct names the input argument `file` to be
+`./mpg.txt` which refers to the file [mpg.txt](./data/mpg.txt) in the same directory
+where R is running.  
+
+(If the file is somewhere else, an absolute pathname
+can be specified, for example `file =
+"/Users/me/Documents/mpg.txt"`.)
+
+## On naming arguments...
+
+__Coding Style Note__ 
+
+When R functions take arguments, it is always a
+good idea to use _named_ arguments where possible as shown above in
+the `scan` invocation. 
+
+This improves the readability of your code
+since one always writes code at least for two people: 
+"you now, and you in the future." (Hadley Wickham)
+
+Tools like `RStudio` make
+this very easy with their auto-completion feature, where you are given
+context sensitive choices for what is expected in the arguments.
+
+## Dealing with unexpected values
+
+In the lab, we had some typing issues after reading in data
+
+For example, the dates in the bay area bike share data did not read
+correctly.
+
+But by and large, our data were very "clean" (comma delimited, no
+"unexpected" values, et cetera)
+
+As a simple case,
+consider what happens when the same data above is corrupted and
+stored in a file [mpg-bad.txt](./data/mpg-bad.txt).
+
+```
+21.0 21.0 22.8 21.4 18.7
+NA 14.3 24.4 22.8 19.2
+17.8 16.4 17.3 15.2 10.4
+Oh $# 32.4 30.4 33.9
+21.5 15.5 15.2 13.3 19.2
+27.3 26.0 30.4 15.8 19.7
+15.0 21.4
+```
+
+This kind of thing can happen in real life. When data are
+entered manually, we often find strange designations for
+missing values, et cetera
+
+## Reading badly formatted data
+
+```{r, error=TRUE}
+mpg <- scan(file = "./data/mpg-bad.txt")
+```
+
+R bombs out with an error message because it got some unexpected
+items; the `Oh` is singled out, but not the `NA`, which R understands.
+
+Like most R functions `scan` takes other arguments that control how
+it behaves; for example an argument that specify what
+string of characters should be considered to be missing values. (The
+details are in the help for the function `scan`.)
+
+Therefore, this dataset can read into R more cleanly as:
+
+```{r}
+mpg <- scan(file = "./data/mpg-bad.txt", na.strings = c(NA, "Oh", "$#"))
+print(mpg)
+```
+
+## More options for reading files
+
+We illustrate a few other options for controling `scan`:
+
+- Ignore some leading lines
+```{r}
+mpg <- scan(file = "./data/mpg-bad.txt", na.strings = c(NA, "Oh", "$#"), skip = 4)
+print(mpg)
+```
+
+- Read only the first two lines
+```r
+mpg <- scan(file = "./data/mpg-bad.txt", nlines = 2)
+print(mpg)
+```
+
+- Treat the values as strings rather than numbers
+
+```r
+mpg <- scan(file = "./data/mpg-bad.txt", what = character(0))
+print(mpg)
+```
+
+The default is to treat the read quantities as numbers (`numeric` or
+`double` in R programming parlance).
+
+## Delimited Files
+
+In the first lab, the files we used were **delimited files**
+
+- Delimited files (comma / tab) are commonly used to store multivariate data.
+
+- To read such data correctly into a data frame, the data has to be properly
+structured. For example, each row must have the same number of items.
+
+- We assume well-formatted data in what follows, and clearly there were
+no fundamental problems with the data format in the files used in the
+first lab
+
+- Be defensive in importing data and examine the result for errors!
+
+## Rancho San Antonio rainfall
+
+The Santa Clara Valley Water District has a number of sensors that
+record rainfall and water levels at reservoirs. The data can be
+downloaded using
+[their website](http://www.valleywater.org/services/alert.aspx).  (The
+site can be down at times!).
+
+- The file [rancho.csv](./data/rancho.csv) contains a comma
+separated file of cumulative rainfall readings for the season during
+the last 30 days.
+
+- As in the lab, we will use `readr::read_csv` instead of base R's `utils::read.csv`.
+
+```{r}
+library(readr)
+```
+
+```{r}
+ranchoRainfall <- read_csv(file = "./data/rancho.csv")
+```
+
+
+## Closer inspection
+
+Recall `read_csv` in the package `readr` will read a comma
+separated file and create a `tibble` out of it. Let's examine
+what was read into R.
+
+```{r}
+str(ranchoRainfall)
+```
+
+Although `ranchoRainfall` is a `tibble`, it is not at all what we
+expected, 
+
+We anticipated problems from the warnings
+spewed out by the `read_csv` invocation. So this calls for some
+examination of the actual data by reading, say, the first 25 lines of
+the file.
+
+## Reading raw data: `readLines`
+
+readLines just takes in a specified number of lines of a file as a **character vector**
+
+```{r}
+readLines(con = "./data/rancho.csv", 25)
+```
+
+Line 22 describes what is being measured and line 23 notes the units.  The
+actual data starts in line 24. Therefore, we need to **skip** the first 23
+lines to get at the data. 
+
+Note: a reasonable alternative to `readLines` is to open the file in a text
+editor, assuming it is not too large; on a mac or linux you can also use 
+the `head` command in the terminal.
+
+This is all too common a phenomenon, where a
+file is expected to be a comma separated file (because it has a file
+extension `.csv`) but the reality is messier.
+
+Often these unstructured header lines give some information about what is in the file,
+so they are worth reading...
+
+## Skipping "unstructured" header lines
+
+Our second try where we ask `read_csv` to skip the first 23 lines.
+
+```{r}
+ranchoRainfall <- read_csv(file = "./data/rancho.csv", skip = 23)
+```
+
+Now things seem better, so let us see.
+```{r}
+str(ranchoRainfall)
+```
+
+## Specifying the header row
+
+A mess again, although not as bad: some numbers have made it through
+like `22.4`, `22.6` etc, but the first one did not. 
+
+What happened? `read_csv` **assumed** that the first
+data line was a header naming the variable columns and so the first **data row** 
+was used to create (not very informative!) variable names.
+
+So third try, telling `read_csv` we don't have column names:
+
+```{r}
+ranchoRainfall <- read_csv(file = "./data/rancho.csv", skip = 23, col_names = FALSE)
+```
+
+```r
+str(ranchoRainfall)
+```
+
+## Default variable naming in files without a header
+
+By default, `read_csv` named the
+variables `X1`, `X2`. If we had skipped 22 lines instead of 23, and
+specified that the first line should be used as a header line naming
+the variables, we would get an only slightly better named data set.
+
+```{r}
+ranchoRainfall <- read_csv(file = "./data/rancho.csv", skip = 22, col_names = TRUE)
+```
+
+```{r}
+str(ranchoRainfall)
+```
+
+Sticking with that for the moment, we see that the first variable
+`(PST)` has been automatically inferred to be a _date and time_
+specification.
+
+## Difference between `utils::read.csv` and `readr::read_csv`
+
+We
+reiterate some differences between `readr::read_csv` and
+`utils::read.csv`.
+
+```{r}
+rancho2 <- read.csv(file = "./data/rancho.csv", skip = 22)
+str(rancho2)
+```
+
+Notice that `utils::read.csv` converted the dates to factors, which
+is, of course, problematic.
+
+## Specifying variable names, again
+
+we still want better
+names for the variables.
+
+```{r}
+names(ranchoRainfall) <- c("DateAndTime", "Rainfall")
+str(ranchoRainfall)
+```
+
+## Plotting rainfall
+
+Once we have the data, of course, we can do many useful things with
+it. 
+
+here is a simple
+plot of the cumulative rainfall against date and time.
+
+We can use this to answer questions about periods of heavier and
+lighter rainfall, and how much total rainfall occurred in different
+periods. 
+
+```{r}
+plot(ranchoRainfall$DateAndTime, ranchoRainfall$Rainfall)
+```
+
+## Using `ggplot2`
+
+We can make the same plot using `ggplot2`. The default settings often yield nicer looking plots. You'll get a thorough introduction to graphics in week 4.
+
+```{r}
+library(ggplot2)
+ggplot(data = ranchoRainfall,aes(x = DateAndTime, y = Rainfall)) +
+    geom_point()
+```
+
+We see that there was a good amount of rainfall between
+April 8 and 10.
+
+## Saving data in `R` format
+
+We will use this data in other lectures and so we save this version of
+the data (to avoid going through the steps again) for future use in a
+file `rancho.RDS`.
+
+```{r}
+saveRDS(ranchoRainfall, "./data/rancho.RDS")
+```
+
+A more flexible file format that we'll use later is called `.RData`
+
+
+## Non-rectangular data formats
+
+Not all data is rectangular in nature. 
+
+For example, taxonomic data
+naturally have a tree structure, web sites mark up data in HTML. There
+are also specialized, efficient, formats are available for array data
+such as 
+
+- [HDF5](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)
+- [NetCDF](https://en.wikipedia.org/wiki/NetCDF).
+
+It is impossible to go over all of them here, but one of the lab
+exercises will walk you though a different format called XML
+(eXtensible Markup Language).
+
+
+## Web pages
+
+Often data in web pages may be tabular, but extracting them in tabular
+format requires some work. Consider for example the
+[Wikipedia page on country population](https://en.wikipedia.org/wiki/Country_population).
+
+In the middle of the page is a table consisting of all the countries
+and their respective populations. But while the data looks like a
+table in your browser, it is actually marked up using HTML.
+
+We can use R's XML processing libraries to scrape such tables.
+
+## `rvest`
+
+- Picking off data from
+web pages requires experimentation because pages can contain nested multiple tables.
+
+- Here is a code snippet that will pull off the population table from
+a Wikipedia article on [country population](https://en.wikipedia.org/wiki/Country_population), for example.
+
+```{r}
+library(rvest)
+url <- "https://en.wikipedia.org/wiki/Country_population"
+page <- read_html(url)
+```
+
+## `rvest`
+
+Let's take a look at what `rvest` has read:
+```{r}
+str(page)
+```
+
+## `rvest`
+
+The `read_html` function is from the `xml2` library that `rvest`
+depends upon. 
+
+It does all the hard work of reading the data in as XML,
+and now we are ready to pick off the HTML tables.
+
+```{r}
+page_tables <- html_table(page)
+str(page_tables)
+```
+
+- Often, one has to examine the data to make this judgement. At the
+time of this writing, the table of interest was the second one, so we
+pick off the second table below. However, this can change, as people
+make edits to the Wikipedia page!
+
+```{r}
+population <- page_tables[[1]]
+str(population)
+```
+
+There is still much cleaning up to do before any real computation can
+be done using this data. Even the population numbers are characters,
+with commas in between!
+
+## Finally...
+
+For the curious, as to how we would actually clean up the data, we
+would use a tool we shall introduce further on in the labs. But, here
+it is, in case you wish to try it.
+
+```{r}
+##
+## First give better names to the data columns
+##
+names(population) <- c("Rank", "Country", "Population",
+                       "Date", "Percent", "Source")
+library(dplyr)
+population <- population %>%
+    mutate(Population = parse_number(Population),
+           Percent = parse_number(Percent),
+           Date = parse_date(Date, format = "%B %d, %Y"))
+head(population)
+
+```
+
+## JSON
+
+An alternative to XML is JSON (JavaScript Object Notation).
+
+- Twitter feeds.
+
+- New York Times queries.
+
+
+Package `jsonlite` can parse JSON files into `R`. See
+its vignette for examples.
+
+<!-- ## Further Notes -->
+
+<!-- - The R package `readr` provides drop-in replacements for many of the -->
+<!-- external data functions provided by the R such as `read_csv`, -->
+<!-- `read_delim`. These are often much faster than the original R -->
+<!-- implementations. -->
+
+
+## Summary
+
+- Various functions in base R and readr to read in tabular data
+- Be careful: files are not always in the format you expect!
+- For specially formatted data, there are R packages that can aid with reading and processing
+

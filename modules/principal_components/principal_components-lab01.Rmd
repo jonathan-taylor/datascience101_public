@@ -1,0 +1,366 @@
+---
+title: "Principal Components Lab 1"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+```{r setup}
+#source('http://stats101.stanford.edu/profile.R')
+knitr::opts_chunk$set(dev="png",dpi=300, out.width=500,  fig.align="center",fig.width=5,fig.height=4)
+library(readr,ggplot2)
+```
+
+### Putting lines through Galton's dataset
+
+Francis [Galton](https://en.wikipedia.org/wiki/Francis_Galton) contributed to the development of statistics and genetics. There is an [archive](http://wellcomelibrary.org/collections/digital-collections/makers-of-modern-genetics/digitised-archives/francis-galton/#?asi=0&ai=129&z=0.2419%2C-0.0575%2C0.2326%2C0.3479) of his work available on line.
+We are going to work with one of the famous datasets he collected. You can find a detailed description of it in the [paper](http://www.medicine.mcgill.ca/epidemiology/hanley/Reprints/Hanley_Article_Galton_Data.pdf) by Hanley.
+
+#### Load the data and univariate summaries
+
+```{r,warning=FALSE,message=FALSE,fig.width=9,fig.height=4,out.width=700}
+library(UsingR)
+data(galton)
+summary(galton)
+par(mfrow=c(1,2))
+x<-seq(60,75,length.out = 100)
+hist(galton$child,probability = TRUE, xlim=c(60,75),ylim=c(0,.3),main="Child",xlab="height")
+lines(x,dnorm(x,mean(galton$child),sqrt(var(galton$child))))
+abline(v=mean(galton$child),col="red",lwd=2)
+hist(galton$parent,probability = TRUE, xlim=c(60,75),ylim=c(0,.3),main="Mid-Parent",xlab="height")
+lines(x,dnorm(x,mean(galton$parent),sqrt(var(galton$parent))))
+abline(v=mean(galton$parent),col="blue",lwd=2)
+```
+
+#### Understanding the relation between the two variables
+
+We start looking at a scatterplot of the heights. Since Galton did discretize his data, there are a number of repetitions. In order to visualize these we use the `sunflowerplot`. We are also going to center the data, subtracting from mid-parent's and child's heights their averages. This is purely for our convenience, as it will allow us to work with the expressions of lines that go through the origin. 
+
+```{r,fig.width=8,fig.height=7,out.width=600}
+
+par(mfrow=c(1,1))
+attach(galton)
+child<-child-mean(child)
+parent<-parent-mean(parent)
+detach()
+sunflowerplot(child,parent,xlab="Child Height", ylab="Mid-parent Height",main="Galton's data",col="darkgray",seg.col="darkgray",xlim=c(-6.5,6.5),ylim=c(-6.5,6.5))
+```
+
+#### Ellipses and bivariate normal
+
+We have seen that the normal density provided a good model for the histogram of the heights. We can now see if the **[bivariate normal](https://en.wikipedia.org/wiki/Multivariate_normal_distribution)** provides a good fit. The parameters of a bivariate normal are 1) a vector of means, 2) a matrix of variance-covariances. There is a package in R called `mvtnorm` that allows you to generate data from multivariate normals and to calculate densities.  
+Please install the package if you do not have it already `install.packages("mvtnorm")`.
+Here we are using it to superimpose to the scatterplot of the data the contours of a bivariate normal that has means equal to 0 and variance-covariances equal to the ones in the data. Practially this is the equivalent of what we did before with the histograms and densities, but since we would need to do a three dimensional plots, we resort to contours.
+With this goal in mind, we will use the function `contour`
+
+```{r,fig.width=8,fig.height=7,out.width=600}
+library(mvtnorm)
+sunflowerplot(child,parent,xlab="Child Height", ylab="Mid-parent Height",main="Galton's data: the ellipses",col="darkgray",seg.col="darkgray")
+x.points <- seq(-6,6,length.out=100) 
+y.points <- x.points
+z <- matrix(0,nrow=100,ncol=100)
+mu <- c(0,0)
+sigma <- cov(galton) 
+for (i in 1:100) {
+for (j in 1:100) {
+z[i,j] <- dmvnorm(c(x.points[i],y.points[j]),
+                      mean=mu,sigma=sigma)
+} }
+contour(x.points,y.points,z,add=TRUE)
+```
+
+Note that the contour plots of a bivariate normal is a set of ellipses.
+Overall, it seems that the contour plots of the normal densities capture well the distribution of the data. 
+
+#### Principal components and ellipse axis
+
+Now we are going to calculate the principal components and see that they correspond to the axis of the ellipse. 
+We have not studied yet what is the formula to calculate principal components, but we can just try the commands in R and we will have a better understanding of what is the reasoning behind these commands tomorrow. We are going to use the function `prcomp`. It takes as an argument a set of observations on multiple variables and it returns an  list  that contains a components colled `rotation`, which is what we are interested in  now. A way to interpret this rotation is to think about a "change in coordinates"
+
+```{r}
+pca.xy = prcomp(cbind(child,parent),retx=TRUE)
+pca.xy
+rot = pca.xy$rotation
+```
+
+We are now going to use this information to draw  the lines onto the previous plot
+```{r,fig.width=8,fig.height=7,out.width=600}
+library(mvtnorm)
+sunflowerplot(child,parent,xlab="Child Height", ylab="Mid-parent Height",main="Galton's data: principal components",col="darkgray",seg.col="darkgray")
+x.points <- seq(-6,6,length.out=100) 
+y.points <- x.points
+z <- matrix(0,nrow=100,ncol=100)
+mu <- c(0,0)
+sigma <- cov(galton) 
+for (i in 1:100) {
+for (j in 1:100) {
+z[i,j] <- dmvnorm(c(x.points[i],y.points[j]),
+                      mean=mu,sigma=sigma)
+} }
+contour(x.points,y.points,z,add=TRUE)
+abline(0,rot[2,1]/rot[1,1],col="seagreen3",lwd=2)
+abline(0,rot[2,2]/rot[1,2],col="seagreen3",lwd=2)
+```
+
+#### Conditional averages
+
+We are now going to go back to the data and calculate the conditional average height of children given the height of parents and viceversa. We are doing it in a spelled out way, to make sure we are clear on the meaning of what we are doing. We are going to work with the data in tabular form.
+
+```{r}
+table(galton$child,galton$parent)
+```
+
+However, we will use the centered data.
+
+```{r}
+tabledata<-table(child,parent)
+N<-sum(tabledata)
+#Calculating marginal frequencies
+Xfreq<-apply(tabledata,1,sum)/N
+Yfreq<-apply(tabledata,2,sum)/N
+Xval<-as.numeric(rownames(tabledata))
+Yval<-as.numeric(colnames(tabledata))
+# Calculating marginal means
+Xmean<-sum(Xfreq*Xval)
+Ymean<-sum(Yfreq*Yval)
+# Calculating conditional means
+Xmean.given.Y<-apply(Xval*tabledata,2,sum)/(Yfreq*N)
+Ymean.given.X<-apply(Yval*t(tabledata),2,sum)/(Xfreq*N)
+```
+
+Now we will plot these conditional averages---together with the regression lines---on the data scatter plot.
+
+```{r,fig.width=8,fig.height=7,out.width=600}
+# plotting the results, together with the original data
+sunflowerplot(child,parent,xlab="Child Height",ylab="Mid-Parent height",col="gray",seg.col="gray",main="Galton's data: regression lines")
+points(Xmean.given.Y,Yval,col=2,pch=15)
+lines(Xmean.given.Y,Yval,col=2,pch=15)
+points(Xval,Ymean.given.X, col="blue",pch=17)
+lines(Xval,Ymean.given.X,col="blue",pch=17)
+abline(v=Ymean,col=2,lty=2)
+abline(h=Xmean,col="blue",lty=2)
+reg1<-lm(child~parent)
+abline(0,1/reg1$coefficients[2],col="red",lwd=2)
+reg2<-lm(parent~child)
+abline(0,reg2$coefficients[2],col="blue",lwd=2)
+
+```
+
+We can see that the regression lines are **a linear approximation** of the conditional means. If the data has a bivariate normal distribution (which our dataset seems pretty close to have), then the linear regression lines are not an approximation of the conditional means, but the conditional means exactly.
+
+#### A plot with a lot of information
+
+```{r,fig.width=8,fig.height=7,out.width=600}
+# plotting the results, together with the original data
+sunflowerplot(child,parent,xlab="Child Height",ylab="Mid-Parent height",col="gray",seg.col="gray",main="All the Galton's lines")
+abline(v=Ymean,col=2,lty=2)
+abline(h=Xmean,col="blue",lty=2)
+reg1<-lm(child~parent)
+abline(0,1/reg1$coefficients[2],col="red",lwd=2)
+reg2<-lm(parent~child)
+abline(0,reg2$coefficients[2],col="blue",lwd=2)
+x.points <- seq(-6,6,length.out=100) 
+y.points <- x.points
+z <- matrix(0,nrow=100,ncol=100)
+mu <- c(0,0)
+sigma <- cov(galton) 
+library(mvtnorm)
+for (i in 1:100) {
+for (j in 1:100) {
+z[i,j] <- dmvnorm(c(x.points[i],y.points[j]),
+                      mean=mu,sigma=sigma)
+} }
+contour(x.points,y.points,z,add=TRUE)
+abline(0,rot[2,1]/rot[1,1],col="seagreen3",lwd=2)
+abline(0,rot[2,2]/rot[1,2],col="seagreen3",lwd=2)
+
+```
+
+### Pearson's data
+
+Now let's try to create a plot just like the one before using [Karl Pearson](https://en.wikipedia.org/wiki/Karl_Pearson)'s data on height. 
+
+```{r,fig.width=7.8,fig.height=8,out.width=600}
+data(father.son)
+summary(father.son)
+par(mfrow=c(1,1))
+plot(father.son,main="Pearson's height data",xlab="Father",ylab="Son")
+```
+
+Specifically, you want to center the data, and then produce a scatterplot that has the two regression lines, the two principal components, and the ellipses of a bivariate normal density superimposed. 
+
+### Code for plots from lecture
+
+
+#### Minimal sum of squared errors
+
+Here we want to verify that the regression lines do minimize the sum of squares of the relevant errors, (horizontal or vertical distances).
+In the top two panels, we look at the vertical distances (red lines), corresponding to the error we make predicting the son's height starting from the father's. In the bottom two panels we look at the horizontal distances (blue lines) corresponding to the error we make predicting the father's height starting from the son's. On the left hand side, we use the regression line of son on father, on the right hand side, the regression line of father on son.
+
+```{R, echo=TRUE,fig.height=8,fig.width=8,out.width=800}
+attach(father.son)
+son = sheight-mean(sheight)
+father = fheight-mean(fheight)
+par(mfrow=c(2,2),mar=c(5,7,4,2))
+plot(father,son,main="Reg. Line of Son on Father",xlab="Father",ylab="Son",xlim=c(-10,10),ylim=c(-10,10),cex.main=1.5,cex.lab=1.5)
+mtext("Vertical Errors",side=2,line=5,cex=1.5)
+reg1<-lm(son~father)
+abline(0,0.5141,col=2)
+N<-length(father)
+for(i in 1:N)
+  {lines(c(father[i],father[i]),c(son[i],0.5141*father[i]),col=2)}
+plot(father,son,main="Reg. Line of Father on Son",xlab="Father",ylab="Son",xlim=c(-10,10),ylim=c(-10,10),cex.main=1.5,cex.lab=1.5)
+reg2<-lm(father~son)
+abline(0,1/0.4889,col=4)
+N<-length(father)
+for(i in 1:N)
+  {lines(c(father[i],father[i]),c(son[i],father[i]/0.4889),col=2)}
+abline(0,1/0.4889,col=4)
+
+
+plot(father,son,main="Reg. Line of Son  on Father",xlab="Father",ylab="Son",xlim=c(-10,10),ylim=c(-10,10),cex.main=1.5,cex.lab=1.5)
+abline(0,0.5141,col=2)
+for(i in 1:N)
+  {lines(c(father[i],son[i]/0.5141),c(son[i],son[i]),col=4)}
+abline(0,0.5141,col=2)
+mtext("Horizontal Errors",side=2,line=5,cex=1.5)
+
+plot(father,son,main="Reg. Line of Father on Son",xlab="Father",ylab="Son",xlim=c(-10,10),ylim=c(-10,10),cex.main=1.5,cex.lab=1.5)
+abline(0,1/0.4889,col=4)
+for(i in 1:N)
+  {lines(c(father[i],son[i]*0.4889),c(son[i],son[i]),col=4)}
+
+
+```
+
+#### Euclidean distance of a point to a line
+
+To do these plots, we first need a formula to calculate the projection of a point onto a line. The function we use `our.proj` will give the x-coordinate of the projection point.
+
+To obtain a clearer graph we work with a sub-sample of the data.
+ 
+```{R, echo=TRUE,fig.height=6.2,fig.width=5.6,out.width=500}
+our.proj = function(x, y, a){(x+a*y)/(1+a^2)} 
+subsample = sample(1:N,100, replace=F)
+sfather = father[subsample]
+sson = son[subsample]
+
+
+par(mfrow=c(1,1))
+plot(sfather,sson,xlab="Fathers' height", ylab="Son's height",main="Distances of points to a line")
+abline(0,1)
+for(i in 1:100)
+  {lines(c(sfather[i],sson[i]),c(sson[i],sson[i]),col=4)}
+for(i in 1:100)
+  {lines(c(sfather[i],sfather[i]),c(sson[i],sfather[i]),col=2)}
+ t = our.proj(sfather,sson,1)
+for(i in 1:100)
+{
+lines(c(sfather[i],t[i]),c(sson[i],t[i]),col=3)
+}
+```
+
+#### Finding the line that minimizes SS of Euclidean distances
+
+We create two variables
+
+ $$x \sim {\cal N}(0,1)$$
+$$ y= 2x + \epsilon, \;\;\; \epsilon \sim {\cal N}(0,1)$$
+
+And evaluate the sum of squared euclidean distances between these data points and 8 lines, all with intercept 0 and slopes
+
+$$ -.5,-1, -2, -4, 4, 2, 1, .5$$ 
+
+
+```{R, echo=TRUE,fig.height=6,fig.width=8.5,out.width=700}
+x = rnorm(30)
+y = 2*x +rnorm(30)
+dataset = cbind(x,y)
+rm(x,y)
+par(mfrow=c(2,4),mar=c(6,4,6,2))
+slopeval = c(-.5,-1,-2,-4,4,2,1,.5)
+
+for(j in 1:8) {
+    slope = slopeval[j]
+    t = our.proj(dataset[,1],dataset[,2],slope)
+    err =  round(sum((dataset[,1]-t)^2+(dataset[,2]-slope*t)),2)
+    plot(dataset[,1],dataset[,2],xlim=c(-5,5),ylim=c(-5,5),main=paste("Sum of SE =",as.character(err)),ylab="Variable 2",xlab="variable 1")
+    slope = slopeval[j]
+    mtext(paste("slope=",as.character(slope)),side=3,line=5)
+    abline(0,slope)
+    for(i in 1:30) {
+        lines(c(dataset[i,1],t[i]),c(dataset[i,2],slope*t[i]),col=2)
+    }
+    points(t,slope*t,col=4,pch=20)
+}
+```
+
+#### How the principal components and the regression lines vary with noise
+
+
+$$z\sim {\cal N}(0,1)$$
+$$x=z + \epsilon$$
+$$ y= z+ \eta$$
+
+There is a noise component $\epsilon$ and $\eta$ both in $x$ and $y$
+Let $\sigma$ be the standard-deviaton of $\epsilon$ and $\eta$. We consider 8 values for $\sigma=(1,0.7,.6,.5,.4,.3,.2,.1)$
+We are going to generate 8 datasets following this rule, plot the data, and the two regression lines (red and blue) as well as the line that minimizes the sum of square euclidean distance from the points (green)
+
+
+
+```{R, echo=TRUE,fig.height=5,fig.width=8.5,out.width=800}
+par(mfrow=c(2,4))
+SIGMA<-c(1,0.7,.6,.5,.4,.3,.2,.1)
+for(i in 1:8)
+{
+    sigma<-SIGMA[i]
+    z<-rnorm(100)
+    y<-z+rnorm(100)*sigma
+    x<-z+rnorm(100)*sigma
+    y<-y-mean(y)
+    x<-x-mean(x)
+    pca.xy<-prcomp(cbind(x,y),retx=TRUE)
+    rot <- pca.xy$rotation
+    reg1<-lm(y~x)
+    reg2<-lm(x~y)
+    slopeOR<-rot[2,1]/rot[1,1]
+    titleplot<-paste(paste(paste("Sigma =",sigma),", SlopeOR="),as.character(round(slopeOR,2)))
+    plot(x,y,xlim=c(-3.5,3.5),ylim=c(-3.5,3.5),main=titleplot)
+    abline(reg1$coeff[1],reg1$coeff[2],col=2)
+    abline(-reg2$coeff[1]/reg2$coeff[2],1/reg2$coeff[2],col=4)    
+    abline(0,rot[2,1]/rot[1,1],col=3)
+}
+```
+
+
+
+
+#### An application of Pythagoras' theorem
+
+The figure below makes the point that finding the line that minimizes the sum of square euclidean distances of each point to the line is the same as finding the line that maximizes the variance of the projections. Look for the multiple right triangles that share one hypotenuse and think about the relation between this and the squares of the other two sides.
+```{R, echo=TRUE,fig.height=6.2,fig.width=5.3,out.width=600}
+par(mfrow=c(1,1))
+plot(father,son,xlab="Fathers' height", ylab="Son's height",main="",col="gray")
+i<-10
+points(father[i],son[i],pch=20,col=2)
+points(0,0,pch=20)
+lines(c(father[i],0),c(son[i],0))
+abline(0,1,col="mediumslateblue")
+t<-our.proj(father,son,1)
+lines(c(father[i],t[i]),c(son[i],t[i]),col="mediumslateblue",lty=2)
+points(t[i],t[i],pch=20,col="mediumslateblue")
+lines(c(t[i],0), c(t[i],0),col="mediumslateblue",lw=2)
+
+abline(0,0.5,col="darkolivegreen4")
+t<-our.proj(father,son,.5)
+lines(c(father[i],t[i]),c(son[i],.5*t[i]),col="darkolivegreen4",lty=2)
+points(t[i],.5*t[i],pch=20,col="darkolivegreen4")
+lines(c(t[i],0), c(.5*t[i],0),col="darkolivegreen4",lw=2)
+
+abline(0,2,col="darkorange3")
+t<-our.proj(father,son,2)
+lines(c(father[i],t[i]),c(son[i],2*t[i]),col="darkorange3",lty=2)
+points(t[i],2*t[i],pch=20,col="darkorange3")
+lines(c(t[i],0), c(2*t[i],0),col="darkorange3",lw=2)
+```

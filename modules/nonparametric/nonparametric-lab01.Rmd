@@ -1,0 +1,96 @@
+---
+title: "Nonparametric Statistics Lab: Cloud seeding"
+author: "Data Science Team"
+output: 
+      html_document:
+        keep_md: true
+---
+
+```{r setup, include=FALSE}
+#source('http://datascience101.stanford.edu/profile.R')
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Introduction
+
+In this lab, we will focus on the two-sample permutation test. We will look at two cloud seeding examples; let's start from a simple example and then look a larger dataset.
+
+Scientists are interested in whether humans can use chemicals to let clouds produce more rainfall. 
+
+In one study, researchers in Florida explored whether injecting silver iodide into cumulus clouds would lead to increased rainfall. 
+
+On each day that was judged to be suitable for cloud seeding, a target cloud was identified and a plane flew through the target cloud in order to seed it. 
+
+Randomization was used to determine whether or not to load a seeding mechanism and seed the target cloud with silver iodide on that day. 
+
+Radar was used to measure the volume of rainfall from the selected cloud during the next 24 hours. The volume of rain was measured in volume units of acre-feet, the “height” of rain across 1 acre.” (Rossman and Chance, 2006)
+
+# Let us start with a simple example. 
+
+Suppose scientists have conducted the experiment for only three days. With such a small sample size, we don't necessarily need to use R. Among the three days, in two of them, the clouds were seeded and on the other day, the cloud was unseeded.
+
+Below are the recorded rainfalls.
+
+Day1 unseeded 147.8
+
+Day2 seeded 489.1
+
+Day3 seeded 119.0
+
+The null hypothesis $H_0$ is that: injecting silver iodide into cumulus clouds would have no effect on the amount of rainfall we get.
+
+Let us use the difference in means between the two groups as our testing statistic and think about the following questions:
+
+- what is the difference that we observe in means between the two groups? Do your calculation as seeded - unseeded.
+- under $H_0$, is a permutation test appropriatehelp9? In other words, can labels/groups be randomly assigned to different research subjects?
+- how many possible cloud assignments would results in two seeded clouds and one unseeded cloud?
+- calculate the difference in means between the two groups for each assignment you listed in the previous step. make sure your calculation is performed as seeded - unseeded.
+
+Remember the p-value represents the probability of "something as or more extreme than what we observe" under the assumption that $H_0$ is true. 
+
+- based on all the mean difference you calculated in the permutations, what is the p-value? after you get the p-value, what is your conclusion to our testing problem?
+
+- how many different p-values we can possibly get in this scenario? that's how much a dataset of size three can do.
+
+The above example is a simple permutation test example and the sample size is so small that we can carry it out by hand. What if we have 10 days of observations?
+
+# A larger dataset
+
+Let us load the data from ``cloudseeding``, which contains 10 days data. We create vectors ``rainfall`` and ``treatment`` separately to ease our work later.
+
+```{r}
+cloudseeding = read.csv("data/cloudseeding.txt", sep="",header=T)
+rainfall = cloudseeding$rainfall
+treatment = cloudseeding$treatment
+teststat.obs = mean(rainfall[treatment == "seeded"]) - mean(rainfall[treatment == "unseeded"])
+print(cloudseeding)
+teststat.obs
+```
+- how many different assignments of seeded/unseeded are possible?
+Let us list all possible assignments of the rainfalls to the two groups, with four unseeded clouds and six seeded clouds. 
+
+```{r}
+library(gtools)
+unseeded = combinations(10, 4, v=rainfall, set=FALSE, repeats.allowed=FALSE)
+unseeded
+```
+
+Now we can calculate the difference in means between the groups for each possible assignment of seeded/unseeded clouds.
+
+```{r}
+seeded = NULL
+for(i in 1:210) {
+seeded = rbind(seeded, setdiff(rainfall, unseeded[i,]))}
+teststat = rep(0, 210)
+for(i in 1:210) {
+teststat[i] = mean(seeded[i,]) - mean(unseeded[i,])
+}
+```
+
+To calculate p-value, we calculate the proportion of possible assignments that have a difference in means that is greater than or equal to the observed difference in means
+
+```{r}
+teststat >= teststat.obs
+sum(teststat >= teststat.obs)
+sum(teststat >= teststat.obs)/210
+```
+- what's your conclusion?

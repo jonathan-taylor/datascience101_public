@@ -1,0 +1,61 @@
+---
+title: "Introduction, Homework"
+author: "Data Science Team"
+output: 
+     html_document:
+         keep_md: true
+---
+
+### Due  by 9:30 am Friday April 14 on Canvas.
+
+
+You will find the datasets to do this homework in the subdirectory **data** of the directory **Week01**, which you can download from [Canvas](https://canvas.stanford.edu/courses/64451/files) in zipped form.
+
+The homework is **due as an [.Rmd](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf) file** that compiles correctly into an .html document. Of course, learning how to make one will require you some time, but this is part of your assignement.
+You will upload your homework in Canvas.
+
+
+
+### 1. Sprint data
+
+We looked at the datasets **100men** and **100women** for mean and women in the lab.
+
+(a) Read in the datasets  and extract the nationalities for each sprinter.
+
+(b) Create a graphical display of the nationalities of the different sprinters, distinguishing men and women. (You might use the `maps` package in R)
+Describe any patterns that you see.
+
+(c) Are males or females improving more quickly over time?  Are women "catching up" to men? Make some  plots to examine this question.
+
+(d) The file  **200men** contains records for the 200m sprint by men. What strikes you as different/similar in comparing the 200m and the 100m sprints?
+
+### 2. The mile records
+
+The file **milemen** contains the world records for the mile for men.
+The four  minute barrier was broken on  May 6, 1954 by Roger Bannister. At the time, many people
+thought it impossible for anyone to break the  four minute mark  and this may have created a psychological
+barrier that made it more difficult to achieve. 
+
+Do you see evidence of this in the data?
+Read in this data and  make some plots and /or calculations to shed light on the question.
+
+### 3. A data set that picks your curiosity
+
+Browsing the web, identify one dataset that picks your curiosity (feel free to start from one of the sites mentioned in the first lecture).
+
+(a) Specify which dataset you are going to be working with, providing a link to the original source.
+(b) Load the data in R.
+(c) Provide a  description of the variables involved, presenting summary statistics and graphical displays.
+(d) Formulate a question that you believe the data can help you answer.
+(e) Find some prior work related to your question and use it to put forward an hypothesis that you might test.
+
+### 4. "Big Data Religion"
+
+Read the [article](https://www.forbes.com/sites/gilpress/2014/09/09/the-government-academia-complex-and-big-data-religion/#704edc612a10) from Gil Press linked from the web-page (note that he has written many pieces on the subject and you might enjoy reading more than one). Write a critical discussion of the article that emphatises the conceptual points, using a plain style. Make sure to include in your summary a discussion of the two following points.
+
+(a) Why does Press associate Big Data with a "religion" rather than "science"?
+(b) What elements of Snow's investigation on the mode of transmission of Cholera differ from the mode of research described as "big data religion"?
+
+### 5. Reproducible research
+
+Using .Rmd to record and annotate your research results is taking one step to assure that your research is reproducible. If you search the web for this term, you will see that this is a central focus of contemporary science. To have an introduction to the topic, read the article [An invitation to reproducible computational research](https://academic.oup.com/biostatistics/article-lookup/doi/10.1093/biostatistics/kxq028) also linked from the web-page. Summarize three key ideas discussed in it.
